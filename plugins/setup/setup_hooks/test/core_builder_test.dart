@@ -1,12 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:code_assets/code_assets.dart';
+import 'package:crypto/crypto.dart';
 import 'package:hooks/hooks.dart';
 import 'package:path/path.dart' as p;
 import 'package:setup_hooks/src/build.dart';
+import 'package:setup_hooks/src/build_cache.dart';
 import 'package:setup_hooks/src/core_builder.dart';
 import 'package:setup_hooks/src/error.dart';
+import 'package:setup_hooks/src/fingerprint.dart';
 import 'package:setup_hooks/src/target.dart';
+import 'package:setup_hooks/src/util.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -34,6 +39,7 @@ void main() {
     required OS os,
     required Architecture architecture,
     bool codeAssets = true,
+    bool linkingEnabled = false,
     Uri? compiler,
     Directory? package,
     Map<String, Object?> userDefines = const {},
@@ -52,7 +58,7 @@ void main() {
         ),
       )
       ..setupBuildInput()
-      ..config.setupBuild(linkingEnabled: false);
+      ..config.setupBuild(linkingEnabled: linkingEnabled);
     if (codeAssets) {
       CodeAssetExtension(
         targetArchitecture: architecture,
@@ -166,7 +172,7 @@ void main() {
 
   group('run', () {
     test(
-      'reports read files and written directories as dependencies',
+      'reports read files, written files and directories as dependencies',
       () async {
         final goFile = p.join(repository.path, 'core', 'lib.go');
         final coreDir = p.join(repository.path, 'libclash', 'linux');
@@ -178,6 +184,7 @@ void main() {
               inputs: [goFile],
               outputs: [
                 p.join(coreDir, 'FlClashCore'),
+                p.join(coreDir, 'FlClashHelperService'),
                 p.join(coreDir, 'manifest.json'),
               ],
               rebuilt: true,
@@ -194,8 +201,124 @@ void main() {
         expect(seen?.target, Target.linuxAmd64);
         expect(BuildOutput(output.json).dependencies, [
           Uri.file(goFile),
+          Uri.file(p.join(coreDir, 'FlClashCore')),
+          Uri.file(p.join(coreDir, 'FlClashHelperService')),
+          Uri.file(p.join(coreDir, 'manifest.json')),
           Uri.directory(coreDir),
         ]);
+      },
+    );
+
+    test(
+      'restores shared artifacts after another hook mode overwrites them',
+      () async {
+        final source = File(p.join(repository.path, 'core', 'lib.go'));
+        final coreDir = Directory(
+          p.join(repository.path, 'libclash', 'windows'),
+        )..createSync(recursive: true);
+        final core = File(p.join(coreDir.path, 'FlClashCore.exe'));
+        final helper = File(p.join(coreDir.path, 'FlClashHelperService.exe'));
+        final manifest = File(p.join(coreDir.path, coreManifestName));
+        final cache = BuildCache(rootDir: repository.path);
+        final snapshots = <bool, ({List<Uri> dependencies, String digest})>{};
+        var builds = 0;
+        var hookRuns = 0;
+        final builder = CoreBuilder(
+          build: (_) async {
+            hookRuns++;
+            final execution = await cache.run(
+              key: 'windows-amd64-core',
+              fingerprint: () async => Fingerprint(source.readAsStringSync()),
+              primaryOutput: core.path,
+              notice: BuildNotice(),
+              build: () async {
+                builds++;
+                core.writeAsStringSync('core-${source.readAsStringSync()}');
+                final coreSha256 = await calcSha256(core.path);
+                helper.writeAsStringSync('helper-$coreSha256');
+                writeCoreManifest(path: manifest.path, coreSha256: coreSha256);
+                return [core.path, helper.path, manifest.path];
+              },
+            );
+            return BuildReport(
+              inputs: [source.path],
+              outputs: execution.outputs,
+              rebuilt: execution.rebuilt,
+            );
+          },
+        );
+
+        String dependencyDigest(List<Uri> dependencies) {
+          final values = <String>[];
+          for (final dependency in dependencies) {
+            final path = p.fromUri(dependency);
+            switch (FileSystemEntity.typeSync(path)) {
+              case FileSystemEntityType.file:
+                values.add(
+                  sha256.convert(File(path).readAsBytesSync()).toString(),
+                );
+              case FileSystemEntityType.directory:
+                final names =
+                    Directory(path)
+                        .listSync()
+                        .map((entry) => p.basename(entry.path))
+                        .toList()
+                      ..sort();
+                values.add(names.join('\n'));
+              default:
+                values.add('missing:$path');
+            }
+          }
+          return values.join('\n');
+        }
+
+        Future<void> runHook({required bool linkingEnabled}) async {
+          final snapshot = snapshots[linkingEnabled];
+          if (snapshot != null &&
+              dependencyDigest(snapshot.dependencies) == snapshot.digest) {
+            return;
+          }
+          final output = BuildOutputBuilder();
+          await builder.run(
+            input: buildInput(
+              os: OS.windows,
+              architecture: Architecture.x64,
+              linkingEnabled: linkingEnabled,
+            ),
+            output: output,
+          );
+          final dependencies = BuildOutput(output.json).dependencies;
+          snapshots[linkingEnabled] = (
+            dependencies: dependencies,
+            digest: dependencyDigest(dependencies),
+          );
+        }
+
+        source.writeAsStringSync('dev');
+        await runHook(linkingEnabled: true);
+        final devSha256 = await calcSha256(core.path);
+        source.writeAsStringSync('main');
+        await runHook(linkingEnabled: false);
+        expect(await calcSha256(core.path), isNot(devSha256));
+
+        source.writeAsStringSync('dev');
+        await runHook(linkingEnabled: true);
+        expect(await calcSha256(core.path), devSha256);
+        expect(helper.readAsStringSync(), 'helper-$devSha256');
+        expect(jsonDecode(manifest.readAsStringSync()), {
+          'coreSha256': devSha256,
+        });
+        expect(builds, 3);
+
+        await runHook(linkingEnabled: true);
+        expect(builds, 3);
+        expect(hookRuns, 3);
+        helper.deleteSync();
+        await runHook(linkingEnabled: true);
+        expect(helper.existsSync(), isTrue);
+        expect(await calcSha256(core.path), devSha256);
+        expect(builds, 4);
+        expect(hookRuns, 4);
       },
     );
 

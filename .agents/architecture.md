@@ -1512,10 +1512,11 @@ What the hook protocol forces:
   run, so nothing in the hook branches on debug versus release. It cannot tell `flutter test` from a build either; the
   `build_assets: false` user-define in the root `pubspec.yaml` is the one switch (see `.agents/commands.md`), and
   `setup.dart` refuses to package while it is set.
-- The hook declares the files it read but the *directories* it wrote: `hooks_runner` hashes a file by content and a
-  directory by child names, so `libclash/macos/` catches a deleted artifact without MD5-ing a 55 MB Core on every
-  build. A rebuild touches those directories after the runner's cutoff, so the next build runs the hook once more and
-  setup's cache answers it; that extra run is expected.
+- The hook declares input files, output files, and output directories as dependencies. `hooks_runner` hashes files by
+  content and directories by child names: file dependencies detect artifacts overwritten by another branch or hook
+  configuration, while directory dependencies detect added or deleted artifacts. A rebuild touches those directories
+  after the runner's cutoff, so the next build runs the hook once more and setup's cache answers it; that extra run is
+  expected.
 - The runner discards hook output on success, even under `-v`, so the hook mirrors it into
   `.dart_tool/setup_build_cache/hook.log` (rotated at 512 KB), one `===` header per invocation.
 
