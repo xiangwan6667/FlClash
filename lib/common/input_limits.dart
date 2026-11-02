@@ -11,6 +11,8 @@ abstract final class TextInputLimits {
   static const hostValue = url;
   static const userName = 128;
   static const password = 512;
+  static const realityMLDSA65Verify = (1952 * 4 + 2) ~/ 3;
+  static const realityClientVersion = 11;
   static const userAgent = 512;
   static const fileName = 255;
   static const port = 5;

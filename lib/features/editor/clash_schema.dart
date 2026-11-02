@@ -407,6 +407,8 @@ const _reality = {
     'public-key': _str,
     'short-id': _str,
     'support-x25519mlkem768': _bool,
+    'mldsa65-verify': _str,
+    'client-version': _str,
   }),
 };
 
@@ -794,7 +796,7 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'udp': _bool,
     ..._tcpDial,
     'uuid': _str,
-    'flow': YamlSchema.scalar(['xtls-rprx-vision']),
+    'flow': YamlSchema.scalar(['xtls-rprx-vision', 'xtls-rprx-vision-udp443']),
     'encryption': _str,
     'packet-encoding': YamlSchema.scalar(['packetaddr', 'xudp']),
     ..._optionalTls,
@@ -997,7 +999,9 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'udp': _bool,
     ..._tcpDial,
     'psk': _str,
-    'version': YamlSchema.scalar(['1', '2', '3', '4', '5']),
+    'version': YamlSchema.scalar(['1', '2', '3', '4', '5', '6']),
+    'v6-mode': YamlSchema.scalar(['default', 'unshaped', 'unsafe-raw']),
+    'client-id': _str,
     'reuse': _bool,
     'client-fingerprint': _clientFingerprint,
     'obfs-opts': YamlSchema.map({

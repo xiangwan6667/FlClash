@@ -593,7 +593,11 @@ extension CustomProxyExt on CustomProxy {
         'miu',
         'trusttunnel',
       }.contains(type),
-      ProxyField.realityPublicKey || ProxyField.realityShortId => const {
+      ProxyField.realityPublicKey ||
+      ProxyField.realityShortId ||
+      ProxyField.realityMLDSA65Verify ||
+      ProxyField.realityClientVersion ||
+      ProxyField.realityHybrid => const {
         'vmess',
         'vless',
         'trojan',
@@ -615,8 +619,10 @@ extension CustomProxyExt on CustomProxy {
       ProxyField.pluginSkipCertVerify =>
         type == 'ss' && _pluginReads(field.path.last),
       ProxyField.protocolParam || ProxyField.obfsParam => type == 'ssr',
-      ProxyField.obfsMode ||
-      ProxyField.obfsHost ||
+      ProxyField.snellV6Mode || ProxyField.snellClientId =>
+        type == 'snell' && valueOf(ProxyField.version).toString() == '6',
+      ProxyField.obfsMode || ProxyField.obfsHost =>
+        type == 'snell' && valueOf(ProxyField.version).toString() != '6',
       ProxyField.version => type == 'snell',
       ProxyField.ports ||
       ProxyField.hopInterval => type == 'hysteria' || type == 'hysteria2',
@@ -734,7 +740,8 @@ extension CustomProxyExt on CustomProxy {
       'trojan' => const ['tcp', 'ws', 'grpc'],
       _ => const [],
     },
-    ProxyField.flow => const ['xtls-rprx-vision'],
+    ProxyField.flow => const ['xtls-rprx-vision', 'xtls-rprx-vision-udp443'],
+    ProxyField.snellV6Mode => const ['default', 'unshaped', 'unsafe-raw'],
     ProxyField.clientFingerprint => const [
       'chrome',
       'firefox',
