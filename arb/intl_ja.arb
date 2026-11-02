@@ -965,15 +965,5 @@
   "addedToLocalProxies": "{name} をローカルプロキシに追加しました",
   "alreadyInLocalProxies": "{name} はすでにローカルプロキシにあります",
   "aboutForkEdition": "派生版",
-  "aboutBasedOn": "ベース",
-  "updateChannelStable": "安定版",
-  "updateChannelPreview": "プレビュー版",
-  "updateChannelValue": "更新チャンネル：{channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "ベース"
 }

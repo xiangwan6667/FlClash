@@ -6,11 +6,9 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/request.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -87,57 +85,6 @@ void main() {
         });
     }
 
-    test('uses the saved channel instead of the build branch', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      container.listen(appSettingProvider, (_, _) {});
-      final stable = {'tag_name': 'v1.2.3', 'target_commitish': 'Miu'};
-      final preview = {'tag_name': 'v1.2.4', 'target_commitish': 'Miu-dev'};
-      final request = requestAnswering([preview, stable])
-        ..attach(container.read);
-      for (final (channel, expected) in [
-        ('stable', stable),
-        ('preview', preview),
-      ]) {
-        container
-            .read(appSettingProvider.notifier)
-            .update(
-              (_) => AppSettingProps.fromJson({'updateChannel': channel}),
-            );
-        expect(await request.latestRelease(), expected);
-      }
-    });
-
-    test(
-      'discards a result when its channel changed during the request',
-      () async {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
-        container.listen(appSettingProvider, (_, _) {});
-        final request = requestAnswering([
-          {'tag_name': 'v1.2.3', 'target_commitish': updateBranch},
-        ])..attach(container.read);
-        request.dio.interceptors.add(
-          InterceptorsWrapper(
-            onResponse: (response, handler) {
-              container
-                  .read(appSettingProvider.notifier)
-                  .update(
-                    (state) => state.copyWith(
-                      updateChannel:
-                          defaultUpdateChannel == UpdateChannel.stable
-                          ? UpdateChannel.preview
-                          : UpdateChannel.stable,
-                    ),
-                  );
-              handler.next(response);
-            },
-          ),
-        );
-        expect(await request.latestRelease(), isNull);
-      },
-    );
-
     test('only reads published releases targeting this build branch', () async {
       final own = {'tag_name': 'v1.2.3', 'target_commitish': updateBranch};
       final request = requestAnswering([
@@ -170,9 +117,29 @@ void main() {
       final request = Request()
         ..dio.httpClientAdapter = _HostAdapter({
           'api.github.com': () => ResponseBody.fromString('{}', 403),
-          'github.com': () => throw StateError('cross-channel fallback'),
+          'github.com': () => throw StateError('cross-branch fallback'),
         });
       await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
+    });
+
+    test('only offers a higher version from this build branch', () async {
+      globalState.packageInfo = PackageInfo(
+        appName: appName,
+        packageName: 'com.follow.clash.miu',
+        version: '1.2.3',
+        buildNumber: '1',
+      );
+      for (final version in ['1.2.2', '1.2.3', '1.2.4']) {
+        final own = {'tag_name': 'v$version', 'target_commitish': updateBranch};
+        final request = requestAnswering([
+          {'tag_name': 'v9.0.0', 'target_commitish': 'other-branch'},
+          own,
+        ]);
+        expect(
+          await request.checkForUpdate(),
+          version == '1.2.4' ? own : isNull,
+        );
+      }
     });
 
     test('continues past a page belonging to another branch', () async {

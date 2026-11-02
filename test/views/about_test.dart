@@ -49,116 +49,61 @@ void main() {
     }
   }
 
-  String channelLabel() => currentAppLocalizations.updateChannelValue(
-    container.read(appSettingProvider).updateChannel.label,
-  );
-
-  testWidgets('selects and remembers a channel when the menu reopens', (
+  testWidgets('shows only the ordinary update button without a channel popup', (
     tester,
   ) async {
     await pumpAbout(tester);
-    expect(find.text(channelLabel()), findsOneWidget);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    const selected = defaultUpdateChannel == UpdateChannel.stable
-        ? UpdateChannel.preview
-        : UpdateChannel.stable;
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
-    await tester.tap(find.text(selected.label));
-    await tester.pumpAndSettle();
-    expect(container.read(appSettingProvider).updateChannel, selected);
-    expect(find.text(channelLabel()), findsOneWidget);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    final menu = tester.widget<CommonPopupMenu>(find.byType(CommonPopupMenu));
     expect(
-      menu.items.singleWhere((item) => item.checked == true).label,
-      selected.label,
+      find.widgetWithText(TonalButton, currentAppLocalizations.checkUpdate),
+      findsOneWidget,
     );
+    expect(find.byType(TonalButton), findsOneWidget);
+    expect(find.byType(CommonPopupBox), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dismissing the menu leaves the saved channel unchanged', (
-    tester,
-  ) async {
-    await pumpAbout(tester);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    await tester.tapAt(const Offset(10, 10));
-    await tester.pumpAndSettle();
-    expect(
-      container.read(appSettingProvider).updateChannel,
-      defaultUpdateChannel,
-    );
-    expect(find.byType(CommonPopupMenu), findsNothing);
-  });
-
-  testWidgets('leaving About while the menu closes does not use its ref', (
-    tester,
-  ) async {
-    await pumpAbout(tester);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    const selected = defaultUpdateChannel == UpdateChannel.stable
-        ? UpdateChannel.preview
-        : UpdateChannel.stable;
-    await tester.tap(find.text(selected.label));
-    await tester.pumpWidget(const SizedBox());
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('uses a compact popup beside the channel button', (tester) async {
-    await pumpAbout(tester);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    expect(find.byType(SheetDragHandle), findsNothing);
-    expect(find.byType(CommonPopupMenu), findsOneWidget);
-    expect(tester.getSize(find.byType(PopupMenuCard)).height, lessThan(200));
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('does not allow switching while an update check is active', (
+  testWidgets('disables the update button while a check is active', (
     tester,
   ) async {
     container.read(loadingProvider(LoadingTag.checkUpdate).notifier).value =
         true;
     await pumpAbout(tester, settle: false);
     final button = tester.widget<TonalButton>(
-      find.widgetWithText(TonalButton, channelLabel()),
+      find.widgetWithText(TonalButton, currentAppLocalizations.checkUpdate),
     );
     expect(button.onPressed, isNull);
   });
 
   testWidgets(
-    'update actions use regular page text without changing disabled color',
+    'update button uses regular page text without changing disabled color',
     (tester) async {
       await pumpAbout(tester);
-      for (final label in [
-        currentAppLocalizations.checkUpdate,
-        channelLabel(),
-      ]) {
-        final text = tester.widget<RichText>(
-          find.descendant(
-            of: find.widgetWithText(TonalButton, label),
-            matching: find.byType(RichText),
+      final text = tester.widget<RichText>(
+        find.descendant(
+          of: find.widgetWithText(
+            TonalButton,
+            currentAppLocalizations.checkUpdate,
           ),
-        );
-        final style = text.text.style!;
-        expect(style.fontWeight, AppTextStyle.subheadline.weight);
-        expect(style.fontSize, AppTextStyle.subheadline.size);
-      }
+          matching: find.byType(RichText),
+        ),
+      );
+      final style = text.text.style!;
+      expect(style.fontWeight, AppTextStyle.subheadline.weight);
+      expect(style.fontSize, AppTextStyle.subheadline.size);
       container.read(loadingProvider(LoadingTag.checkUpdate).notifier).value =
           true;
       await tester.pump();
       await tester.pump(commonDuration);
-      final text = tester.widget<RichText>(
+      final disabledText = tester.widget<RichText>(
         find.descendant(
-          of: find.widgetWithText(TonalButton, channelLabel()),
+          of: find.widgetWithText(
+            TonalButton,
+            currentAppLocalizations.checkUpdate,
+          ),
           matching: find.byType(RichText),
         ),
       );
-      expect(text.text.style!.color!.a, closeTo(0.38, 0.01));
+      expect(disabledText.text.style!.color!.a, closeTo(0.38, 0.01));
     },
   );
 }

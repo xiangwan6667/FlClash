@@ -965,15 +965,5 @@
   "addedToLocalProxies": "«{name}» добавлен в локальные прокси",
   "alreadyInLocalProxies": "«{name}» уже есть в локальных прокси",
   "aboutForkEdition": "Модифицированная версия",
-  "aboutBasedOn": "На основе",
-  "updateChannelStable": "Стабильный",
-  "updateChannelPreview": "Предварительный",
-  "updateChannelValue": "Канал обновлений: {channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "На основе"
 }

@@ -25,18 +25,6 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
-  void _selectUpdateChannel(
-    BuildContext context,
-    WidgetRef ref,
-    UpdateChannel channel,
-  ) {
-    if (!context.mounted) return;
-    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    ref
-        .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(updateChannel: channel));
-  }
-
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
     final commonAction = ref.read(commonActionProvider.notifier);
@@ -72,9 +60,6 @@ class AboutView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isLoading = ref.watch(loadingProvider(LoadingTag.checkUpdate));
-    final updateChannel = ref.watch(
-      appSettingProvider.select((state) => state.updateChannel),
-    );
     return CommonScaffold(
       isLoading: isLoading,
       title: appLocalizations.about,
@@ -86,9 +71,6 @@ class AboutView extends ConsumerWidget {
         children: [
           _AboutHero(
             isCheckingUpdate: isLoading,
-            updateChannel: updateChannel,
-            onSelectChannel: (channel) =>
-                _selectUpdateChannel(context, ref, channel),
             onCheckUpdate: () {
               _checkUpdate(context, ref);
             },
@@ -165,15 +147,11 @@ class AboutView extends ConsumerWidget {
 
 class _AboutHero extends StatelessWidget {
   final bool isCheckingUpdate;
-  final UpdateChannel updateChannel;
-  final ValueChanged<UpdateChannel> onSelectChannel;
   final VoidCallback onCheckUpdate;
   final VoidCallback onEnterDeveloperMode;
 
   const _AboutHero({
     required this.isCheckingUpdate,
-    required this.updateChannel,
-    required this.onSelectChannel,
     required this.onCheckUpdate,
     required this.onEnterDeveloperMode,
   });
@@ -241,43 +219,12 @@ class _AboutHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            alignment: WrapAlignment.center,
-            children: [
-              TonalButton(
-                size: TonalButtonSize.bar,
-                textStyle: AppTextStyle.subheadline.of(context),
-                glyph: AppGlyphs.sync,
-                label: appLocalizations.checkUpdate,
-                onPressed: isCheckingUpdate ? null : onCheckUpdate,
-              ),
-              IgnorePointer(
-                ignoring: isCheckingUpdate,
-                child: CommonPopupBox(
-                  targetBuilder: (open) => TonalButton(
-                    size: TonalButtonSize.bar,
-                    textStyle: AppTextStyle.subheadline.of(context),
-                    glyph: AppGlyphs.chevronDown,
-                    label: appLocalizations.updateChannelValue(
-                      updateChannel.label,
-                    ),
-                    onPressed: isCheckingUpdate ? null : open,
-                  ),
-                  popupBuilder: (_) => CommonPopupMenu(
-                    items: [
-                      for (final channel in UpdateChannel.values)
-                        CommonPopupMenuItem(
-                          label: channel.label,
-                          checked: channel == updateChannel,
-                          onPressed: () => onSelectChannel(channel),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+          TonalButton(
+            size: TonalButtonSize.bar,
+            textStyle: AppTextStyle.subheadline.of(context),
+            glyph: AppGlyphs.sync,
+            label: appLocalizations.checkUpdate,
+            onPressed: isCheckingUpdate ? null : onCheckUpdate,
           ),
         ],
       ),

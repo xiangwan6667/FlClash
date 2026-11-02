@@ -235,14 +235,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m82(transport) => "En-têtes ${transport}";
 
-  static String m83(channel) => "Canal de mise à jour : ${channel}";
+  static String m83(label) => "${label} doit être une URL";
 
-  static String m84(label) => "${label} doit être une URL";
-
-  static String m85(count) =>
+  static String m84(count) =>
       "${Intl.plural(count, one: 'il y a 1 an', other: 'il y a ${count} ans')}";
 
-  static String m86(count) =>
+  static String m85(count) =>
       "${Intl.plural(count, other: 'il y a ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2019,15 +2017,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Désépingler la fenêtre",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Mettre à jour"),
-    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Aperçu"),
-    "updateChannelStable": MessageLookupByLibrary.simpleMessage("Stable"),
-    "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("Envoi"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Bande passante d’envoi",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m84,
+    "urlTip": m83,
     "useHosts": MessageLookupByLibrary.simpleMessage("Utiliser hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Utiliser les hosts du système",
@@ -2056,8 +2051,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Écrire dans le système règle aussi l’horloge système ; Android l’ignore.",
     ),
-    "yearsAgo": m85,
-    "yearsAgoShort": m86,
+    "yearsAgo": m84,
+    "yearsAgoShort": m85,
     "yes": MessageLookupByLibrary.simpleMessage("Oui"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chinois simplifié"),
   };

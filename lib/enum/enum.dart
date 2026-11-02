@@ -37,15 +37,6 @@ const desktopPlatforms = [
   SupportPlatform.Windows,
 ];
 
-enum UpdateChannel {
-  stable('Miu'),
-  preview('Miu-dev');
-
-  const UpdateChannel(this.branch);
-
-  final String branch;
-}
-
 enum GroupName { GLOBAL }
 
 enum GroupType {
