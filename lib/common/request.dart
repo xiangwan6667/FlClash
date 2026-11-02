@@ -109,7 +109,7 @@ class Request {
     final release = await latestRelease();
     if (release == null) return null;
     final remoteVersion = release['tag_name'] as String;
-    final version = globalState.packageInfo.version;
+    final version = globalState.packageInfo.displayVersion;
     final hasUpdate =
         compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
     return hasUpdate ? release : null;

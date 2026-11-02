@@ -182,6 +182,27 @@ void main() {
       expect(await request.latestRelease(), own);
       expect(page, 2);
     });
+
+    test('checks prerelease revisions without crossing branches', () async {
+      globalState.packageInfo = PackageInfo(
+        appName: appName,
+        packageName: 'com.follow.clash.miu',
+        version: '0.9.3-pre.2',
+        buildNumber: '2026110202',
+      );
+      for (final revision in [1, 2, 3, 10]) {
+        final own = {
+          'tag_name': 'v0.9.3-pre.$revision',
+          'target_commitish': updateBranch,
+          'prerelease': true,
+        };
+        final request = requestAnswering([
+          {'tag_name': 'v9.0.0', 'target_commitish': 'Miu'},
+          own,
+        ]);
+        expect(await request.checkForUpdate(), revision > 2 ? own : isNull);
+      }
+    });
   });
 
   group('downloadVerifiedRelease', () {

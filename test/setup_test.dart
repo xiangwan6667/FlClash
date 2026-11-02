@@ -25,6 +25,16 @@ void main() {
       expect(setup.createBuildEnvironment('dev'), {'APP_ENV': 'dev'});
     });
 
+    test(
+      'passes the release version separately from native package metadata',
+      () {
+        expect(
+          setup.createBuildEnvironment('pre', releaseVersion: '0.9.3-pre.2'),
+          {'APP_ENV': 'pre', 'APP_RELEASE_VERSION': '0.9.3-pre.2'},
+        );
+      },
+    );
+
     test('omits verbose from flutter build args by default', () {
       final args = setup.createFlutterBuildArgs(
         platform: 'android',

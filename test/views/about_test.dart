@@ -54,6 +54,10 @@ void main() {
   ) async {
     await pumpAbout(tester);
     expect(
+      find.text('v${globalState.packageInfo.displayVersion}'),
+      findsOneWidget,
+    );
+    expect(
       find.widgetWithText(TonalButton, currentAppLocalizations.checkUpdate),
       findsOneWidget,
     );
