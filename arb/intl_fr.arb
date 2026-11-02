@@ -1081,12 +1081,8 @@
   "fallbackFilterDomainDesc": "Ces domaines sont résolus directement par Fallback.",
   "aboutForkEdition": "Version dérivée",
   "aboutBasedOn": "Basé sur",
-  "updateChannel": "Canal de mise à jour",
   "updateChannelStable": "Stable",
   "updateChannelPreview": "Aperçu",
-  "updateChannelStableDescription": "Miu · Pour un usage quotidien",
-  "updateChannelPreviewDescription": "Miu-dev · Découvrir les nouveautés en avance",
-  "updateChannelHint": "Les mises à jour seront recherchées sur le canal choisi.",
   "updateChannelValue": "Canal de mise à jour : {channel}",
   "@updateChannelValue": {
     "placeholders": {

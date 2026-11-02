@@ -1131,10 +1131,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "installCertificateSuccess": MessageLookupByLibrary.simpleMessage(
       "Certificat installé",
     ),
-    "installedAppsPermissionDeniedMessage":
-        MessageLookupByLibrary.simpleMessage(
-          "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
-        ),
+    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "L’autorisation de la liste des apps a été refusée ; les apps installées ne peuvent donc pas être listées. Veuillez l’accorder manuellement dans les réglages du système.",
+    ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "Ce système masque la liste des apps installées tant que l’autorisation n’est pas accordée. Accordez-la pour configurer le proxy par app.",
     ),
@@ -2276,20 +2275,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Désépingler la fenêtre",
     ),
     "update": MessageLookupByLibrary.simpleMessage("Mettre à jour"),
-    "updateChannel": MessageLookupByLibrary.simpleMessage(
-      "Canal de mise à jour",
-    ),
-    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
-      "Les mises à jour seront recherchées sur le canal choisi.",
-    ),
     "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Aperçu"),
-    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu-dev · Découvrir les nouveautés en avance",
-    ),
     "updateChannelStable": MessageLookupByLibrary.simpleMessage("Stable"),
-    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu · Pour un usage quotidien",
-    ),
     "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "Impossible de télécharger la mise à jour.",

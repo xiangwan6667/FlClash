@@ -1081,12 +1081,8 @@
   "fallbackFilterDomainDesc": "これらのドメインは、直接 Fallback で解決します。",
   "aboutForkEdition": "派生版",
   "aboutBasedOn": "ベース",
-  "updateChannel": "更新チャンネル",
   "updateChannelStable": "安定版",
   "updateChannelPreview": "プレビュー版",
-  "updateChannelStableDescription": "Miu · 日常の使用向け",
-  "updateChannelPreviewDescription": "Miu-dev · 新機能をいち早く体験",
-  "updateChannelHint": "選択したチャンネルで更新を確認します。",
   "updateChannelValue": "更新チャンネル：{channel}",
   "@updateChannelValue": {
     "placeholders": {

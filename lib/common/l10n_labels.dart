@@ -9,13 +9,6 @@ extension UpdateChannelL10n on UpdateChannel {
     UpdateChannel.stable => currentAppLocalizations.updateChannelStable,
     UpdateChannel.preview => currentAppLocalizations.updateChannelPreview,
   };
-
-  String get description => switch (this) {
-    UpdateChannel.stable =>
-      currentAppLocalizations.updateChannelStableDescription,
-    UpdateChannel.preview =>
-      currentAppLocalizations.updateChannelPreviewDescription,
-  };
 }
 
 extension PageLabelL10n on PageLabel {

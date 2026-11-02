@@ -1081,12 +1081,8 @@
   "fallbackFilterDomainDesc": "这些域名直接使用 Fallback 解析。",
   "aboutForkEdition": "二开版",
   "aboutBasedOn": "基于",
-  "updateChannel": "更新渠道",
   "updateChannelStable": "正式版",
   "updateChannelPreview": "预览版",
-  "updateChannelStableDescription": "Miu · 适合日常使用",
-  "updateChannelPreviewDescription": "Miu-dev · 提前体验新功能",
-  "updateChannelHint": "选择后，检查更新将使用所选渠道。",
   "updateChannelValue": "更新渠道：{channel}",
   "@updateChannelValue": {
     "placeholders": {

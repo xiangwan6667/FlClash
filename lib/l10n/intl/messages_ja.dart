@@ -1804,18 +1804,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("名称未設定"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
-    "updateChannel": MessageLookupByLibrary.simpleMessage("更新チャンネル"),
-    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
-      "選択したチャンネルで更新を確認します。",
-    ),
     "updateChannelPreview": MessageLookupByLibrary.simpleMessage("プレビュー版"),
-    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu-dev · 新機能をいち早く体験",
-    ),
     "updateChannelStable": MessageLookupByLibrary.simpleMessage("安定版"),
-    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu · 日常の使用向け",
-    ),
     "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "更新をダウンロードできませんでした。",

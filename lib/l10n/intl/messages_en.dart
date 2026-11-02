@@ -2104,18 +2104,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
-    "updateChannel": MessageLookupByLibrary.simpleMessage("Update channel"),
-    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
-      "Update checks will use the selected channel.",
-    ),
     "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Preview"),
-    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu-dev · Try new features early",
-    ),
     "updateChannelStable": MessageLookupByLibrary.simpleMessage("Stable"),
-    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu · For everyday use",
-    ),
     "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "The update could not be downloaded.",
