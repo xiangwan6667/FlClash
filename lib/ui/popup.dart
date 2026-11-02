@@ -988,15 +988,12 @@ class _RenderPopupMorph extends RenderProxyBox {
         holdFrost: absorbed > 0 ? glass.from.blur : null,
       );
     }
-    // Returning cards keep their own shadow as they fade into the platter's,
-    // which fills under them from the start so the page does not show
-    // through; on glass they stand bare and the platter holds throughout.
     _paintShadows(
       context.canvas,
       path,
       platter.shift(offset),
       platterRadius,
-      remaining * (glass == null ? 1 - reveal : 1.0),
+      remaining,
     );
     final Color fill;
     if (glass == null) {
@@ -2758,7 +2755,7 @@ class PopupMenuCard extends SingleChildRenderObjectWidget {
   final LiquidGlassStyle? glass;
   final LiquidGlassRim? rim;
 
-  /// Leaves the glass out while the popup's platter bends the backdrop.
+  /// Leaves the surface and shadow to the popup's morphing platter.
   final bool bare;
 
   @override
@@ -2938,7 +2935,9 @@ class _RenderPopupMenuCard extends RenderProxyBox {
     final radius = _radius;
     final shape = AppShape.all(radius).getOuterPath(rect);
     final glass = _glass;
-    if (glass == null) {
+    if (_bare) {
+      _pane.clear();
+    } else if (glass == null) {
       final canvas = context.canvas;
       final surface = shape.shift(offset);
       final corners = AppRadius.all(radius);
@@ -2949,8 +2948,6 @@ class _RenderPopupMenuCard extends RenderProxyBox {
         );
       }
       canvas.drawPath(surface, Paint()..color = _fill);
-    } else if (_bare) {
-      _pane.clear();
     } else {
       _pane.paint(
         context,
