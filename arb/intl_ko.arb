@@ -1080,15 +1080,5 @@
   "fallbackFilterIpcidrDesc": "Nameserver가 이 범위의 IP를 반환하면 Fallback 결과를 사용합니다.",
   "fallbackFilterDomainDesc": "이 도메인은 바로 Fallback으로 확인합니다.",
   "aboutForkEdition": "파생 버전",
-  "aboutBasedOn": "기반 프로젝트",
-  "updateChannelStable": "정식 버전",
-  "updateChannelPreview": "미리 보기",
-  "updateChannelValue": "업데이트 채널: {channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "기반 프로젝트"
 }

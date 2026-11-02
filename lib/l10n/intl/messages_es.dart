@@ -272,16 +272,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m97(transport) => "Encabezados ${transport}";
 
-  static String m98(channel) => "Canal de actualización: ${channel}";
+  static String m98(label) => "${label} debe ser una URL";
 
-  static String m99(label) => "${label} debe ser una URL";
+  static String m99(date) => "Válido hasta el ${date}";
 
-  static String m100(date) => "Válido hasta el ${date}";
-
-  static String m101(count) =>
+  static String m100(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m102(count) =>
+  static String m101(count) =>
       "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -2275,9 +2273,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Sin nombre"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Desfijar ventana"),
     "update": MessageLookupByLibrary.simpleMessage("Actualizar"),
-    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Preliminar"),
-    "updateChannelStable": MessageLookupByLibrary.simpleMessage("Estable"),
-    "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "No se pudo descargar la actualización.",
     ),
@@ -2307,7 +2302,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlRewrite": MessageLookupByLibrary.simpleMessage("Reescritura de URL"),
-    "urlTip": m99,
+    "urlTip": m98,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -2316,7 +2311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "usedTraffic": MessageLookupByLibrary.simpleMessage("Tráfico usado"),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "username": MessageLookupByLibrary.simpleMessage("Usuario"),
-    "validUntil": m100,
+    "validUntil": m99,
     "value": MessageLookupByLibrary.simpleMessage("Valor"),
     "view": MessageLookupByLibrary.simpleMessage("Ver"),
     "viewAll": MessageLookupByLibrary.simpleMessage("Ver todo"),
@@ -2335,8 +2330,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

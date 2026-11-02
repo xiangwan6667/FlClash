@@ -1080,15 +1080,5 @@
   "fallbackFilterIpcidrDesc": "Если Nameserver возвращает IP из этих диапазонов, используется ответ Fallback.",
   "fallbackFilterDomainDesc": "Эти домены сразу разрешаются через Fallback.",
   "aboutForkEdition": "Модифицированная версия",
-  "aboutBasedOn": "На основе",
-  "updateChannelStable": "Стабильный",
-  "updateChannelPreview": "Предварительный",
-  "updateChannelValue": "Канал обновлений: {channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "На основе"
 }

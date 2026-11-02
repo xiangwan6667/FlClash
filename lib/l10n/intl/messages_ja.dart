@@ -238,15 +238,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m97(transport) => "${transport} リクエストヘッダー";
 
-  static String m98(channel) => "更新チャンネル：${channel}";
+  static String m98(label) => "${label}はURLである必要があります";
 
-  static String m99(label) => "${label}はURLである必要があります";
+  static String m99(date) => "有効期限 ${date}";
 
-  static String m100(date) => "有効期限 ${date}";
+  static String m100(count) => "${count} 年前";
 
   static String m101(count) => "${count} 年前";
-
-  static String m102(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1804,9 +1802,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("名称未設定"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("固定を解除"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
-    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("プレビュー版"),
-    "updateChannelStable": MessageLookupByLibrary.simpleMessage("安定版"),
-    "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage(
       "更新をダウンロードできませんでした。",
     ),
@@ -1834,14 +1829,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("アップロード帯域幅"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlRewrite": MessageLookupByLibrary.simpleMessage("URL 書き換え"),
-    "urlTip": m99,
+    "urlTip": m98,
     "useHosts": MessageLookupByLibrary.simpleMessage("Hostsを使用"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("システムのHostsを使用"),
     "usedShort": MessageLookupByLibrary.simpleMessage("使用済み"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("使用済みトラフィック"),
     "userAgent": MessageLookupByLibrary.simpleMessage("User-Agent"),
     "username": MessageLookupByLibrary.simpleMessage("ユーザー名"),
-    "validUntil": m100,
+    "validUntil": m99,
     "value": MessageLookupByLibrary.simpleMessage("値"),
     "view": MessageLookupByLibrary.simpleMessage("表示"),
     "viewAll": MessageLookupByLibrary.simpleMessage("すべて表示"),
@@ -1856,8 +1851,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "システムに書き込むを有効にするとシステムクロックも設定します。Android では無視されます。",
     ),
-    "yearsAgo": m101,
-    "yearsAgoShort": m102,
+    "yearsAgo": m100,
+    "yearsAgoShort": m101,
     "yes": MessageLookupByLibrary.simpleMessage("はい"),
     "zhCN": MessageLookupByLibrary.simpleMessage("簡体字中国語"),
   };

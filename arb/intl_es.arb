@@ -1080,15 +1080,5 @@
   "fallbackFilterIpcidrDesc": "Si Nameserver devuelve una IP de estos rangos, se usa la respuesta de Fallback.",
   "fallbackFilterDomainDesc": "Estos dominios se resuelven directamente con Fallback.",
   "aboutForkEdition": "Versión derivada",
-  "aboutBasedOn": "Basado en",
-  "updateChannelStable": "Estable",
-  "updateChannelPreview": "Preliminar",
-  "updateChannelValue": "Canal de actualización: {channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "Basado en"
 }

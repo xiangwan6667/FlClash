@@ -9097,36 +9097,6 @@ class AppLocalizations {
   String get aboutBasedOn {
     return Intl.message('Based on', name: 'aboutBasedOn', desc: '', args: []);
   }
-
-  /// `Stable`
-  String get updateChannelStable {
-    return Intl.message(
-      'Stable',
-      name: 'updateChannelStable',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Preview`
-  String get updateChannelPreview {
-    return Intl.message(
-      'Preview',
-      name: 'updateChannelPreview',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update channel: {channel}`
-  String updateChannelValue(String channel) {
-    return Intl.message(
-      'Update channel: $channel',
-      name: 'updateChannelValue',
-      desc: '',
-      args: [channel],
-    );
-  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

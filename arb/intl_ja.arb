@@ -1080,15 +1080,5 @@
   "fallbackFilterIpcidrDesc": "Nameserver がこれらの範囲の IP を返したときは、Fallback の結果を使います。",
   "fallbackFilterDomainDesc": "これらのドメインは、直接 Fallback で解決します。",
   "aboutForkEdition": "派生版",
-  "aboutBasedOn": "ベース",
-  "updateChannelStable": "安定版",
-  "updateChannelPreview": "プレビュー版",
-  "updateChannelValue": "更新チャンネル：{channel}",
-  "@updateChannelValue": {
-    "placeholders": {
-      "channel": {
-        "type": "String"
-      }
-    }
-  }
+  "aboutBasedOn": "ベース"
 }

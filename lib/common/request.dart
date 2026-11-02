@@ -8,7 +8,6 @@ import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/plugins/app.dart';
-import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' show join;
@@ -24,9 +23,6 @@ class Request {
   String? userAgent;
 
   ProviderReader? _read;
-
-  UpdateChannel get _updateChannel =>
-      _read?.call(appSettingProvider).updateChannel ?? defaultUpdateChannel;
 
   void attach(ProviderReader read) {
     _read = read;
@@ -120,18 +116,16 @@ class Request {
   }
 
   Future<Map<String, dynamic>?> latestRelease() async {
-    final channel = _updateChannel;
     for (var page = 1; ; page++) {
       final response = await dio.get<List<dynamic>>(
         'https://api.github.com/repos/$repository/releases',
         queryParameters: {'per_page': 100, 'page': page},
         options: Options(responseType: ResponseType.json),
       );
-      if (_updateChannel != channel) return null;
       final releases = response.data!;
       for (final entry in releases) {
         if (entry is Map<String, dynamic> &&
-            entry['target_commitish'] == channel.branch &&
+            entry['target_commitish'] == updateBranch &&
             entry['draft'] != true) {
           return entry;
         }

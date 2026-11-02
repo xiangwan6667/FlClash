@@ -133,9 +133,6 @@ const appliedConfigMd5Key = 'applied_config_md5';
 const defaultSystemDnsFallback = '223.5.5.5';
 const repository = 'xiangwan6667/FlClash';
 const updateBranch = 'Miu-dev';
-const defaultUpdateChannel = updateBranch == 'Miu'
-    ? UpdateChannel.stable
-    : UpdateChannel.preview;
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 const defaultTestUrl = 'https://www.gstatic.com/generate_204';

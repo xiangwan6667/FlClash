@@ -131,22 +131,6 @@ void main() {
   });
 
   group('AppSettingProps JSON round-trip', () {
-    test('missing and unknown update channels use the build default', () {
-      expect(AppSettingProps.fromJson({}).updateChannel, defaultUpdateChannel);
-      expect(
-        AppSettingProps.fromJson({'updateChannel': 'unknown'}).updateChannel,
-        defaultUpdateChannel,
-      );
-    });
-
-    test('preserves the saved update channel across JSON reloads', () {
-      for (final channel in ['stable', 'preview']) {
-        final restored = AppSettingProps.fromJson({'updateChannel': channel});
-        final reloaded = roundTrip(restored.toJson, AppSettingProps.fromJson);
-        expect(reloaded.toJson()['updateChannel'], channel);
-      }
-    });
-
     test('default values survive round-trip', () {
       const props = AppSettingProps();
       final restored = roundTrip(
