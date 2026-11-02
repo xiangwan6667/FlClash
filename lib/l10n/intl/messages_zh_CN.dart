@@ -234,13 +234,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m97(transport) => "${transport} 请求头";
 
-  static String m98(label) => "${label}必须为URL";
+  static String m98(channel) => "更新渠道：${channel}";
 
-  static String m99(date) => "有效期至 ${date}";
+  static String m99(label) => "${label}必须为URL";
 
-  static String m100(count) => "${count} 年前";
+  static String m100(date) => "有效期至 ${date}";
 
   static String m101(count) => "${count} 年前";
+
+  static String m102(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1632,6 +1634,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("更新渠道"),
+    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
+      "选择后，检查更新将使用所选渠道。",
+    ),
+    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("预览版"),
+    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu-dev · 提前体验新功能",
+    ),
+    "updateChannelStable": MessageLookupByLibrary.simpleMessage("正式版"),
+    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu · 适合日常使用",
+    ),
+    "updateChannelValue": m98,
     "updateDownloadFailed": MessageLookupByLibrary.simpleMessage("无法下载更新。"),
     "updateDownloadStarted": MessageLookupByLibrary.simpleMessage(
       "已开始下载更新，可在首页查看进度",
@@ -1651,14 +1666,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
     "urlRewrite": MessageLookupByLibrary.simpleMessage("URL 重写"),
-    "urlTip": m98,
+    "urlTip": m99,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
     "usedTraffic": MessageLookupByLibrary.simpleMessage("已用流量"),
     "userAgent": MessageLookupByLibrary.simpleMessage("用户代理"),
     "username": MessageLookupByLibrary.simpleMessage("用户名"),
-    "validUntil": m99,
+    "validUntil": m100,
     "value": MessageLookupByLibrary.simpleMessage("值"),
     "view": MessageLookupByLibrary.simpleMessage("查看"),
     "viewAll": MessageLookupByLibrary.simpleMessage("查看全部"),
@@ -1673,8 +1688,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m100,
-    "yearsAgoShort": m101,
+    "yearsAgo": m101,
+    "yearsAgoShort": m102,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

@@ -255,6 +255,9 @@ abstract class AppSettingProps with _$AppSettingProps {
     TabAnimation tabAnimation,
     @Default(true) bool floatingNavigationBar,
     @Default(true) bool autoCheckUpdate,
+    @Default(defaultUpdateChannel)
+    @JsonKey(unknownEnumValue: defaultUpdateChannel)
+    UpdateChannel updateChannel,
     @Default(true)
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,

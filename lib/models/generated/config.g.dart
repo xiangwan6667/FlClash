@@ -42,6 +42,13 @@ _AppSettingProps _$AppSettingPropsFromJson(
       TabAnimation.fade,
   floatingNavigationBar: json['floatingNavigationBar'] as bool? ?? true,
   autoCheckUpdate: json['autoCheckUpdate'] as bool? ?? true,
+  updateChannel:
+      $enumDecodeNullable(
+        _$UpdateChannelEnumMap,
+        json['updateChannel'],
+        unknownValue: UpdateChannel.preview,
+      ) ??
+      defaultUpdateChannel,
   sidebarExpanded:
       _readSidebarExpanded(json, 'sidebarExpanded') as bool? ?? true,
   acceptedDisclaimerVersion:
@@ -115,6 +122,7 @@ Map<String, dynamic> _$AppSettingPropsToJson(_AppSettingProps instance) =>
       'tabAnimation': _$TabAnimationEnumMap[instance.tabAnimation]!,
       'floatingNavigationBar': instance.floatingNavigationBar,
       'autoCheckUpdate': instance.autoCheckUpdate,
+      'updateChannel': _$UpdateChannelEnumMap[instance.updateChannel]!,
       'sidebarExpanded': instance.sidebarExpanded,
       'acceptedDisclaimerVersion': instance.acceptedDisclaimerVersion,
       'minimizeOnExit': instance.minimizeOnExit,
@@ -143,6 +151,11 @@ const _$RequestFeedEnumMap = {
 const _$TabAnimationEnumMap = {
   TabAnimation.slide: 'slide',
   TabAnimation.fade: 'fade',
+};
+
+const _$UpdateChannelEnumMap = {
+  UpdateChannel.stable: 'stable',
+  UpdateChannel.preview: 'preview',
 };
 
 const _$RestoreStrategyEnumMap = {
