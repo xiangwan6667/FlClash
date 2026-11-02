@@ -2254,45 +2254,6 @@ void main() {
     expect(bare(), isTrue);
   });
 
-  testWidgets('the morph alone paints the flat menu surface and shadow', (
-    tester,
-  ) async {
-    final open = await pumpMenu(tester, [const PopupMenuItem(label: 'item')]);
-    bool cardPaintsSurface() {
-      var painted = false;
-      final fill = cardOf(tester, surfaces).fill;
-      expect(
-        tester.renderObject(surfaces),
-        paints..everything((method, args) {
-          if (method == #drawRSuperellipse ||
-              (method == #drawPath && (args[1] as Paint).color == fill)) {
-            painted = true;
-          }
-          return true;
-        }),
-      );
-      return painted;
-    }
-
-    open();
-    await tester.pump();
-    final route = ModalRoute.of(tester.element(surfaces))!;
-    expect(route.transitionDuration, const Duration(milliseconds: 450));
-    expect(route.reverseTransitionDuration, const Duration(milliseconds: 500));
-    await tester.pump(const Duration(milliseconds: 96));
-    expect(cardOf(tester, surfaces).bare, isTrue);
-    expect(cardPaintsSurface(), isFalse);
-    await tester.pumpAndSettle();
-    expect(cardPaintsSurface(), isTrue);
-    await tester.tapAt(Offset.zero);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 48));
-    expect(cardOf(tester, surfaces).bare, isTrue);
-    expect(cardPaintsSurface(), isFalse);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-  });
-
   testWidgets('a menu returns its open sub menu alone into the button', (
     tester,
   ) async {

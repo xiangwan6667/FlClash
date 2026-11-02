@@ -176,7 +176,7 @@ class _AboutHero extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
     return Padding(
-      padding: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: Column(
         children: [
           _DeveloperModeDetector(
@@ -233,7 +233,6 @@ class _AboutHero extends StatelessWidget {
           const SizedBox(height: 20),
           TonalButton(
             size: TonalButtonSize.bar,
-            textStyle: AppTextStyle.subheadline.of(context),
             glyph: AppGlyphs.sync,
             label: appLocalizations.checkUpdate,
             onPressed: isCheckingUpdate ? null : onCheckUpdate,

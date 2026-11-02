@@ -4,5 +4,5 @@
 	branch = flclash-dev-miu
 [submodule "plugins/prism_ui"]
 	path = plugins/prism_ui
-	url = https://github.com/xiangwan6667/prism_ui.git
-	branch = codex/miu-popup-outline
+	url = https://github.com/chen08209/prism_ui.git
+	branch = main
