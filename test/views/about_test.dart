@@ -53,7 +53,7 @@ void main() {
     container.read(appSettingProvider).updateChannel.label,
   );
 
-  testWidgets('selects and remembers a channel when the sheet reopens', (
+  testWidgets('selects and remembers a channel when the menu reopens', (
     tester,
   ) async {
     await pumpAbout(tester);
@@ -63,48 +63,58 @@ void main() {
     const selected = defaultUpdateChannel == UpdateChannel.stable
         ? UpdateChannel.preview
         : UpdateChannel.stable;
-    expect(find.byType(SelectionCheck), findsOneWidget);
+    expect(find.byType(CommonPopupMenu), findsOneWidget);
     await tester.tap(find.text(selected.label));
     await tester.pumpAndSettle();
     expect(container.read(appSettingProvider).updateChannel, selected);
     expect(find.text(channelLabel()), findsOneWidget);
     await tester.tap(find.text(channelLabel()));
     await tester.pumpAndSettle();
-    final row = tester.widget<DecorationListItem>(
-      find.widgetWithText(DecorationListItem, selected.label),
+    final menu = tester.widget<CommonPopupMenu>(find.byType(CommonPopupMenu));
+    expect(
+      menu.items.singleWhere((item) => item.checked == true).label,
+      selected.label,
     );
-    expect(row.isSelected, isTrue);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('cancelling leaves the saved channel unchanged', (tester) async {
-    await pumpAbout(tester);
-    await tester.tap(find.text(channelLabel()));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(currentAppLocalizations.cancel));
-    await tester.pumpAndSettle();
-    expect(
-      container.read(appSettingProvider).updateChannel,
-      defaultUpdateChannel,
-    );
-    expect(find.text(currentAppLocalizations.updateChannel), findsNothing);
-  });
-
-  testWidgets('uses the floating card sheet and expands with top space', (
+  testWidgets('dismissing the menu leaves the saved channel unchanged', (
     tester,
   ) async {
     await pumpAbout(tester);
     await tester.tap(find.text(channelLabel()));
     await tester.pumpAndSettle();
-    final handle = find.byType(SheetDragHandle);
-    expect(handle, findsOneWidget);
-    final restingTop = tester.getTopLeft(handle).dy;
-    expect(restingTop, greaterThan(250));
-    await tester.drag(find.byType(Scrollable).last, const Offset(0, -400));
+    await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    final expandedTop = tester.getTopLeft(handle).dy;
-    expect(expandedTop, lessThan(restingTop - 100));
-    expect(expandedTop, greaterThan(40));
+    expect(
+      container.read(appSettingProvider).updateChannel,
+      defaultUpdateChannel,
+    );
+    expect(find.byType(CommonPopupMenu), findsNothing);
+  });
+
+  testWidgets('leaving About while the menu closes does not use its ref', (
+    tester,
+  ) async {
+    await pumpAbout(tester);
+    await tester.tap(find.text(channelLabel()));
+    await tester.pumpAndSettle();
+    const selected = defaultUpdateChannel == UpdateChannel.stable
+        ? UpdateChannel.preview
+        : UpdateChannel.stable;
+    await tester.tap(find.text(selected.label));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('uses a compact popup beside the channel button', (tester) async {
+    await pumpAbout(tester);
+    await tester.tap(find.text(channelLabel()));
+    await tester.pumpAndSettle();
+    expect(find.byType(SheetDragHandle), findsNothing);
+    expect(find.byType(CommonPopupMenu), findsOneWidget);
+    expect(tester.getSize(find.byType(PopupMenuCard)).height, lessThan(200));
     expect(tester.takeException(), isNull);
   });
 

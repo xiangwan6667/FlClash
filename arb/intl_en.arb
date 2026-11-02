@@ -966,12 +966,8 @@
   "alreadyInLocalProxies": "{name} is already in local proxies",
   "aboutForkEdition": "Fork edition",
   "aboutBasedOn": "Based on",
-  "updateChannel": "Update channel",
   "updateChannelStable": "Stable",
   "updateChannelPreview": "Preview",
-  "updateChannelStableDescription": "Miu · For everyday use",
-  "updateChannelPreviewDescription": "Miu-dev · Try new features early",
-  "updateChannelHint": "Update checks will use the selected channel.",
   "updateChannelValue": "Update channel: {channel}",
   "@updateChannelValue": {
     "placeholders": {

@@ -1462,18 +1462,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
-    "updateChannel": MessageLookupByLibrary.simpleMessage("更新渠道"),
-    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
-      "选择后，检查更新将使用所选渠道。",
-    ),
     "updateChannelPreview": MessageLookupByLibrary.simpleMessage("预览版"),
-    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu-dev · 提前体验新功能",
-    ),
     "updateChannelStable": MessageLookupByLibrary.simpleMessage("正式版"),
-    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu · 适合日常使用",
-    ),
     "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),

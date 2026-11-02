@@ -966,12 +966,8 @@
   "alreadyInLocalProxies": "{name}은(는) 이미 로컬 프록시에 있습니다",
   "aboutForkEdition": "파생 버전",
   "aboutBasedOn": "기반 프로젝트",
-  "updateChannel": "업데이트 채널",
   "updateChannelStable": "정식 버전",
   "updateChannelPreview": "미리 보기",
-  "updateChannelStableDescription": "Miu · 일상적인 사용에 적합",
-  "updateChannelPreviewDescription": "Miu-dev · 새로운 기능을 먼저 체험",
-  "updateChannelHint": "선택한 채널에서 업데이트를 확인합니다.",
   "updateChannelValue": "업데이트 채널: {channel}",
   "@updateChannelValue": {
     "placeholders": {

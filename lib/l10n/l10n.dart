@@ -7943,8 +7943,7 @@ class AppLocalizations {
   String customImportDroppedSubRules(num count, Object label) {
     return Intl.plural(
       count,
-      one:
-          '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
+      one: '1 SUB-RULE rule was dropped, since custom profiles do not support sub-rules',
       other:
           '$label SUB-RULE rules were dropped, since custom profiles do not support sub-rules',
       name: 'customImportDroppedSubRules',
@@ -8068,16 +8067,6 @@ class AppLocalizations {
     return Intl.message('Based on', name: 'aboutBasedOn', desc: '', args: []);
   }
 
-  /// `Update channel`
-  String get updateChannel {
-    return Intl.message(
-      'Update channel',
-      name: 'updateChannel',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Stable`
   String get updateChannelStable {
     return Intl.message(
@@ -8093,36 +8082,6 @@ class AppLocalizations {
     return Intl.message(
       'Preview',
       name: 'updateChannelPreview',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Miu · For everyday use`
-  String get updateChannelStableDescription {
-    return Intl.message(
-      'Miu · For everyday use',
-      name: 'updateChannelStableDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Miu-dev · Try new features early`
-  String get updateChannelPreviewDescription {
-    return Intl.message(
-      'Miu-dev · Try new features early',
-      name: 'updateChannelPreviewDescription',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Update checks will use the selected channel.`
-  String get updateChannelHint {
-    return Intl.message(
-      'Update checks will use the selected channel.',
-      name: 'updateChannelHint',
       desc: '',
       args: [],
     );

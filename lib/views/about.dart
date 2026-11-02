@@ -25,15 +25,13 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
-  Future<void> _selectUpdateChannel(BuildContext context, WidgetRef ref) async {
+  void _selectUpdateChannel(
+    BuildContext context,
+    WidgetRef ref,
+    UpdateChannel channel,
+  ) {
+    if (!context.mounted) return;
     if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
-    final channel = await showSheet<UpdateChannel>(
-      context: context,
-      builder: (_) => _UpdateChannelSheet(
-        selected: ref.read(appSettingProvider).updateChannel,
-      ),
-    );
-    if (channel == null || !context.mounted) return;
     ref
         .read(appSettingProvider.notifier)
         .update((state) => state.copyWith(updateChannel: channel));
@@ -89,7 +87,8 @@ class AboutView extends ConsumerWidget {
           _AboutHero(
             isCheckingUpdate: isLoading,
             updateChannel: updateChannel,
-            onSelectChannel: () => _selectUpdateChannel(context, ref),
+            onSelectChannel: (channel) =>
+                _selectUpdateChannel(context, ref, channel),
             onCheckUpdate: () {
               _checkUpdate(context, ref);
             },
@@ -167,7 +166,7 @@ class AboutView extends ConsumerWidget {
 class _AboutHero extends StatelessWidget {
   final bool isCheckingUpdate;
   final UpdateChannel updateChannel;
-  final VoidCallback onSelectChannel;
+  final ValueChanged<UpdateChannel> onSelectChannel;
   final VoidCallback onCheckUpdate;
   final VoidCallback onEnterDeveloperMode;
 
@@ -253,76 +252,30 @@ class _AboutHero extends StatelessWidget {
                 label: appLocalizations.checkUpdate,
                 onPressed: isCheckingUpdate ? null : onCheckUpdate,
               ),
-              TonalButton(
-                size: TonalButtonSize.bar,
-                glyph: AppGlyphs.chevronDown,
-                label: appLocalizations.updateChannelValue(updateChannel.label),
-                onPressed: isCheckingUpdate ? null : onSelectChannel,
+              IgnorePointer(
+                ignoring: isCheckingUpdate,
+                child: CommonPopupBox(
+                  targetBuilder: (open) => TonalButton(
+                    size: TonalButtonSize.bar,
+                    glyph: AppGlyphs.chevronDown,
+                    label: appLocalizations.updateChannelValue(
+                      updateChannel.label,
+                    ),
+                    onPressed: isCheckingUpdate ? null : open,
+                  ),
+                  popupBuilder: (_) => CommonPopupMenu(
+                    items: [
+                      for (final channel in UpdateChannel.values)
+                        CommonPopupMenuItem(
+                          label: channel.label,
+                          checked: channel == updateChannel,
+                          onPressed: () => onSelectChannel(channel),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UpdateChannelSheet extends StatefulWidget {
-  const _UpdateChannelSheet({required this.selected});
-
-  final UpdateChannel selected;
-
-  @override
-  State<_UpdateChannelSheet> createState() => _UpdateChannelSheetState();
-}
-
-class _UpdateChannelSheetState extends State<_UpdateChannelSheet> {
-  late final _controller = sheetScrollController(context);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    return CommonScaffold(
-      title: appLocalizations.updateChannel,
-      body: ListView(
-        controller: _controller,
-        padding: const EdgeInsets.all(16).copyWith(
-          top: context.contentTopPadding,
-          bottom: 16 + context.bottomInset,
-        ),
-        children: [
-          generateGroup([
-            for (final channel in UpdateChannel.values)
-              DecorationListItem(
-                title: Text(channel.label),
-                subtitle: Text(channel.description),
-                isSelected: channel == widget.selected,
-                trailing: channel == widget.selected
-                    ? const SelectionCheck()
-                    : null,
-                onPressed: () => Navigator.of(context).pop(channel),
-              ),
-          ]),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              appLocalizations.updateChannelHint,
-              textAlign: TextAlign.center,
-              style: AppTextStyle.footnote
-                  .of(context)
-                  .copyWith(color: context.colorScheme.onSurfaceVariant),
-            ),
-          ),
-          TonalButton(
-            size: TonalButtonSize.bar,
-            label: appLocalizations.cancel,
-            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),

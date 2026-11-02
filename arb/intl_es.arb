@@ -966,12 +966,8 @@
   "alreadyInLocalProxies": "{name} ya está en proxies locales",
   "aboutForkEdition": "Versión derivada",
   "aboutBasedOn": "Basado en",
-  "updateChannel": "Canal de actualización",
   "updateChannelStable": "Estable",
   "updateChannelPreview": "Preliminar",
-  "updateChannelStableDescription": "Miu · Para uso diario",
-  "updateChannelPreviewDescription": "Miu-dev · Prueba las novedades antes",
-  "updateChannelHint": "Las actualizaciones se buscarán en el canal seleccionado.",
   "updateChannelValue": "Canal de actualización: {channel}",
   "@updateChannelValue": {
     "placeholders": {

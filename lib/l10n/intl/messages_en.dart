@@ -965,9 +965,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "inputRuleContent": MessageLookupByLibrary.simpleMessage(
       "Enter the rule content",
     ),
-    "installedAppsPermissionDeniedMessage": MessageLookupByLibrary.simpleMessage(
-      "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
-    ),
+    "installedAppsPermissionDeniedMessage":
+        MessageLookupByLibrary.simpleMessage(
+          "The app list permission was denied, so installed apps cannot be listed. Please grant it manually in system settings.",
+        ),
     "installedAppsPermissionDesc": MessageLookupByLibrary.simpleMessage(
       "This system hides the installed app list until the permission is granted. Authorize it to configure the per-app proxy.",
     ),
@@ -1868,18 +1869,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Unnamed"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Unpin window"),
     "update": MessageLookupByLibrary.simpleMessage("Update"),
-    "updateChannel": MessageLookupByLibrary.simpleMessage("Update channel"),
-    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
-      "Update checks will use the selected channel.",
-    ),
     "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Preview"),
-    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu-dev · Try new features early",
-    ),
     "updateChannelStable": MessageLookupByLibrary.simpleMessage("Stable"),
-    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
-      "Miu · For everyday use",
-    ),
     "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("Upload"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("Upload bandwidth"),
