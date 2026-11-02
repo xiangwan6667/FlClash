@@ -360,6 +360,22 @@ func TestHandleValidateProxiesReportsEachProxyInPlace(t *testing.T) {
 	}
 }
 
+func TestHandleValidateProxiesAcceptsMiuAndRejectsInvalidPSK(t *testing.T) {
+	got := handleValidateProxies([]map[string]any{
+		{"name": "miu", "type": "miu", "server": "example.com", "port": 443, "psk": "0123456789abcdef", "udp": true},
+		{"name": "invalid", "type": "miu", "server": "example.com", "port": 443, "psk": "short"},
+	})
+	if len(got) != 2 {
+		t.Fatalf("got %d results, want 2", len(got))
+	}
+	if got[0] != "" {
+		t.Fatalf("valid Miu proxy rejected: %q", got[0])
+	}
+	if got[1] == "" {
+		t.Fatal("Miu proxy with an invalid PSK was accepted")
+	}
+}
+
 func TestHandleConvertProxiesReadsABase64ShareLinkList(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "subscription")
 	links := "trojan://secret@example.com:443#first\nss://YWVzLTEyOC1nY206cGFzcw@example.com:8388#second\n"

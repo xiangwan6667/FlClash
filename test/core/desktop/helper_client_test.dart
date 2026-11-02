@@ -23,6 +23,15 @@ void main() {
     expect(peer, contains('const PORT_VALUE: &str = "$helperPortValue";'));
   });
 
+  test('Linux client and Helper use the same isolated service paths', () {
+    final linux = File(
+      'services/helper/src/service/linux.rs',
+    ).readAsStringSync();
+
+    expect(linux, contains('const SOCKET_PATH: &str = "$helperSocketPath";'));
+    expect(linux, contains('const UNIT_PATH: &str = "$helperUnitPath";'));
+  });
+
   test(
     'start returns a Helper lease identity with matching session and PID',
     () async {

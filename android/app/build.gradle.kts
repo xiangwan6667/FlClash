@@ -33,10 +33,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.follow.clash"
+        applicationId = "com.follow.clash.miu"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = flutter.versionCode
+        // Keep both Miu branches on the same code so either can replace the other.
+        versionCode = 2026110201
         versionName = flutter.versionName
     }
 

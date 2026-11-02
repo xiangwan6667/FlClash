@@ -17,7 +17,7 @@ env:
   # See CI Caches in .agents/commands.md.
   BRANCH_CACHE: ${{ !startsWith(github.ref, 'refs/tags/') }}
   FLUTTER_VERSION: '3.47.6'
-  GO_VERSION: '1.27.1'
+  GO_VERSION: '1.27.3'
   NDK_VERSION: r28c
 
 jobs:
@@ -323,8 +323,9 @@ jobs:
         run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
 
   build:
-    # Releases publish where the release links point: the public repository.
-    if: github.repository == 'chen08209/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      (github.repository == 'chen08209/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      (github.repository == 'xiangwan6667/FlClash' && (github.ref == 'refs/heads/Miu' || github.ref == 'refs/heads/Miu-dev') && (github.event_name == 'push' || github.event_name == 'workflow_dispatch'))
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -443,6 +444,41 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
+      - name: Verify macOS installation layout
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          image=$(find dist -maxdepth 1 -name '*.dmg' -print -quit)
+          test -n "$image"
+          mountpoint=$(mktemp -d)
+          hdiutil attach -quiet -readonly -nobrowse -mountpoint "$mountpoint" "$image"
+          trap 'hdiutil detach -quiet "$mountpoint"' EXIT
+          app="$mountpoint/FlClash-Miu/FlClash.app"
+          test -d "$app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = com.follow.clash.miu
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$app/Contents/Info.plist")" = FlClash
+
+      - name: Verify Linux installation layout
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          deb=$(find dist -maxdepth 1 -name '*.deb' -print -quit)
+          rpm=$(find dist -maxdepth 1 -name '*.rpm' -print -quit)
+          image=$(find dist -maxdepth 1 -name '*.AppImage' -print -quit)
+          test -n "$deb" && test -n "$rpm" && test -n "$image"
+          test "$(dpkg-deb --field "$deb" Package)" = flclash-miu
+          dpkg-deb --contents "$deb" > "$RUNNER_TEMP/miu-deb-contents"
+          grep -F '/opt/FlClash-Miu/FlClash-Miu' "$RUNNER_TEMP/miu-deb-contents"
+          test "$(rpm -qp --queryformat '%{NAME}' "$rpm")" = flclash-miu
+          rpm -qpl "$rpm" > "$RUNNER_TEMP/miu-rpm-contents"
+          grep -F '/usr/share/flclash-miu/FlClash-Miu' "$RUNNER_TEMP/miu-rpm-contents"
+          mkdir "$RUNNER_TEMP/miu-appimage"
+          (cd "$RUNNER_TEMP/miu-appimage" && "$GITHUB_WORKSPACE/$image" --appimage-extract > /dev/null)
+          test -f "$RUNNER_TEMP/miu-appimage/squashfs-root/FlClash-Miu"
+          grep -F 'exec ./FlClash-Miu' "$RUNNER_TEMP/miu-appimage/squashfs-root/AppRun"
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
@@ -451,6 +487,7 @@ jobs:
           overwrite: true
 
   upload:
+    if: github.repository == 'chen08209/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     needs: [ build, dart, plugins, go, android, rust, windows-helper-test ]

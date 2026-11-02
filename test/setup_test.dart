@@ -67,6 +67,14 @@ hooks:
       expect(setup.createPackageTargets('macos', null), 'dmg');
     });
 
+    test('macOS DMGs keep FlClash in an independent application folder', () {
+      expect(setup.createPackageHookArgs('macos', 'dmg'), [
+        '--hook-post=sh tool/package_miu_macos_dmg.sh',
+      ]);
+      expect(setup.createPackageHookArgs('windows', 'exe,zip'), isEmpty);
+      expect(setup.createPackageHookArgs('macos', 'zip'), isEmpty);
+    });
+
     test('downloads the appimagetool build matching the host', () {
       expect(setup.appImageToolArch('arm64'), 'aarch64');
       expect(setup.appImageToolArch('amd64'), 'x86_64');

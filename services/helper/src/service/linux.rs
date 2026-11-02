@@ -19,10 +19,10 @@ use tokio::signal::unix::{signal, SignalKind};
 use tokio::time::Sleep;
 use tokio_stream::Stream;
 
-const SERVICE_NAME: &str = "flclash-helper";
-const UNIT_PATH: &str = "/etc/systemd/system/flclash-helper.service";
-const RUNTIME_DIR_NAME: &str = "flclash";
-const SOCKET_PATH: &str = "/run/flclash/helper.sock";
+const SERVICE_NAME: &str = "flclash-miu-helper";
+const UNIT_PATH: &str = "/etc/systemd/system/flclash-miu-helper.service";
+const RUNTIME_DIR_NAME: &str = "flclash-miu";
+const SOCKET_PATH: &str = "/run/flclash-miu/helper.sock";
 const OWNER_UID_ENV: &str = "FLCLASH_HELPER_OWNER_UID";
 const OWNER_GID_ENV: &str = "FLCLASH_HELPER_OWNER_GID";
 const SOCKET_MODE: u32 = 0o660;
@@ -393,7 +393,7 @@ mod tests {
         assert!(unit.contains("Group=1001\n"));
         assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_UID=1000\n"));
         assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_GID=1001\n"));
-        assert!(unit.contains("RuntimeDirectory=flclash\n"));
+        assert!(unit.contains("RuntimeDirectory=flclash-miu\n"));
         assert!(unit.contains("Restart=on-failure\n"));
         assert!(unit.contains("StartLimitBurst=5\n"));
     }
