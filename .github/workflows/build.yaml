@@ -408,6 +408,13 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_26.3.app || sudo xcode-select -s /Applications/Xcode_26.2.app
           xcodebuild -version
 
+      - name: Disable build tool usage reporting
+        shell: bash
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
+          go telemetry off
+
       - name: Setup NDK
         if: startsWith(matrix.platform,'android')
         uses: nttld/setup-ndk@v1

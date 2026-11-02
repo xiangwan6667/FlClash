@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/l10n_labels.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/enum/enum.dart';
@@ -304,7 +305,9 @@ void main() {
 
     adapter.response.complete(
       ResponseBody.fromString(
-        jsonEncode({'tag_name': 'v0.0.0'}),
+        jsonEncode([
+          {'tag_name': 'v0.0.0', 'target_commitish': updateBranch},
+        ]),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
