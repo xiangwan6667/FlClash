@@ -27,3 +27,5 @@ include(":app")
 include(":core")
 include(":service")
 include(":common")
+
+project(":mobile_scanner").projectDir = file("../plugins/mobile_scanner_android")
