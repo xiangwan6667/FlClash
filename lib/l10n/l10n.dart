@@ -8052,6 +8052,21 @@ class AppLocalizations {
       args: [name],
     );
   }
+
+  /// `Fork edition`
+  String get aboutForkEdition {
+    return Intl.message(
+      'Fork edition',
+      name: 'aboutForkEdition',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Based on`
+  String get aboutBasedOn {
+    return Intl.message('Based on', name: 'aboutBasedOn', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {
