@@ -1,6 +1,6 @@
 # Android scanner override
 
-Android implementation from mobile_scanner 7.4.2 (Apache-2.0), retaining its
+Android implementation from mobile_scanner 7.4.2 (BSD-3-Clause), retaining its
 CameraX and Flutter channel lifecycle. The decoder uses ZXing locally instead of
 ML Kit. Google Tasks supplies only the local completion API; no ML Kit, Firebase
 or DataTransport component is included. Apple platforms retain the upstream
