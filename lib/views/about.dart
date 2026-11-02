@@ -86,13 +86,31 @@ class AboutView extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           generateSection(
-            title: appLocalizations.more,
+            title: appLocalizations.aboutForkEdition,
             items: [
               _buildLinkItem(
                 glyph: AppGlyphs.code,
                 title: appLocalizations.project,
                 url: 'https://github.com/$repository',
                 label: 'github.com/$repository',
+              ),
+              _buildLinkItem(
+                glyph: AppGlyphs.cpu,
+                title: appLocalizations.core,
+                url:
+                    'https://github.com/xiangwan6667/mihomo/tree/flclash-dev-miu',
+                label: 'github.com/xiangwan6667/mihomo',
+              ),
+            ],
+          ),
+          generateSection(
+            title: appLocalizations.aboutBasedOn,
+            items: [
+              _buildLinkItem(
+                glyph: AppGlyphs.code,
+                title: appLocalizations.project,
+                url: 'https://github.com/chen08209/FlClash',
+                label: 'github.com/chen08209/FlClash',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,

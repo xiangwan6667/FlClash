@@ -291,6 +291,8 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "about": MessageLookupByLibrary.simpleMessage("À propos"),
+    "aboutBasedOn": MessageLookupByLibrary.simpleMessage("Basé sur"),
+    "aboutForkEdition": MessageLookupByLibrary.simpleMessage("Version dérivée"),
     "accessControl": MessageLookupByLibrary.simpleMessage("Contrôle d’accès"),
     "accessControlAllowDesc": MessageLookupByLibrary.simpleMessage(
       "Seules les apps sélectionnées passent par le VPN",

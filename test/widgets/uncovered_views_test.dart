@@ -253,6 +253,10 @@ void main() {
     await tester.pump();
 
     expect(find.byType(AboutView), findsOneWidget);
+    expect(find.text('Fork edition'), findsOneWidget);
+    expect(find.text('Based on'), findsOneWidget);
+    expect(find.text('github.com/xiangwan6667/FlClash'), findsOneWidget);
+    expect(find.text('github.com/xiangwan6667/mihomo'), findsOneWidget);
     expect(find.text('Telegram'), findsOneWidget);
     final hero = find.byWidgetPredicate(
       (widget) => widget.runtimeType.toString() == '_AboutHero',
