@@ -97,6 +97,21 @@ flutter {
     source = "../.."
 }
 
+val verifyNoTelemetryDependencies = tasks.register("verifyNoTelemetryDependencies") {
+    doLast {
+        val blocked = configurations.getByName("releaseRuntimeClasspath")
+            .incoming.resolutionResult.allComponents.mapNotNull { it.moduleVersion }
+            .filter {
+                it.group in setOf("com.google.mlkit", "com.google.firebase", "com.google.android.datatransport") ||
+                    it.name.startsWith("play-services-mlkit") ||
+                    it.name.startsWith("play-services-measurement")
+            }
+        check(blocked.isEmpty()) { "Telemetry dependencies are forbidden: ${blocked.joinToString()}" }
+    }
+}
+
+tasks.named("preBuild").configure { dependsOn(verifyNoTelemetryDependencies) }
+
 dependencies {
     implementation(project(":service"))
     implementation(project(":common"))

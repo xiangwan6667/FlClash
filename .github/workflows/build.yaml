@@ -274,7 +274,7 @@ jobs:
           chmod +x gradlew
           # No JVM unit test loads the Core or the Flutter build, but `:core` compiles against
           # the gomobile AAR, so one ABI of it is built.
-          ./gradlew :common:testDebugUnitTest :service:testDebugUnitTest :app:testDebugUnitTest \
+          ./gradlew :common:testDebugUnitTest :service:testDebugUnitTest :app:testDebugUnitTest :mobile_scanner:testDebugUnitTest \
             -Ptarget-platform=android-arm64 \
             -x :app:compileFlutterBuildDebug -x :app:copyFlutterAssetsDebug
 
@@ -467,6 +467,25 @@ jobs:
           test -d "$app"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = com.follow.clash.miu
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$app/Contents/Info.plist")" = FlClash
+
+      - name: Verify Android packages contain no telemetry SDKs
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import zipfile
+          packages = list(Path('dist').rglob('*.apk'))
+          assert packages, 'No Android packages were built'
+          blocked = (b'com/google/mlkit', b'com/google/firebase', b'com/google/android/datatransport')
+          for package in packages:
+              with zipfile.ZipFile(package) as archive:
+                  for name in archive.namelist():
+                      assert not name.endswith(('.jks', '.keystore', '/local.properties')), name
+                      if name.endswith('.dex'):
+                          data = archive.read(name)
+                          assert not any(marker in data for marker in blocked), package.name
+          PY
 
       - name: Verify Linux installation layout
         if: matrix.platform == 'linux'
