@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/metacubex/mihomo/component/resolver"
 	"github.com/metacubex/mihomo/dns"
+	"github.com/metacubex/mihomo/tunnel"
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
@@ -56,6 +57,11 @@ func handleClearDnsCache() {
 // Android's NetworkObserver reports through handleResetNetwork.
 func handleNetworkChanged() {
 	handleClearDnsCache()
+	for _, proxy := range tunnel.AllProxies() {
+		if pooled, ok := proxy.Adapter().(interface{ CloseIdle() }); ok {
+			pooled.CloseIdle()
+		}
+	}
 }
 
 // A connection that went out over a network the device has left hangs until

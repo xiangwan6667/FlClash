@@ -6,7 +6,7 @@ AppPublisher={{PUBLISHER_NAME}}
 AppPublisherURL={{PUBLISHER_URL}}
 AppSupportURL={{PUBLISHER_URL}}
 AppUpdatesURL={{PUBLISHER_URL}}
-DefaultDirName={{INSTALL_DIR_NAME}}
+DefaultDirName={autopf}\FlClash-Miu
 DisableProgramGroupPage=yes
 OutputDir=.
 OutputBaseFilename={{OUTPUT_BASE_FILENAME}}
@@ -55,20 +55,6 @@ begin
   end;
 end;
 
-procedure KillProcesses;
-var
-  Processes: TArrayOfString;
-  i: Integer;
-  ResultCode: Integer;
-begin
-  Processes := ['FlClash.exe', 'FlClashCore.exe', 'FlClashHelperService.exe'];
-
-  for i := 0 to GetArrayLength(Processes)-1 do
-  begin
-    Exec('taskkill', '/f /im ' + Processes[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
-  end;
-end;
-
 procedure UnregisterHelperService;
 var
   HelperPath: String;
@@ -98,18 +84,17 @@ begin
   Result := Pos(Lowercase(AddBackslash(ExpandConstant('{app}'))), Lowercase(Value)) > 0;
 end;
 
-// The value name is appName and the schemes are protocolSchemes, both in
-// lib/common.
+// The value name is miuInstallName and the schemes are protocolSchemes.
 procedure RemoveUserRegistrations;
 var
   Schemes: TArrayOfString;
   Value: String;
   i: Integer;
 begin
-  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}', Value) and PointsIntoApp(Value) then
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-Miu', Value) and PointsIntoApp(Value) then
   begin
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{APP_NAME}}');
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{APP_NAME}}');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-Miu');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', 'FlClash-Miu');
   end;
 
   Schemes := ['clash', 'clashmeta', 'flclash'];
@@ -126,7 +111,6 @@ function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
   WaitForUpdatingApp;
   UnregisterHelperService;
-  KillProcesses;
   Result := '';
 end;
 
@@ -141,7 +125,6 @@ end;
 function InitializeUninstall(): Boolean;
 begin
   UnregisterHelperService;
-  KillProcesses;
   ClearStaleProxy;
   Result := True;
 end;
@@ -150,10 +133,10 @@ end;
 // windows/runner/Runner.rc.
 procedure RemoveUserData;
 begin
-  DelTree(ExpandConstant('{userappdata}\com.follow\clash'), True, True, True);
-  DelTree(ExpandConstant('{localappdata}\com.follow\clash'), True, True, True);
-  RemoveDir(ExpandConstant('{userappdata}\com.follow'));
-  RemoveDir(ExpandConstant('{localappdata}\com.follow'));
+  DelTree(ExpandConstant('{userappdata}\com.follow.miu\clash'), True, True, True);
+  DelTree(ExpandConstant('{localappdata}\com.follow.miu\clash'), True, True, True);
+  RemoveDir(ExpandConstant('{userappdata}\com.follow.miu'));
+  RemoveDir(ExpandConstant('{localappdata}\com.follow.miu'));
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
@@ -209,8 +192,8 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
-Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
+Name: "{autoprograms}\\FlClash-Miu\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
+Name: "{autodesktop}\\FlClash-Miu\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait; Check: IsAppUpdate

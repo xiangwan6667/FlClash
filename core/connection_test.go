@@ -12,6 +12,25 @@ import (
 	"github.com/metacubex/mihomo/tunnel/statistic"
 )
 
+type idleClosingProxy struct {
+	constant.ProxyAdapter
+	closed int
+}
+
+func (p *idleClosingProxy) CloseIdle() { p.closed++ }
+
+func TestNetworkChangeClosesIdleProxyConnections(t *testing.T) {
+	proxy := &idleClosingProxy{ProxyAdapter: outbound.NewDirectWithOption(outbound.DirectOption{Name: "pooled"})}
+	tunnel.UpdateProxies(map[string]constant.Proxy{"pooled": adapter.NewProxy(proxy)}, nil)
+	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
+
+	handleNetworkChanged()
+
+	if proxy.closed != 1 {
+		t.Fatalf("network change closed idle connections %d times, want 1", proxy.closed)
+	}
+}
+
 func TestProxyOnlyTrafficLeavesOutADirectProxyOfAnyName(t *testing.T) {
 	direct := outbound.NewDirectWithOption(outbound.DirectOption{Name: "直连"})
 	reject := outbound.NewRejectWithOption(outbound.RejectOption{Name: "HK"})

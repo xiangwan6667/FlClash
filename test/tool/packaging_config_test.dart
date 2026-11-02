@@ -20,13 +20,33 @@ void main() {
         expect(scripts.first, contains('exit 0'));
         expect(
           scripts,
-          contains('rm -f /etc/systemd/system/flclash-helper.service'),
+          contains('rm -f /etc/systemd/system/flclash-miu-helper.service'),
         );
         expect(
           scripts.any((script) => script.contains('systemctl daemon-reload')),
           isTrue,
         );
       });
+    }
+  });
+
+  test('Linux packages keep an independent identity and the FlClash label', () {
+    final cmake = File('linux/CMakeLists.txt').readAsStringSync();
+    final options =
+        loadYaml(File('distribute_options.yaml').readAsStringSync()) as YamlMap;
+    expect(cmake, contains('set(BINARY_NAME "FlClash-Miu")'));
+    expect(cmake, contains('set(APPLICATION_ID "com.follow.clash.miu")'));
+    expect(options['app_name'], 'FlClash-Miu');
+    for (final format in ['deb', 'rpm', 'appimage']) {
+      final config =
+          loadYaml(
+                File(
+                  'linux/packaging/$format/make_config.yaml',
+                ).readAsStringSync(),
+              )
+              as YamlMap;
+      expect(config['display_name'], 'FlClash');
+      if (format != 'appimage') expect(config['package_name'], 'flclash-miu');
     }
   });
 

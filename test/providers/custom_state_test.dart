@@ -932,6 +932,26 @@ void main() {
     });
   });
 
+  test('Miu custom proxies expose their required and TLS fields', () {
+    const proxy = CustomProxy(id: 1, definition: {'type': 'miu'});
+
+    expect(customProxyTypes, contains('miu'));
+    expect(proxy.requiredKeys, {'server', 'port', 'psk'});
+    expect(proxy.fields, contains(ProxyField.psk));
+    expect(proxy.accountKeys, contains(ProxyField.psk));
+    expect(
+      proxy.options,
+      containsAll([
+        ProxyField.sni,
+        ProxyField.alpn,
+        ProxyField.skipCertVerify,
+        ProxyField.clientFingerprint,
+        ProxyField.realityPublicKey,
+        ProxyField.realityShortId,
+      ]),
+    );
+  });
+
   test('customProxyTypes lists every type the core parses', () {
     final source = File('core/Clash.Meta/adapter/parser.go').readAsStringSync();
     expect(customProxyTypes, [

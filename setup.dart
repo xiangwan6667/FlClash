@@ -124,6 +124,13 @@ List<String> createFlutterBuildArgs({
   return flutterBuildArgs;
 }
 
+List<String> createPackageHookArgs(String platform, String targets) {
+  if (platform == 'macos' && targets.split(',').contains('dmg')) {
+    return ['--hook-post=sh tool/package_miu_macos_dmg.sh'];
+  }
+  return const [];
+}
+
 Map<String, String> createBuildEnvironment(String env) {
   return {'APP_ENV': env};
 }
@@ -209,6 +216,7 @@ Future<int> _package(
       if (flutterBuildArgs.isNotEmpty)
         '--flutter-build-args=${flutterBuildArgs.join(',')}',
       ...descriptionArgs,
+      ...createPackageHookArgs(platform, targets),
     ],
     includeParentEnvironment: true,
     runInShell: Platform.isWindows,

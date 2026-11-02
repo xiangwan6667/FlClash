@@ -53,7 +53,7 @@ void main() {
   test('releaseAssetName drops the tag prefix', () {
     expect(
       releaseAssetName('v0.9.3', 'android-arm64-v8a.apk'),
-      'FlClash-0.9.3-android-arm64-v8a.apk',
+      'FlClash-Miu-0.9.3-android-arm64-v8a.apk',
     );
   });
 

@@ -40,7 +40,7 @@ class LinuxProtocolRegistrationPlan {
     required this.applicationsDir,
   });
 
-  String get desktopId => 'flclash-url-handler.desktop';
+  String get desktopId => 'flclash-miu-url-handler.desktop';
 
   String get desktopPath => '$applicationsDir/$desktopId';
 
