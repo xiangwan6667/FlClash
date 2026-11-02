@@ -107,6 +107,7 @@ class Request {
   /// Null when this build is current; throws when GitHub cannot be asked.
   Future<Map<String, dynamic>?> checkForUpdate() async {
     final release = await latestRelease();
+    if (release == null) return null;
     final remoteVersion = release['tag_name'] as String;
     final version = globalState.packageInfo.version;
     final hasUpdate =
@@ -114,34 +115,23 @@ class Request {
     return hasUpdate ? release : null;
   }
 
-  /// The release page redirect still answers once the hourly API quota is spent.
-  Future<Map<String, dynamic>> latestRelease() async {
-    try {
-      final response = await dio.get<Map<String, dynamic>>(
-        'https://api.github.com/repos/$repository/releases/latest',
+  Future<Map<String, dynamic>?> latestRelease() async {
+    for (var page = 1; ; page++) {
+      final response = await dio.get<List<dynamic>>(
+        'https://api.github.com/repos/$repository/releases',
+        queryParameters: {'per_page': 100, 'page': page},
         options: Options(responseType: ResponseType.json),
       );
-      return response.data!;
-    } on DioException catch (error) {
-      commonPrint.log(
-        'latest release API failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
+      final releases = response.data!;
+      for (final entry in releases) {
+        if (entry is Map<String, dynamic> &&
+            entry['target_commitish'] == updateBranch &&
+            entry['draft'] != true) {
+          return entry;
+        }
+      }
+      if (releases.length < 100) return null;
     }
-    final response = await dio.get<void>(
-      'https://github.com/$repository/releases/latest',
-      options: Options(
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 400,
-      ),
-    );
-    final location = response.headers.value(HttpHeaders.locationHeader);
-    final segments = Uri.tryParse(location ?? '')?.pathSegments ?? const [];
-    final tagIndex = segments.indexOf('tag') + 1;
-    if (tagIndex == 0 || tagIndex >= segments.length) {
-      throw FormatException('No release tag in the redirect', location);
-    }
-    return {'tag_name': segments[tagIndex]};
   }
 
   Future<String> downloadVerifiedRelease({

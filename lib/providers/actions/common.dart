@@ -161,7 +161,7 @@ class CommonAction extends _$CommonAction {
       );
       if (res == true) {
         if (suffix == null) {
-          _openReleasePage();
+          _openReleasePage(tag);
         } else {
           unawaited(_downloadUpdate(tag, releaseAssetName(tag, suffix)));
         }
@@ -180,9 +180,9 @@ class CommonAction extends _$CommonAction {
     }
   }
 
-  void _openReleasePage() {
+  void _openReleasePage(String tag) {
     unawaited(
-      launchUrl(Uri.parse('https://github.com/$repository/releases/latest')),
+      launchUrl(Uri.https('github.com', '/$repository/releases/tag/$tag')),
     );
   }
 
@@ -249,6 +249,7 @@ class CommonAction extends _$CommonAction {
       );
       await _showUpdateFailure(
         userFacingErrorMessage(error, currentAppLocalizations),
+        tag: tag,
       );
     } finally {
       if (identical(_updateCancelToken, cancelToken)) {
@@ -275,7 +276,10 @@ class CommonAction extends _$CommonAction {
       final status = await app?.installPackage(download.path);
       await clearUpdateDownloads();
       if (status != null && packageInstallFailed(status)) {
-        await _showUpdateFailure(currentAppLocalizations.updateInstallFailed);
+        await _showUpdateFailure(
+          currentAppLocalizations.updateInstallFailed,
+          tag: download.tag,
+        );
       }
       return;
     }
@@ -283,18 +287,21 @@ class CommonAction extends _$CommonAction {
     if (started == true) {
       await ref.read(systemActionProvider.notifier).handleExit();
     } else if (started == false) {
-      await _showUpdateFailure(currentAppLocalizations.updateInstallFailed);
+      await _showUpdateFailure(
+        currentAppLocalizations.updateInstallFailed,
+        tag: download.tag,
+      );
     }
   }
 
-  Future<void> _showUpdateFailure(String message) async {
+  Future<void> _showUpdateFailure(String message, {required String tag}) async {
     final res = await dialogs.showMessage(
       title: currentAppLocalizations.updateFailed,
       message: TextSpan(text: message),
       confirmText: currentAppLocalizations.goDownload,
     );
     if (res == true) {
-      _openReleasePage();
+      _openReleasePage(tag);
     }
   }
 }

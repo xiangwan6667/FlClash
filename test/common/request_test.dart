@@ -90,54 +90,75 @@ void main() {
   });
 
   group('latestRelease', () {
-    Request requestAnswering(Map<String, ResponseBody Function()> byHost) {
-      return Request()..dio.httpClientAdapter = _HostAdapter(byHost);
-    }
-
-    test('reads the release from the API', () async {
-      final request = requestAnswering({
-        'api.github.com': () => ResponseBody.fromString(
-          '{"tag_name":"v1.2.3","body":"notes"}',
-          200,
-          headers: {
-            Headers.contentTypeHeader: [Headers.jsonContentType],
-          },
-        ),
-      });
-
-      expect(await request.latestRelease(), {
-        'tag_name': 'v1.2.3',
-        'body': 'notes',
-      });
-    });
-
-    test(
-      'falls back to the release page when the API is rate limited',
-      () async {
-        final request = requestAnswering({
-          'api.github.com': () => ResponseBody.fromString('{}', 403),
-          'github.com': () => ResponseBody.fromString(
-            '',
-            302,
+    Request requestAnswering(List<Map<String, dynamic>> releases) {
+      return Request()
+        ..dio.httpClientAdapter = _HostAdapter({
+          'api.github.com': () => ResponseBody.fromString(
+            jsonEncode(releases),
+            200,
             headers: {
-              HttpHeaders.locationHeader: [
-                'https://github.com/owner/repo/releases/tag/v1.2.4',
-              ],
+              Headers.contentTypeHeader: [Headers.jsonContentType],
             },
           ),
         });
+    }
 
-        expect(await request.latestRelease(), {'tag_name': 'v1.2.4'});
+    test('only reads published releases targeting this build branch', () async {
+      final own = {'tag_name': 'v1.2.3', 'target_commitish': updateBranch};
+      final request = requestAnswering([
+        {'tag_name': 'v9.0.0', 'target_commitish': 'other-branch'},
+        {'tag_name': 'v8.0.0', 'target_commitish': updateBranch, 'draft': true},
+        own,
+      ]);
+      request.dio.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            expect(options.uri.path, '/repos/$repository/releases');
+            handler.next(options);
+          },
+        ),
+      );
+      expect(await request.latestRelease(), own);
+    });
+
+    test(
+      'does not offer another branch when this branch has no release',
+      () async {
+        final request = requestAnswering([
+          {'tag_name': 'v9.0.0', 'target_commitish': 'other-branch'},
+        ]);
+        expect(await request.latestRelease(), isNull);
       },
     );
 
-    test('fails instead of answering when neither endpoint does', () async {
-      final request = requestAnswering({
-        'api.github.com': () => ResponseBody.fromString('{}', 403),
-        'github.com': () => ResponseBody.fromString('', 503),
-      });
-
+    test('API failures never fall back to the global latest release', () async {
+      final request = Request()
+        ..dio.httpClientAdapter = _HostAdapter({
+          'api.github.com': () => ResponseBody.fromString('{}', 403),
+          'github.com': () => throw StateError('cross-channel fallback'),
+        });
       await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
+    });
+
+    test('continues past a page belonging to another branch', () async {
+      var page = 0;
+      final own = {'tag_name': 'v1.2.3', 'target_commitish': updateBranch};
+      final request = Request()
+        ..dio.httpClientAdapter = _HostAdapter({
+          'api.github.com': () => ResponseBody.fromString(
+            jsonEncode(
+              ++page == 1
+                  ? List.filled(100, {'target_commitish': 'other-branch'})
+                  : [own],
+            ),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          ),
+        });
+      expect(await request.latestRelease(), own);
+      expect(page, 2);
     });
   });
 
