@@ -260,6 +260,7 @@ class _AboutHero extends StatelessWidget {
             children: [
               TonalButton(
                 size: TonalButtonSize.bar,
+                textStyle: AppTextStyle.subheadline.of(context),
                 glyph: AppGlyphs.sync,
                 label: appLocalizations.checkUpdate,
                 onPressed: isCheckingUpdate ? null : onCheckUpdate,
@@ -269,6 +270,7 @@ class _AboutHero extends StatelessWidget {
                 child: PopupAnchor(
                   targetBuilder: (open) => TonalButton(
                     size: TonalButtonSize.bar,
+                    textStyle: AppTextStyle.subheadline.of(context),
                     glyph: AppGlyphs.chevronDown,
                     label: appLocalizations.updateChannelValue(
                       updateChannel.label,

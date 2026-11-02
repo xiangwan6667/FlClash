@@ -129,4 +129,36 @@ void main() {
     );
     expect(button.onPressed, isNull);
   });
+
+  testWidgets(
+    'update actions use regular page text without changing disabled color',
+    (tester) async {
+      await pumpAbout(tester);
+      for (final label in [
+        currentAppLocalizations.checkUpdate,
+        channelLabel(),
+      ]) {
+        final text = tester.widget<RichText>(
+          find.descendant(
+            of: find.widgetWithText(TonalButton, label),
+            matching: find.byType(RichText),
+          ),
+        );
+        final style = text.text.style!;
+        expect(style.fontWeight, AppTextStyle.subheadline.weight);
+        expect(style.fontSize, AppTextStyle.subheadline.size);
+      }
+      container.read(loadingProvider(LoadingTag.checkUpdate).notifier).value =
+          true;
+      await tester.pump();
+      await tester.pump(commonDuration);
+      final text = tester.widget<RichText>(
+        find.descendant(
+          of: find.widgetWithText(TonalButton, channelLabel()),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(text.text.style!.color!.a, closeTo(0.38, 0.01));
+    },
+  );
 }
