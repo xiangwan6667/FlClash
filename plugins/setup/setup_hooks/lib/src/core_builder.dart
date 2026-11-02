@@ -89,6 +89,7 @@ final class CoreBuilder implements Builder {
     }
     output.dependencies.addAll([
       for (final path in report.inputs) Uri.file(path),
+      for (final path in report.outputs) Uri.file(path),
       for (final path in report.outputDirectories) Uri.directory(path),
     ]);
   }
