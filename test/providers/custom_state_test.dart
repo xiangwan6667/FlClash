@@ -1179,6 +1179,20 @@ void main() {
             continue;
           }
           for (final choice in proxy.choicesOf(field)) {
+            if (field == ProxyField.flow &&
+                choice == 'xtls-rprx-vision-udp443') {
+              expect(
+                File('$root/outbound/vless.go').readAsStringSync(),
+                contains('vless.XRV + "-udp443"'),
+              );
+              expect(
+                File(
+                  'core/Clash.Meta/transport/vless/vless.go',
+                ).readAsStringSync(),
+                contains(RegExp(r'\bXRV\s*=\s*"xtls-rprx-vision"')),
+              );
+              continue;
+            }
             expect(
               sources,
               contains('"${choice.toLowerCase()}"'),
