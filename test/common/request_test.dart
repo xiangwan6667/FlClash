@@ -6,6 +6,10 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/config.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
@@ -82,6 +86,57 @@ void main() {
           ),
         });
     }
+
+    test('uses the saved channel instead of the build branch', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container.listen(appSettingProvider, (_, _) {});
+      final stable = {'tag_name': 'v1.2.3', 'target_commitish': 'Miu'};
+      final preview = {'tag_name': 'v1.2.4', 'target_commitish': 'Miu-dev'};
+      final request = requestAnswering([preview, stable])
+        ..attach(container.read);
+      for (final (channel, expected) in [
+        ('stable', stable),
+        ('preview', preview),
+      ]) {
+        container
+            .read(appSettingProvider.notifier)
+            .update(
+              (_) => AppSettingProps.fromJson({'updateChannel': channel}),
+            );
+        expect(await request.latestRelease(), expected);
+      }
+    });
+
+    test(
+      'discards a result when its channel changed during the request',
+      () async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        container.listen(appSettingProvider, (_, _) {});
+        final request = requestAnswering([
+          {'tag_name': 'v1.2.3', 'target_commitish': updateBranch},
+        ])..attach(container.read);
+        request.dio.interceptors.add(
+          InterceptorsWrapper(
+            onResponse: (response, handler) {
+              container
+                  .read(appSettingProvider.notifier)
+                  .update(
+                    (state) => state.copyWith(
+                      updateChannel:
+                          defaultUpdateChannel == UpdateChannel.stable
+                          ? UpdateChannel.preview
+                          : UpdateChannel.stable,
+                    ),
+                  );
+              handler.next(response);
+            },
+          ),
+        );
+        expect(await request.latestRelease(), isNull);
+      },
+    );
 
     test('only reads published releases targeting this build branch', () async {
       final own = {'tag_name': 'v1.2.3', 'target_commitish': updateBranch};

@@ -198,11 +198,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m82(transport) => "${transport} 请求头";
 
-  static String m83(label) => "${label}必须为URL";
+  static String m83(channel) => "更新渠道：${channel}";
 
-  static String m84(count) => "${count} 年前";
+  static String m84(label) => "${label}必须为URL";
 
   static String m85(count) => "${count} 年前";
+
+  static String m86(count) => "${count} 年前";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1460,10 +1462,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("未命名"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("取消置顶"),
     "update": MessageLookupByLibrary.simpleMessage("更新"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("更新渠道"),
+    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
+      "选择后，检查更新将使用所选渠道。",
+    ),
+    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("预览版"),
+    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu-dev · 提前体验新功能",
+    ),
+    "updateChannelStable": MessageLookupByLibrary.simpleMessage("正式版"),
+    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu · 适合日常使用",
+    ),
+    "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("上传"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("上行带宽"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m84,
     "useHosts": MessageLookupByLibrary.simpleMessage("使用Hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("使用系统Hosts"),
     "usedShort": MessageLookupByLibrary.simpleMessage("已用"),
@@ -1486,8 +1501,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "写入系统会同时设置系统时钟，Android 上不生效。",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m85,
+    "yearsAgoShort": m86,
     "yes": MessageLookupByLibrary.simpleMessage("是"),
     "zhCN": MessageLookupByLibrary.simpleMessage("中文简体"),
   };

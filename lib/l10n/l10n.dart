@@ -8067,6 +8067,76 @@ class AppLocalizations {
   String get aboutBasedOn {
     return Intl.message('Based on', name: 'aboutBasedOn', desc: '', args: []);
   }
+
+  /// `Update channel`
+  String get updateChannel {
+    return Intl.message(
+      'Update channel',
+      name: 'updateChannel',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Stable`
+  String get updateChannelStable {
+    return Intl.message(
+      'Stable',
+      name: 'updateChannelStable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview`
+  String get updateChannelPreview {
+    return Intl.message(
+      'Preview',
+      name: 'updateChannelPreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Miu · For everyday use`
+  String get updateChannelStableDescription {
+    return Intl.message(
+      'Miu · For everyday use',
+      name: 'updateChannelStableDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Miu-dev · Try new features early`
+  String get updateChannelPreviewDescription {
+    return Intl.message(
+      'Miu-dev · Try new features early',
+      name: 'updateChannelPreviewDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update checks will use the selected channel.`
+  String get updateChannelHint {
+    return Intl.message(
+      'Update checks will use the selected channel.',
+      name: 'updateChannelHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update channel: {channel}`
+  String updateChannelValue(String channel) {
+    return Intl.message(
+      'Update channel: $channel',
+      name: 'updateChannelValue',
+      desc: '',
+      args: [channel],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalizations> {

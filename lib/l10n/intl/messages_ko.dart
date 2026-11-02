@@ -202,11 +202,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m82(transport) => "${transport} 요청 헤더";
 
-  static String m83(label) => "${label}은(는) URL이어야 합니다";
+  static String m83(channel) => "업데이트 채널: ${channel}";
 
-  static String m84(count) => "${Intl.plural(count, other: '${count}년 전')}";
+  static String m84(label) => "${label}은(는) URL이어야 합니다";
 
   static String m85(count) => "${Intl.plural(count, other: '${count}년 전')}";
+
+  static String m86(count) => "${Intl.plural(count, other: '${count}년 전')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -1582,10 +1584,23 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("이름 없음"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("창 고정 해제"),
     "update": MessageLookupByLibrary.simpleMessage("업데이트"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage("업데이트 채널"),
+    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
+      "선택한 채널에서 업데이트를 확인합니다.",
+    ),
+    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("미리 보기"),
+    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu-dev · 새로운 기능을 먼저 체험",
+    ),
+    "updateChannelStable": MessageLookupByLibrary.simpleMessage("정식 버전"),
+    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu · 일상적인 사용에 적합",
+    ),
+    "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("업로드"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage("업로드 대역폭"),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m84,
     "useHosts": MessageLookupByLibrary.simpleMessage("hosts 사용"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage("시스템 hosts 사용"),
     "usedShort": MessageLookupByLibrary.simpleMessage("사용"),
@@ -1608,8 +1623,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "시스템에 기록하면 시스템 시계도 설정합니다. Android에서는 무시됩니다.",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m85,
+    "yearsAgoShort": m86,
     "yes": MessageLookupByLibrary.simpleMessage("예"),
     "zhCN": MessageLookupByLibrary.simpleMessage("중국어 간체"),
   };

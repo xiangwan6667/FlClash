@@ -25,6 +25,20 @@ class AboutView extends ConsumerWidget {
     Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
   ];
 
+  Future<void> _selectUpdateChannel(BuildContext context, WidgetRef ref) async {
+    if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
+    final channel = await showSheet<UpdateChannel>(
+      context: context,
+      builder: (_) => _UpdateChannelSheet(
+        selected: ref.read(appSettingProvider).updateChannel,
+      ),
+    );
+    if (channel == null || !context.mounted) return;
+    ref
+        .read(appSettingProvider.notifier)
+        .update((state) => state.copyWith(updateChannel: channel));
+  }
+
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
     final commonAction = ref.read(commonActionProvider.notifier);
@@ -60,6 +74,9 @@ class AboutView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appLocalizations = context.appLocalizations;
     final isLoading = ref.watch(loadingProvider(LoadingTag.checkUpdate));
+    final updateChannel = ref.watch(
+      appSettingProvider.select((state) => state.updateChannel),
+    );
     return CommonScaffold(
       isLoading: isLoading,
       title: appLocalizations.about,
@@ -71,6 +88,8 @@ class AboutView extends ConsumerWidget {
         children: [
           _AboutHero(
             isCheckingUpdate: isLoading,
+            updateChannel: updateChannel,
+            onSelectChannel: () => _selectUpdateChannel(context, ref),
             onCheckUpdate: () {
               _checkUpdate(context, ref);
             },
@@ -147,11 +166,15 @@ class AboutView extends ConsumerWidget {
 
 class _AboutHero extends StatelessWidget {
   final bool isCheckingUpdate;
+  final UpdateChannel updateChannel;
+  final VoidCallback onSelectChannel;
   final VoidCallback onCheckUpdate;
   final VoidCallback onEnterDeveloperMode;
 
   const _AboutHero({
     required this.isCheckingUpdate,
+    required this.updateChannel,
+    required this.onSelectChannel,
     required this.onCheckUpdate,
     required this.onEnterDeveloperMode,
   });
@@ -164,7 +187,7 @@ class _AboutHero extends StatelessWidget {
     final colorScheme = context.colorScheme;
     final appLocalizations = context.appLocalizations;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.only(top: 16),
       child: Column(
         children: [
           _DeveloperModeDetector(
@@ -219,11 +242,87 @@ class _AboutHero extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              TonalButton(
+                size: TonalButtonSize.bar,
+                glyph: AppGlyphs.sync,
+                label: appLocalizations.checkUpdate,
+                onPressed: isCheckingUpdate ? null : onCheckUpdate,
+              ),
+              TonalButton(
+                size: TonalButtonSize.bar,
+                glyph: AppGlyphs.chevronDown,
+                label: appLocalizations.updateChannelValue(updateChannel.label),
+                onPressed: isCheckingUpdate ? null : onSelectChannel,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UpdateChannelSheet extends StatefulWidget {
+  const _UpdateChannelSheet({required this.selected});
+
+  final UpdateChannel selected;
+
+  @override
+  State<_UpdateChannelSheet> createState() => _UpdateChannelSheetState();
+}
+
+class _UpdateChannelSheetState extends State<_UpdateChannelSheet> {
+  late final _controller = sheetScrollController(context);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appLocalizations = context.appLocalizations;
+    return CommonScaffold(
+      title: appLocalizations.updateChannel,
+      body: ListView(
+        controller: _controller,
+        padding: const EdgeInsets.all(16).copyWith(
+          top: context.contentTopPadding,
+          bottom: 16 + context.bottomInset,
+        ),
+        children: [
+          generateGroup([
+            for (final channel in UpdateChannel.values)
+              DecorationListItem(
+                title: Text(channel.label),
+                subtitle: Text(channel.description),
+                isSelected: channel == widget.selected,
+                trailing: channel == widget.selected
+                    ? const SelectionCheck()
+                    : null,
+                onPressed: () => Navigator.of(context).pop(channel),
+              ),
+          ]),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              appLocalizations.updateChannelHint,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.footnote
+                  .of(context)
+                  .copyWith(color: context.colorScheme.onSurfaceVariant),
+            ),
+          ),
           TonalButton(
             size: TonalButtonSize.bar,
-            glyph: AppGlyphs.sync,
-            label: appLocalizations.checkUpdate,
-            onPressed: isCheckingUpdate ? null : onCheckUpdate,
+            label: appLocalizations.cancel,
+            onPressed: () => Navigator.of(context).pop(),
           ),
         ],
       ),

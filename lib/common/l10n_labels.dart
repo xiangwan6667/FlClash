@@ -4,6 +4,20 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app_localizations.dart';
 
+extension UpdateChannelL10n on UpdateChannel {
+  String get label => switch (this) {
+    UpdateChannel.stable => currentAppLocalizations.updateChannelStable,
+    UpdateChannel.preview => currentAppLocalizations.updateChannelPreview,
+  };
+
+  String get description => switch (this) {
+    UpdateChannel.stable =>
+      currentAppLocalizations.updateChannelStableDescription,
+    UpdateChannel.preview =>
+      currentAppLocalizations.updateChannelPreviewDescription,
+  };
+}
+
 extension PageLabelL10n on PageLabel {
   String get label {
     final appLocalizations = currentAppLocalizations;

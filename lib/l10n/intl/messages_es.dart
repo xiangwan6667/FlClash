@@ -231,12 +231,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m82(transport) => "Encabezados ${transport}";
 
-  static String m83(label) => "${label} debe ser una URL";
+  static String m83(channel) => "Canal de actualización: ${channel}";
 
-  static String m84(count) =>
+  static String m84(label) => "${label} debe ser una URL";
+
+  static String m85(count) =>
       "${Intl.plural(count, one: 'hace 1 año', other: 'hace ${count} años')}";
 
-  static String m85(count) => "${Intl.plural(count, other: 'hace ${count} a')}";
+  static String m86(count) => "${Intl.plural(count, other: 'hace ${count} a')}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -2017,12 +2019,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "unnamed": MessageLookupByLibrary.simpleMessage("Sin nombre"),
     "unpinWindow": MessageLookupByLibrary.simpleMessage("Desfijar ventana"),
     "update": MessageLookupByLibrary.simpleMessage("Actualizar"),
+    "updateChannel": MessageLookupByLibrary.simpleMessage(
+      "Canal de actualización",
+    ),
+    "updateChannelHint": MessageLookupByLibrary.simpleMessage(
+      "Las actualizaciones se buscarán en el canal seleccionado.",
+    ),
+    "updateChannelPreview": MessageLookupByLibrary.simpleMessage("Preliminar"),
+    "updateChannelPreviewDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu-dev · Prueba las novedades antes",
+    ),
+    "updateChannelStable": MessageLookupByLibrary.simpleMessage("Estable"),
+    "updateChannelStableDescription": MessageLookupByLibrary.simpleMessage(
+      "Miu · Para uso diario",
+    ),
+    "updateChannelValue": m83,
     "upload": MessageLookupByLibrary.simpleMessage("Subida"),
     "uploadBandwidth": MessageLookupByLibrary.simpleMessage(
       "Ancho de banda de subida",
     ),
     "url": MessageLookupByLibrary.simpleMessage("URL"),
-    "urlTip": m83,
+    "urlTip": m84,
     "useHosts": MessageLookupByLibrary.simpleMessage("Usar hosts"),
     "useSystemHosts": MessageLookupByLibrary.simpleMessage(
       "Usar hosts del sistema",
@@ -2051,8 +2068,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "writeToSystemDesc": MessageLookupByLibrary.simpleMessage(
       "Escribir en el sistema también ajusta el reloj del sistema; Android lo ignora.",
     ),
-    "yearsAgo": m84,
-    "yearsAgoShort": m85,
+    "yearsAgo": m85,
+    "yearsAgoShort": m86,
     "yes": MessageLookupByLibrary.simpleMessage("Sí"),
     "zhCN": MessageLookupByLibrary.simpleMessage("Chino simplificado"),
   };

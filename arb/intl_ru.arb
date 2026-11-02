@@ -965,5 +965,19 @@
   "addedToLocalProxies": "«{name}» добавлен в локальные прокси",
   "alreadyInLocalProxies": "«{name}» уже есть в локальных прокси",
   "aboutForkEdition": "Модифицированная версия",
-  "aboutBasedOn": "На основе"
+  "aboutBasedOn": "На основе",
+  "updateChannel": "Канал обновлений",
+  "updateChannelStable": "Стабильный",
+  "updateChannelPreview": "Предварительный",
+  "updateChannelStableDescription": "Miu · Для повседневного использования",
+  "updateChannelPreviewDescription": "Miu-dev · Ранний доступ к новым функциям",
+  "updateChannelHint": "Обновления будут проверяться в выбранном канале.",
+  "updateChannelValue": "Канал обновлений: {channel}",
+  "@updateChannelValue": {
+    "placeholders": {
+      "channel": {
+        "type": "String"
+      }
+    }
+  }
 }
