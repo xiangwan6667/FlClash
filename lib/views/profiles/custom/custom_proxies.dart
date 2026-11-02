@@ -62,6 +62,11 @@ extension on ProxyField {
     ProxyField.clientFingerprint => l.clientFingerprint,
     ProxyField.realityPublicKey => 'Reality Public Key',
     ProxyField.realityShortId => 'Reality Short ID',
+    ProxyField.realityMLDSA65Verify => 'ML-DSA-65 Verify',
+    ProxyField.realityClientVersion => 'REALITY Client Version',
+    ProxyField.realityHybrid => 'X25519MLKEM768',
+    ProxyField.snellV6Mode => 'Snell v6 Mode',
+    ProxyField.snellClientId => 'Client ID',
     ProxyField.plugin => l.plugin,
     ProxyField.pluginMode => l.pluginMode,
     ProxyField.pluginHost => l.pluginHost,
@@ -145,7 +150,10 @@ extension on ProxyField {
     ProxyField.skipCertVerify ||
     ProxyField.clientFingerprint ||
     ProxyField.realityPublicKey ||
-    ProxyField.realityShortId => _OptionSection.tls,
+    ProxyField.realityShortId ||
+    ProxyField.realityMLDSA65Verify ||
+    ProxyField.realityClientVersion ||
+    ProxyField.realityHybrid => _OptionSection.tls,
     ProxyField.tfo ||
     ProxyField.mptcp ||
     ProxyField.interfaceName ||
@@ -156,6 +164,9 @@ extension on ProxyField {
 
   int get maxLength => switch (this) {
     ProxyField.username => TextInputLimits.userName,
+    ProxyField.realityMLDSA65Verify => TextInputLimits.realityMLDSA65Verify,
+    ProxyField.realityClientVersion => TextInputLimits.realityClientVersion,
+    ProxyField.snellClientId => TextInputLimits.proxyName,
     ProxyField.interfaceName || ProxyField.alpn => TextInputLimits.name,
     ProxyField.ip ||
     ProxyField.ipv6 ||
