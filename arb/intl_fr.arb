@@ -894,8 +894,6 @@
   "notRunning": "À l’arrêt",
   "trafficPeak": "Pic {value}",
   "trafficTotal": "Total {value}",
-  "trafficChartStart": "−60 s",
-  "trafficChartNow": "Maintenant",
   "ipQualityShort": "Qualité",
   "ipTypeUnknown": "Type inconnu",
   "tapIconToRetry": "Appuyez sur l’icône pour réessayer",

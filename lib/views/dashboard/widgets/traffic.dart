@@ -16,13 +16,6 @@ const _minSpeedScale = 8 * 1024.0;
 
 const _chartBleed = 3.0;
 
-const _desktopChartLength = 30;
-
-const _phoneDirections = [TrafficDirection.download, TrafficDirection.upload];
-
-num _peakOf(Iterable<Traffic> samples, TrafficDirection direction) => samples
-    .fold<num>(0, (peak, traffic) => math.max(peak, direction.of(traffic)));
-
 enum TrafficDirection {
   upload,
   download;
@@ -31,18 +24,12 @@ enum TrafficDirection {
 
   Glyph get glyph => this == upload ? AppGlyphs.arrowUp : AppGlyphs.arrowDown;
 
-  String get arrow => this == upload ? '↑' : '↓';
-
   Color colorOf(BuildContext context) => this == upload
       ? DashboardColors.of(context).series2
       : context.colorScheme.primary;
 
   Color glyphColorOf(BuildContext context) => this == upload
       ? context.colorScheme.onSurfaceVariant
-      : context.colorScheme.primary;
-
-  Color accentOf(BuildContext context) => this == upload
-      ? DashboardColors.of(context).complement
       : context.colorScheme.primary;
 
   String labelOf(BuildContext context) => this == upload
@@ -101,7 +88,7 @@ class _SpeedChart extends StatelessWidget {
         for (final traffic in traffics.list) direction.of(traffic).toDouble(),
       ],
       revision: traffics.revision,
-      capacity: _desktopChartLength,
+      capacity: traffics.maxLength,
       minScale: _minSpeedScale,
       baselineRatio: 1,
       color: direction.colorOf(context),
@@ -127,10 +114,9 @@ class SpeedCard extends ConsumerWidget {
       totalTrafficProvider.select((state) => direction.of(state)),
     );
     final current = direction.of(traffics.list.safeLast(const Traffic()));
-    final samples = traffics.list;
-    final peak = _peakOf(
-      samples.skip(math.max(0, samples.length - _desktopChartLength)),
-      direction,
+    final peak = traffics.list.fold<num>(
+      0,
+      (peak, traffic) => math.max(peak, direction.of(traffic)),
     );
     final speed = current.traffic;
     return DashboardCard(
@@ -206,75 +192,36 @@ class SpeedCard extends ConsumerWidget {
   }
 }
 
-/// The phone's single card: both directions read against one time axis.
+/// The phone's single card: both directions side by side.
 class NetworkSpeedCard extends ConsumerWidget {
   const NetworkSpeedCard({super.key});
 
-  static const _chartHeight = 64.0;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
     final traffics = ref.watch(trafficsProvider);
     final total = ref.watch(totalTrafficProvider);
     final latest = traffics.list.safeLast(const Traffic());
-    final totals = [
-      for (final direction in _phoneDirections)
-        '${direction.arrow} ${dashboardTraffic(direction.of(total))}',
-    ].join(' ');
-    final label = DashboardText.label(context);
     return DashboardCard(
-      semanticLabel: appLocalizations.networkSpeed,
+      semanticLabel: context.appLocalizations.networkSpeed,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           DashboardCardHeader(
             glyph: AppGlyphs.speed,
-            title: appLocalizations.networkSpeed,
+            title: context.appLocalizations.networkSpeed,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
+            spacing: 10,
             children: [
-              for (final direction in _phoneDirections)
+              for (final direction in TrafficDirection.values)
                 Expanded(
-                  child: _SpeedFigure(
+                  child: _SpeedTile(
                     direction: direction,
                     speed: direction.of(latest),
+                    total: direction.of(total),
+                    traffics: traffics,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          RepaintBoundary(
-            child: SizedBox(
-              width: double.infinity,
-              height: _chartHeight,
-              child: CustomPaint(
-                painter: _TrafficBarsPainter(
-                  samples: traffics.list,
-                  capacity: traffics.maxLength,
-                  downColor: TrafficDirection.download.accentOf(context),
-                  upColor: TrafficDirection.upload.accentOf(context),
-                  baselineColor: Divider.colorOf(context),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Row(
-            spacing: 8,
-            children: [
-              Text(appLocalizations.trafficChartStart, style: label),
-              Expanded(
-                child: Text(
-                  appLocalizations.trafficTotal(totals),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: label,
-                ),
-              ),
-              Text(appLocalizations.trafficChartNow, style: label),
             ],
           ),
         ],
@@ -283,124 +230,100 @@ class NetworkSpeedCard extends ConsumerWidget {
   }
 }
 
-class _SpeedFigure extends StatelessWidget {
-  const _SpeedFigure({required this.direction, required this.speed});
+/// Keeps one shape at every width, growing only when the text needs more. The
+/// chart fills the tile under the title row, behind the figure and the total.
+class _SpeedTile extends StatelessWidget {
+  const _SpeedTile({
+    required this.direction,
+    required this.speed,
+    required this.total,
+    required this.traffics,
+  });
 
   final TrafficDirection direction;
   final num speed;
+  final num total;
+  final FixedList<Traffic> traffics;
+
+  static const _aspectRatio = 1.45;
+  static const _padding = EdgeInsets.fromLTRB(16, 14, 16, 12);
+  static const _titleGap = 4.0;
+  static const _bleed = 2.0;
 
   @override
   Widget build(BuildContext context) {
+    final color = direction.glyphColorOf(context);
     final show = speed.traffic;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          spacing: 4,
-          children: [
-            GlyphIcon(
-              direction.glyph,
-              size: 16,
-              color: direction.accentOf(context),
-            ),
-            Flexible(
-              child: Text(
-                direction.labelOf(context),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: AppTextStyle.footnote
-                    .of(context, emphasized: true)
-                    .copyWith(color: context.colorScheme.onSurfaceVariant),
+    final scale = DashboardDensityScope.scaleOf(context);
+    final chartTop =
+        _padding.top + _titleGap + AppTextStyle.footnote.leading * scale;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          constraints: BoxConstraints(
+            minHeight: constraints.maxWidth / _aspectRatio,
+          ),
+          clipBehavior: Clip.antiAlias,
+          decoration: ShapeDecoration(
+            color: DashboardColors.of(context).tone,
+            shape: AppShape.all(DashboardCorner.mobileBlock),
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                left: -_bleed,
+                right: -_bleed,
+                top: chartTop,
+                bottom: -_bleed,
+                child: RepaintBoundary(
+                  child: _SpeedChart(direction: direction, traffics: traffics),
+                ),
               ),
-            ),
-          ],
-        ),
-        _Figure(
-          show: show,
-          unit: _speedUnit(show),
-          style: AppTextStyle.title1,
-          unitStyle: AppTextStyle.footnote,
-        ),
-      ],
+              Padding(
+                padding: _padding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      spacing: 4,
+                      children: [
+                        GlyphIcon(direction.glyph, size: 16, color: color),
+                        Flexible(
+                          child: Text(
+                            direction.labelOf(context),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyle.footnote
+                                .of(context, emphasized: true)
+                                .copyWith(
+                                  color: context.colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: _titleGap),
+                    _Figure(
+                      show: show,
+                      unit: _speedUnit(show),
+                      style: AppTextStyle.title1,
+                      unitStyle: AppTextStyle.footnote,
+                    ),
+                    Text(
+                      context.appLocalizations.trafficTotal(
+                        dashboardTraffic(total),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: DashboardText.label(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
-  }
-}
-
-/// Download grows up from the baseline and upload down from it, each on its own
-/// scale: upload is usually so much smaller that a shared one would flatten it.
-class _TrafficBarsPainter extends CustomPainter {
-  const _TrafficBarsPainter({
-    required this.samples,
-    required this.capacity,
-    required this.downColor,
-    required this.upColor,
-    required this.baselineColor,
-  });
-
-  static const _downShare = 0.58;
-  static const _barShare = 0.62;
-  static const _baselineGap = 2.0;
-  static const _oldestOpacity = 0.4;
-  static const _minBarLength = 0.01;
-
-  final List<Traffic> samples;
-  final int capacity;
-  final Color downColor;
-  final Color upColor;
-  final Color baselineColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final baseline = size.height * _downShare;
-    canvas.drawLine(
-      Offset(0, baseline),
-      Offset(size.width, baseline),
-      Paint()..color = baselineColor,
-    );
-    final step = size.width / capacity;
-    final barWidth = step * _barShare;
-    final inset = _baselineGap + barWidth / 2;
-    final downScale = _scaleOf(TrafficDirection.download);
-    final upScale = _scaleOf(TrafficDirection.upload);
-    final downRoom = baseline - inset - barWidth / 2;
-    final upRoom = size.height - baseline - inset - barWidth / 2;
-    final bar = Paint()
-      ..strokeWidth = barWidth
-      ..strokeCap = StrokeCap.round;
-    for (var age = 0; age < capacity; age++) {
-      final sample = age < samples.length
-          ? samples[samples.length - 1 - age]
-          : const Traffic();
-      final x = size.width - step * (age + 0.5);
-      final opacity = 1 - (1 - _oldestOpacity) * age / (capacity - 1);
-      final top = baseline - inset;
-      canvas.drawLine(
-        Offset(x, top),
-        Offset(x, top - _barLength(sample.down / downScale * downRoom)),
-        bar..color = downColor.withValues(alpha: opacity),
-      );
-      final bottom = baseline + inset;
-      canvas.drawLine(
-        Offset(x, bottom),
-        Offset(x, bottom + _barLength(sample.up / upScale * upRoom)),
-        bar..color = upColor.withValues(alpha: opacity),
-      );
-    }
-  }
-
-  /// A renderer may drop a zero-length line, caps included, and an idle second
-  /// still has to show its dot.
-  double _barLength(double length) => math.max(length, _minBarLength);
-
-  double _scaleOf(TrafficDirection direction) =>
-      math.max(_minSpeedScale, _peakOf(samples, direction).toDouble());
-
-  @override
-  bool shouldRepaint(_TrafficBarsPainter oldDelegate) {
-    return !identical(oldDelegate.samples, samples) ||
-        oldDelegate.capacity != capacity ||
-        oldDelegate.downColor != downColor ||
-        oldDelegate.upColor != upColor ||
-        oldDelegate.baselineColor != baselineColor;
   }
 }

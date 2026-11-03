@@ -184,7 +184,7 @@ const pausedMaxLogsLength = maxLogsLength * 2;
 const pausedMaxRequestsLength = maxRequestsLength * 2;
 const pausedMaxDnsQueriesLength = maxDnsQueriesLength * 2;
 
-const trafficSampleLength = 60;
+const trafficSampleLength = 30;
 
 // iOS 27's system colors but the deeper blue of earlier iOS, in the order of the
 // macOS accent colors.

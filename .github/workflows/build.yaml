@@ -19,7 +19,7 @@ env:
   FLUTTER_VERSION: '3.47.6'
   GO_VERSION: '1.27.3'
   NDK_VERSION: r28c
-  APP_RELEASE_VERSION: '0.9.3-pre.2'
+  APP_RELEASE_VERSION: '0.9.3-pre.3'
 
 jobs:
   dart:

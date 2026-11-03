@@ -7403,16 +7403,6 @@ class AppLocalizations {
     );
   }
 
-  /// `−60 s`
-  String get trafficChartStart {
-    return Intl.message('−60 s', name: 'trafficChartStart', desc: '', args: []);
-  }
-
-  /// `Now`
-  String get trafficChartNow {
-    return Intl.message('Now', name: 'trafficChartNow', desc: '', args: []);
-  }
-
   /// `Quality`
   String get ipQualityShort {
     return Intl.message('Quality', name: 'ipQualityShort', desc: '', args: []);
