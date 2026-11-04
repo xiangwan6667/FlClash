@@ -5,14 +5,39 @@
 **Features**
 
 - **connections** Merged requests and connections; quick edit lists (52b975f)
+- **protocols** Improve REALITY and VLESS compatibility and support Snell v6 (e9b0d9b)
+- **protocols** Improve REALITY and VLESS compatibility and support Snell v6 (8a04c83)
+- **updates** Add saved update channel selection (206e8ad)
+- **updates** Add saved update channel selection (dce2b78)
+- **about** Show fork repositories and upstream attribution (71b6d39)
+- **about** Show fork repositories and upstream attribution (0a92d40)
+- Support Miu with isolated platform packages (bd10bac)
+- Support Miu with isolated platform packages (d680b06)
 - **ui** iOS 27 transitions, press and text selection; smoother pages (bb47f2c)
 - **update** Download and install updates in the app (b8f84b3)
 - **core** One delay test timeout; VPN crash and startup fixes (2a5a42c)
+- **connections** Merged requests and connections; quick edit lists (1a7556d)
 
 **Bug Fixes**
 
 - **core** Auto-select leaves an unusable first node at once (7d5db7e)
 - **access** Keep selections a filter hides (63aaf6d)
+- **ui** Restore published shared components after removing channel selection (b711e07)
+- **release** Support prerelease update versions and prepare pre.2 (4a4d7a6)
+- **update** Remove channel selection and follow build branch (c511ea6)
+- **build** Invalidate cached core artifacts after branch changes (003c6f6)
+- **update** Remove channel selection and follow build branch (64c64ce)
+- **build** Invalidate cached core artifacts after branch changes (48272c0)
+- **about** Align update action text and remove the duplicate popup outline while keeping the full animation (d8921f1)
+- **about** Align update action text and remove the duplicate popup outline while keeping the full animation (cdbe704)
+- **updates** Use a compact menu to select the update channel (59bc86d)
+- **updates** Use a compact menu to select the update channel (8a23c7a)
+- **android** Replace ML Kit with offline barcode decoding (5be864e)
+- **android** Replace ML Kit with offline barcode decoding (6be047f)
+- **updates** Isolate Miu release channels and disable build telemetry (0d8f242)
+- **updates** Isolate Miu release channels and disable build telemetry (8429677)
+- **core** Auto-select leaves an unusable first node at once (ed7428b)
+- **access** Keep selections a filter hides (b8fb5b3)
 
 ## v0.9.2 (2026-10-24)
 

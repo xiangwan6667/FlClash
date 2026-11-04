@@ -16,6 +16,44 @@
               "text": "Merged requests and connections; quick edit lists"
             },
             {
+              "id": "e9b0d9b",
+              "scope": "protocols",
+              "text": "Improve REALITY and VLESS compatibility and support Snell v6"
+            },
+            {
+              "id": "8a04c83",
+              "scope": "protocols",
+              "text": "Improve REALITY and VLESS compatibility and support Snell v6"
+            },
+            {
+              "id": "206e8ad",
+              "scope": "updates",
+              "text": "Add saved update channel selection"
+            },
+            {
+              "id": "dce2b78",
+              "scope": "updates",
+              "text": "Add saved update channel selection"
+            },
+            {
+              "id": "71b6d39",
+              "scope": "about",
+              "text": "Show fork repositories and upstream attribution"
+            },
+            {
+              "id": "0a92d40",
+              "scope": "about",
+              "text": "Show fork repositories and upstream attribution"
+            },
+            {
+              "id": "bd10bac",
+              "text": "Support Miu with isolated platform packages"
+            },
+            {
+              "id": "d680b06",
+              "text": "Support Miu with isolated platform packages"
+            },
+            {
               "id": "bb47f2c",
               "scope": "ui",
               "text": "iOS 27 transitions, press and text selection; smoother pages"
@@ -29,6 +67,11 @@
               "id": "2a5a42c",
               "scope": "core",
               "text": "One delay test timeout; VPN crash and startup fixes"
+            },
+            {
+              "id": "1a7556d",
+              "scope": "connections",
+              "text": "Merged requests and connections; quick edit lists"
             }
           ]
         },
@@ -42,6 +85,86 @@
             },
             {
               "id": "63aaf6d",
+              "scope": "access",
+              "text": "Keep selections a filter hides"
+            },
+            {
+              "id": "b711e07",
+              "scope": "ui",
+              "text": "Restore published shared components after removing channel selection"
+            },
+            {
+              "id": "4a4d7a6",
+              "scope": "release",
+              "text": "Support prerelease update versions and prepare pre.2"
+            },
+            {
+              "id": "c511ea6",
+              "scope": "update",
+              "text": "Remove channel selection and follow build branch"
+            },
+            {
+              "id": "003c6f6",
+              "scope": "build",
+              "text": "Invalidate cached core artifacts after branch changes"
+            },
+            {
+              "id": "64c64ce",
+              "scope": "update",
+              "text": "Remove channel selection and follow build branch"
+            },
+            {
+              "id": "48272c0",
+              "scope": "build",
+              "text": "Invalidate cached core artifacts after branch changes"
+            },
+            {
+              "id": "d8921f1",
+              "scope": "about",
+              "text": "Align update action text and remove the duplicate popup outline while keeping the full animation"
+            },
+            {
+              "id": "cdbe704",
+              "scope": "about",
+              "text": "Align update action text and remove the duplicate popup outline while keeping the full animation"
+            },
+            {
+              "id": "59bc86d",
+              "scope": "updates",
+              "text": "Use a compact menu to select the update channel"
+            },
+            {
+              "id": "8a23c7a",
+              "scope": "updates",
+              "text": "Use a compact menu to select the update channel"
+            },
+            {
+              "id": "5be864e",
+              "scope": "android",
+              "text": "Replace ML Kit with offline barcode decoding"
+            },
+            {
+              "id": "6be047f",
+              "scope": "android",
+              "text": "Replace ML Kit with offline barcode decoding"
+            },
+            {
+              "id": "0d8f242",
+              "scope": "updates",
+              "text": "Isolate Miu release channels and disable build telemetry"
+            },
+            {
+              "id": "8429677",
+              "scope": "updates",
+              "text": "Isolate Miu release channels and disable build telemetry"
+            },
+            {
+              "id": "ed7428b",
+              "scope": "core",
+              "text": "Auto-select leaves an unusable first node at once"
+            },
+            {
+              "id": "b8fb5b3",
               "scope": "access",
               "text": "Keep selections a filter hides"
             }
