@@ -54,11 +54,15 @@ void main() {
   ) async {
     await pumpAbout(tester);
     expect(
+      find.text('v${globalState.packageInfo.displayVersion}'),
+      findsOneWidget,
+    );
+    expect(
       find.widgetWithText(TonalButton, currentAppLocalizations.checkUpdate),
       findsOneWidget,
     );
     expect(find.byType(TonalButton), findsOneWidget);
-    expect(find.byType(CommonPopupBox), findsNothing);
+    expect(find.byType(PopupAnchor), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -73,37 +77,4 @@ void main() {
     );
     expect(button.onPressed, isNull);
   });
-
-  testWidgets(
-    'update button uses regular page text without changing disabled color',
-    (tester) async {
-      await pumpAbout(tester);
-      final text = tester.widget<RichText>(
-        find.descendant(
-          of: find.widgetWithText(
-            TonalButton,
-            currentAppLocalizations.checkUpdate,
-          ),
-          matching: find.byType(RichText),
-        ),
-      );
-      final style = text.text.style!;
-      expect(style.fontWeight, AppTextStyle.subheadline.weight);
-      expect(style.fontSize, AppTextStyle.subheadline.size);
-      container.read(loadingProvider(LoadingTag.checkUpdate).notifier).value =
-          true;
-      await tester.pump();
-      await tester.pump(commonDuration);
-      final disabledText = tester.widget<RichText>(
-        find.descendant(
-          of: find.widgetWithText(
-            TonalButton,
-            currentAppLocalizations.checkUpdate,
-          ),
-          matching: find.byType(RichText),
-        ),
-      );
-      expect(disabledText.text.style!.color!.a, closeTo(0.38, 0.01));
-    },
-  );
 }

@@ -7,12 +7,19 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:path/path.dart' show join;
 
 class Request {
   late final Dio dio;
   late final Dio _clashDio;
+
+  /// Refuses an untrusted certificate even with the certificate check turned
+  /// off, because what it fetches is installed, on Windows as administrator.
+  @visibleForTesting
+  late final Dio releaseDio;
   String? userAgent;
 
   ProviderReader? _read;
@@ -29,15 +36,27 @@ class Request {
         final client = HttpClient();
         client.findProxy = (Uri uri) {
           client.userAgent = globalState.ua;
-          final read = _read;
-          if (read == null) {
-            return 'DIRECT';
-          }
-          return FlClashHttpOverrides.findProxyForReader(read, uri);
+          return _findProxy(uri);
         };
         return client;
       },
     );
+    releaseDio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
+    releaseDio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        return HttpClient()
+          ..badCertificateCallback = ((_, _, _) => false)
+          ..findProxy = _findProxy;
+      },
+    );
+  }
+
+  String _findProxy(Uri uri) {
+    final read = _read;
+    if (read == null) {
+      return 'DIRECT';
+    }
+    return FlClashHttpOverrides.findProxyForReader(read, uri);
   }
 
   Future<Response<T>> _download<T>(String url, ResponseType responseType) {
@@ -90,13 +109,12 @@ class Request {
     final release = await latestRelease();
     if (release == null) return null;
     final remoteVersion = release['tag_name'] as String;
-    final version = globalState.packageInfo.version;
+    final version = globalState.packageInfo.displayVersion;
     final hasUpdate =
         compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
     return hasUpdate ? release : null;
   }
 
-  @visibleForTesting
   Future<Map<String, dynamic>?> latestRelease() async {
     for (var page = 1; ; page++) {
       final response = await dio.get<List<dynamic>>(
@@ -114,6 +132,46 @@ class Request {
       }
       if (releases.length < 100) return null;
     }
+  }
+
+  Future<String> downloadVerifiedRelease({
+    required String tag,
+    required String name,
+    required String directory,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) async {
+    final sums = await releaseDio.getUri<String>(
+      releaseAssetUri(tag, releaseChecksumsName),
+      options: Options(responseType: ResponseType.plain),
+      cancelToken: cancelToken,
+    );
+    final expected = releaseChecksum(sums.data ?? '', name);
+    if (expected == null) {
+      throw ReleaseNotVerifiedException(name);
+    }
+    final path = join(directory, name);
+    final uri = releaseAssetUri(tag, name);
+    if (app case final android?) {
+      await android.downloadFile(
+        uri,
+        path,
+        title: name,
+        onReceiveProgress: onReceiveProgress ?? (_, _) {},
+        cancelToken: cancelToken ?? CancelToken(),
+      );
+    } else {
+      await releaseDio.downloadUri(
+        uri,
+        path,
+        onReceiveProgress: onReceiveProgress,
+        cancelToken: cancelToken,
+      );
+    }
+    if (await fileSha256(path) != expected) {
+      throw ReleaseNotVerifiedException(name);
+    }
+    return path;
   }
 }
 

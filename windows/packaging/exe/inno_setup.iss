@@ -19,6 +19,42 @@ ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
+const
+  SYNCHRONIZE = $00100000;
+
+function OpenProcess(dwDesiredAccess: DWORD; bInheritHandle: BOOL; dwProcessId: DWORD): THandle;
+  external 'OpenProcess@kernel32.dll stdcall';
+function WaitForSingleObject(hHandle: THandle; dwMilliseconds: DWORD): DWORD;
+  external 'WaitForSingleObject@kernel32.dll stdcall';
+function CloseHandle(hObject: THandle): BOOL;
+  external 'CloseHandle@kernel32.dll stdcall';
+
+// The app passes /updatefrom=<pid> (windowsUpdateArguments in lib/common)
+// and exits on its own, stopping the Core and clearing the system proxy.
+function UpdatingAppPid: Integer;
+begin
+  Result := StrToIntDef(ExpandConstant('{param:updatefrom|0}'), 0);
+end;
+
+function IsAppUpdate: Boolean;
+begin
+  Result := UpdatingAppPid > 0;
+end;
+
+procedure WaitForUpdatingApp;
+var
+  Handle: THandle;
+begin
+  if not IsAppUpdate then
+    Exit;
+  Handle := OpenProcess(SYNCHRONIZE, False, UpdatingAppPid);
+  if Handle <> 0 then
+  begin
+    WaitForSingleObject(Handle, 15000);
+    CloseHandle(Handle);
+  end;
+end;
+
 procedure UnregisterHelperService;
 var
   HelperPath: String;
@@ -48,8 +84,7 @@ begin
   Result := Pos(Lowercase(AddBackslash(ExpandConstant('{app}'))), Lowercase(Value)) > 0;
 end;
 
-// The value name is appName and the schemes are protocolSchemes, both in
-// lib/common.
+// The value name is miuInstallName and the schemes are protocolSchemes.
 procedure RemoveUserRegistrations;
 var
   Schemes: TArrayOfString;
@@ -74,6 +109,7 @@ end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
+  WaitForUpdatingApp;
   UnregisterHelperService;
   Result := '';
 end;
@@ -160,3 +196,4 @@ Name: "{autoprograms}\\FlClash-Miu\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECU
 Name: "{autodesktop}\\FlClash-Miu\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait; Check: IsAppUpdate

@@ -21,7 +21,7 @@ import 'package:fl_clash/views/profiles/extend/standard.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -32,6 +32,7 @@ import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
 import '../plugins/code_forge/support.dart';
+import '../helpers/host_scaffold.dart';
 
 class _PendingAdapter implements HttpClientAdapter {
   final response = Completer<ResponseBody>();
@@ -153,7 +154,7 @@ void main() {
   }
 
   Finder inMenu(Finder finder) =>
-      find.descendant(of: find.byType(CommonPopupMenu), matching: finder);
+      find.descendant(of: find.byType(PopupMenu), matching: finder);
 
   testWidgets('the proxies menu picks the style from a sub menu', (
     tester,
@@ -178,7 +179,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(proxiesStyleSettingProvider).type, ProxiesType.tab);
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
 
     await openProxiesMenu(tester);
     expect(inMenu(find.text(l10n.iconStyle)), findsNothing);
@@ -238,7 +239,7 @@ void main() {
       container.read(proxiesStyleSettingProvider).hideTimeoutProxies,
       isTrue,
     );
-    expect(find.byType(CommonPopupMenu), findsNothing);
+    expect(find.byType(PopupMenu), findsNothing);
   });
 
   testWidgets('about view renders version and link sections', (tester) async {
@@ -293,11 +294,11 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isFalse);
 
     await tester.tap(find.text('Check for updates'));
     await tester.pump();
-    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+    expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isTrue);
 
     await tester.tap(find.text('Check for updates'));
     await tester.pump(const Duration(milliseconds: 100));
@@ -318,7 +319,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 
-    expect(find.byType(LinearProgressIndicator), findsNothing);
+    expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isFalse);
     expect(find.text('The app is already up to date'), findsOneWidget);
     expect(tester.takeException(), null);
   });
@@ -573,7 +574,7 @@ void main() {
         child: TestApp(
           child: ProfileIdProvider(
             profileId: profile.id,
-            child: const Scaffold(
+            child: const HostScaffold(
               body: CustomScrollView(slivers: [StandardContent()]),
             ),
           ),
@@ -631,7 +632,7 @@ void main() {
         child: TestApp(
           child: ProfileIdProvider(
             profileId: profile.id,
-            child: const Scaffold(
+            child: const HostScaffold(
               body: CustomScrollView(slivers: [StandardContent()]),
             ),
           ),
@@ -682,7 +683,7 @@ void main() {
         child: TestApp(
           child: ProfileIdProvider(
             profileId: profile.id,
-            child: const Scaffold(
+            child: const HostScaffold(
               body: CustomScrollView(slivers: [StandardContent()]),
             ),
           ),

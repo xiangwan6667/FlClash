@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
+import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +36,24 @@ class _HostAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     return byHost[options.uri.host]!();
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _PathAdapter implements HttpClientAdapter {
+  _PathAdapter(this.byPath);
+
+  final Map<String, ResponseBody Function()> byPath;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    return byPath[options.uri.path]!();
   }
 
   @override
@@ -161,6 +181,85 @@ void main() {
         });
       expect(await request.latestRelease(), own);
       expect(page, 2);
+    });
+
+    test('checks prerelease revisions without crossing branches', () async {
+      globalState.packageInfo = PackageInfo(
+        appName: appName,
+        packageName: 'com.follow.clash.miu',
+        version: '0.9.3-pre.2',
+        buildNumber: '2026110202',
+      );
+      for (final revision in [1, 2, 3, 10]) {
+        final own = {
+          'tag_name': 'v0.9.3-pre.$revision',
+          'target_commitish': updateBranch,
+          'prerelease': true,
+        };
+        final request = requestAnswering([
+          {'tag_name': 'v9.0.0', 'target_commitish': 'other-branch'},
+          own,
+        ]);
+        expect(await request.checkForUpdate(), revision > 2 ? own : isNull);
+      }
+    });
+  });
+
+  group('downloadVerifiedRelease', () {
+    const name = 'FlClash-1.2.3-android-arm64-v8a.apk';
+    final package = utf8.encode('package');
+    final digest = sha256.convert(package).toString();
+    late Directory directory;
+
+    setUp(() async {
+      directory = await Directory.systemTemp.createTemp('release');
+    });
+
+    tearDown(() => directory.delete(recursive: true));
+
+    Request requestServing(String sums, List<int> asset) {
+      return Request()
+        ..releaseDio.httpClientAdapter = _PathAdapter({
+          '/$repository/releases/download/v1.2.3/SHA256SUMS': () =>
+              ResponseBody.fromString(sums, 200),
+          '/$repository/releases/download/v1.2.3/$name': () =>
+              ResponseBody.fromBytes(asset, 200),
+        });
+    }
+
+    Future<String> download(Request request) {
+      return request.downloadVerifiedRelease(
+        tag: 'v1.2.3',
+        name: name,
+        directory: directory.path,
+      );
+    }
+
+    test('keeps a file matching the published digest', () async {
+      final request = requestServing('$digest  ./$name\n', package);
+
+      final path = await download(request);
+
+      expect(await File(path).readAsBytes(), package);
+    });
+
+    test('refuses a file that does not match', () async {
+      final request = requestServing('$digest  ./$name\n', utf8.encode('x'));
+
+      await expectLater(
+        download(request),
+        throwsA(isA<ReleaseNotVerifiedException>()),
+      );
+    });
+
+    test('refuses an asset the listing does not name', () async {
+      final request = requestServing('$digest  ./other.apk\n', package);
+
+      await expectLater(
+        download(request),
+        throwsA(isA<ReleaseNotVerifiedException>()),
+      );
+      expect(directory.listSync(), isEmpty);
     });
   });
 

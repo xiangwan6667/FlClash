@@ -24,7 +24,7 @@ func TestNetworkChangeClosesIdleProxyConnections(t *testing.T) {
 	tunnel.UpdateProxies(map[string]constant.Proxy{"pooled": adapter.NewProxy(proxy)}, nil)
 	t.Cleanup(func() { tunnel.UpdateProxies(nil, nil) })
 
-	handleClearDnsCache()
+	handleNetworkChanged()
 
 	if proxy.closed != 1 {
 		t.Fatalf("network change closed idle connections %d times, want 1", proxy.closed)
