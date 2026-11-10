@@ -966,6 +966,11 @@ class AppLocalizations {
     return Intl.message('Project', name: 'project', desc: '', args: []);
   }
 
+  /// `Based on`
+  String get basedOn {
+    return Intl.message('Based on', name: 'basedOn', desc: '', args: []);
+  }
+
   /// `Core`
   String get core {
     return Intl.message('Core', name: 'core', desc: '', args: []);
@@ -1176,10 +1181,10 @@ class AppLocalizations {
     );
   }
 
-  /// `The app is already up to date`
+  /// `No updates available`
   String get checkUpdateError {
     return Intl.message(
-      'The app is already up to date',
+      'No updates available',
       name: 'checkUpdateError',
       desc: '',
       args: [],

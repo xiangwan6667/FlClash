@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.9.5 (2026-11-10)
+
+**Features**
+
+- Use independent Fork identities and remove the About section heading (bb5f745)
+
+**Bug Fixes**
+
+- Fix Android signing verification; this release also includes Miu and REALITY compatibility (e3cc6df)
+
+## v0.9.4 (2026-11-09)
+
+**Features**
+
+- Miu proxy support and independent installation alongside FlClash (868cef6)
+
+**Bug Fixes**
+
+- Improve REALITY compatibility and project update information (1734866)
+
 ## v0.9.3 (2026-11-04)
 
 **Features**

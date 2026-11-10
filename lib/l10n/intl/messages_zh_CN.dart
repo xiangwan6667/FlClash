@@ -334,6 +334,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "该备份来自更高版本的应用，请先更新应用再恢复",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("备份成功"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("基于"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基础信息"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基础策略"),
     "batchImport": MessageLookupByLibrary.simpleMessage("批量导入"),
@@ -378,7 +379,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "关闭证书校验后，订阅和备份可能遭中间人攻击。",
     ),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("检查更新"),
-    "checkUpdateError": MessageLookupByLibrary.simpleMessage("当前应用已经是最新版了"),
+    "checkUpdateError": MessageLookupByLibrary.simpleMessage("暂无可用更新"),
     "cipher": MessageLookupByLibrary.simpleMessage("加密方式"),
     "clearData": MessageLookupByLibrary.simpleMessage("清除数据"),
     "clearDataAndExitTip": MessageLookupByLibrary.simpleMessage(

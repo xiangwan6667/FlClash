@@ -192,12 +192,17 @@ class CommonAction extends _$CommonAction {
     if (suffix == null || ref.read(updateDownloadStateProvider) != null) {
       return;
     }
-    final release = await globalState.loadingRun(
-      request.latestRelease,
+    final result = await globalState.loadingRun(
+      () async => (release: await request.latestRelease()),
       title: currentAppLocalizations.updateDownloadTest,
       tag: LoadingTag.checkUpdate,
     );
-    if (release == null) return;
+    if (result == null) return;
+    final release = result.release;
+    if (release == null) {
+      await checkUpdateResultHandle(isUser: true);
+      return;
+    }
     final tag = release['tag_name'] as String;
     await _downloadUpdate(tag, releaseAssetName(tag, suffix));
   }

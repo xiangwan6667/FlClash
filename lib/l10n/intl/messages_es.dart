@@ -430,6 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupSuccess": MessageLookupByLibrary.simpleMessage(
       "Copia de seguridad completada",
     ),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Basado en"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Información básica"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage(
       "Estrategias básicas",
@@ -503,7 +504,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Buscar actualizaciones",
     ),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
-      "La app ya está actualizada",
+      "No hay actualizaciones disponibles",
     ),
     "cipher": MessageLookupByLibrary.simpleMessage("Cifrado"),
     "clearData": MessageLookupByLibrary.simpleMessage("Borrar datos"),

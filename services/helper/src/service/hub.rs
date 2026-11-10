@@ -41,7 +41,7 @@ use windows_sys::Win32::System::JobObjects::{
     all(feature = "windows-service", target_os = "windows"),
     target_os = "linux"
 )))]
-const LISTEN_PORT: u16 = 47890;
+const LISTEN_PORT: u16 = 47892;
 #[cfg(not(target_os = "linux"))]
 const CORE_PIPE_PREFIX: &str = r"\\.\pipe\FlClashCore_";
 #[cfg(target_os = "linux")]

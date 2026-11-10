@@ -344,6 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "このバックアップは新しいバージョンのアプリで作成されています。アプリを更新してから復元してください",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("バックアップが完了しました"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("ベースとなったプロジェクト"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基本情報"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基本ポリシー"),
     "batchImport": MessageLookupByLibrary.simpleMessage("一括インポート"),
@@ -398,7 +399,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "TLS 証明書の検証を無効にすると、サブスクリプションとバックアップが中間者攻撃にさらされます。",
     ),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("更新を確認"),
-    "checkUpdateError": MessageLookupByLibrary.simpleMessage("すでに最新バージョンです"),
+    "checkUpdateError": MessageLookupByLibrary.simpleMessage("利用可能な更新はありません"),
     "cipher": MessageLookupByLibrary.simpleMessage("暗号方式"),
     "clearData": MessageLookupByLibrary.simpleMessage("データを消去"),
     "clearDataAndExitTip": MessageLookupByLibrary.simpleMessage(

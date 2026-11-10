@@ -212,6 +212,12 @@ jobs:
           test -n "$tags" || { echo 'Could not read tags from build_config.yaml' >&2; exit 1; }
           GOOS=android GOARCH=arm64 go vet "-tags=$tags" . ./mobile ./tun ./platform
 
+      - name: Test Miu and REALITY compatibility
+        working-directory: core/Clash.Meta
+        run: |
+          go test -count=1 ./adapter ./adapter/outbound ./common/convert ./component/tls ./transport/miu
+          go test -race -count=1 ./component/tls ./transport/miu
+
   android:
     name: Android unit tests
     if: *checks
@@ -325,8 +331,7 @@ jobs:
         run: cargo test --manifest-path services/helper/Cargo.toml --features windows-service
 
   build:
-    # Releases publish where the release links point: the public repository.
-    if: github.repository == 'chen08209/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.repository == 'xiangwan6667/FlClash' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -371,12 +376,20 @@ jobs:
 
       - name: Setup Android Signing
         if: startsWith(matrix.platform,'android')
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/app/keystore.jks
+          for value in "$KEYSTORE" "$KEY_ALIAS" "$STORE_PASSWORD" "$KEY_PASSWORD"; do
+            test -n "$value" || { echo 'Android release signing secrets are missing.' >&2; exit 1; }
+          done
+          printf '%s' "$KEYSTORE" | base64 --decode > android/app/keystore.jks
           {
-            echo "keyAlias=${{ secrets.KEY_ALIAS }}"
-            echo "storePassword=${{ secrets.STORE_PASSWORD }}"
-            echo "keyPassword=${{ secrets.KEY_PASSWORD }}"
+            printf 'keyAlias=%s\n' "$KEY_ALIAS"
+            printf 'storePassword=%s\n' "$STORE_PASSWORD"
+            printf 'keyPassword=%s\n' "$KEY_PASSWORD"
           } >> android/local.properties
 
       - name: Setup Go
@@ -445,6 +458,52 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
+      - name: Verify macOS package identity
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          mountpoint="$(mktemp -d)"
+          trap 'hdiutil detach "$mountpoint" >/dev/null 2>&1 || true; rmdir "$mountpoint"' EXIT
+          hdiutil attach -nobrowse -readonly -mountpoint "$mountpoint" "dist/FlClash-${version}-macos-${{ matrix.arch }}.dmg"
+          app="$mountpoint/FlClash-Fork/FlClash.app"
+          test -d "$app"
+          test ! -e "$mountpoint/FlClash.app"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = 'app.flclash.fork'
+
+      - name: Verify Linux package identity
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          deb="dist/FlClash-${version}-linux-${{ matrix.arch }}.deb"
+          rpm="dist/FlClash-${version}-linux-${{ matrix.arch }}.rpm"
+          test "$(dpkg-deb -f "$deb" Package)" = 'flclash-fork'
+          dpkg-deb -c "$deb" | grep -F './opt/FlClash-Fork/FlClash-Fork' >/dev/null
+          test "$(rpm -qp --qf '%{NAME}' "$rpm")" = 'flclash-fork'
+          rpm -qpl "$rpm" | grep -Fx '/usr/share/applications/flclash-fork.desktop' >/dev/null
+
+      - name: Verify Android package identity and signature
+        if: matrix.platform == 'android'
+        shell: bash
+        run: |
+          set -euo pipefail
+          build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          shopt -s nullglob
+          apks=(dist/*android*.apk)
+          test "${#apks[@]}" -eq 3
+          for apk in "${apks[@]}"; do
+            "$build_tools/aapt" dump badging "$apk" | grep -F "package: name='app.flclash.fork'" >/dev/null
+            certificates="$("$build_tools/apksigner" verify --print-certs "$apk")"
+            if ! printf '%s\n' "$certificates" | grep -Fi 'certificate SHA-256 digest: 923e4c3eda8c6b516719b5b30f6e52e9faba273101368c6ce5a3bfdd74f40a33' >/dev/null; then
+              echo "Unexpected signing certificate in $apk" >&2
+              printf '%s\n' "$certificates" >&2
+              exit 1
+            fi
+          done
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
@@ -457,14 +516,6 @@ jobs:
       contents: write
     needs: [ build, dart, plugins, go, android, rust, windows-helper-test ]
     runs-on: ubuntu-latest
-    services:
-      telegram-bot-api:
-        image: aiogram/telegram-bot-api:latest
-        env:
-          TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
-          TELEGRAM_API_HASH: ${{ secrets.TELEGRAM_API_HASH }}
-        ports:
-          - 8081:8081
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -506,17 +557,6 @@ jobs:
             dart run tool/changelog.dart build --unreleased
           fi
           dart run tool/changelog.dart render release "${target[@]}" --out release.md
-          dart run tool/changelog.dart render telegram "${target[@]}" --out telegram.md
-
-      - name: Push to telegram
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          RUN_ID: ${{ github.run_id }}
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-          python release_telegram.py
 
       - name: Patch release.md
         run: |
@@ -535,54 +575,3 @@ jobs:
         with:
           files: ./dist/*
           body_path: './release.md'
-
-      - name: Create Homebrew Cask Source Dir
-        if: ${{ env.IS_STABLE == 'true' }}
-        run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          arm_sha=$(sha256sum "./dist/FlClash-${version}-macos-arm64.dmg" | awk '{print $1}')
-          amd_sha=$(sha256sum "./dist/FlClash-${version}-macos-amd64.dmg" | awk '{print $1}')
-
-          mkdir -p ./brew/Casks
-          sed \
-            -e "s|VERSION|$version|g" \
-            -e "s|ARM_SHA256|$arm_sha|g" \
-            -e "s|AMD_SHA256|$amd_sha|g" \
-            ./.github/homebrew_cask_template.rb > ./brew/Casks/flclash.rb
-
-      - name: Push to Homebrew tap
-        if: ${{ env.IS_STABLE == 'true' }}
-        uses: cpina/github-action-push-to-another-repository@v1.7.2
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.HOMEBREW_SSH_DEPLOY_KEY }}
-        with:
-          source-directory: ./brew/
-          destination-github-username: chen08209
-          destination-repository-name: homebrew-tap
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
-          target-branch: main
-          commit-message: Update Homebrew cask from ${{ github.ref_name }}
-          target-directory: /
-
-      - name: Create Fdroid Source Dir
-        if: ${{ env.IS_STABLE == 'true' }}
-        run: |
-          mkdir -p ./tmp
-          cp ./dist/*android-arm64-v8a* ./tmp/ || true
-          echo "Files copied successfully"
-
-      - name: Push to fdroid repo
-        if: ${{ env.IS_STABLE == 'true' }}
-        uses: cpina/github-action-push-to-another-repository@v1.7.2
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-        with:
-          source-directory: ./tmp/
-          destination-github-username: chen08209
-          destination-repository-name: FlClash-fdroid-repo
-          user-name: 'chen08029'
-          user-email: 'chen08209@gmail.com'
-          target-branch: main
-          commit-message: Update from ${{ github.ref_name }}
-          target-directory: /tmp/

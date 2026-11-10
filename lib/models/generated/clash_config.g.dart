@@ -273,7 +273,7 @@ Map<String, dynamic> _$SnifferConfigToJson(_SnifferConfig instance) =>
 
 _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
   enable: json['enable'] as bool? ?? false,
-  device: json['device'] as String? ?? appName,
+  device: json['device'] as String? ?? defaultTunDevice,
   stack: $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.mips,
   routeAddress:
       (json['route-address'] as List<dynamic>?)

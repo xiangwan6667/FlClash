@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:fl_clash/common/protocol.dart';
 import 'package:test/test.dart';
+import 'package:win32_registry/win32_registry.dart';
 
 void main() {
   group('ProtocolRegistrationPlan', () {
@@ -17,6 +20,41 @@ void main() {
     });
   });
 
+  test('Windows registration preserves an existing handler', () {
+    final scheme = 'flclash-test-$pid-${DateTime.now().microsecondsSinceEpoch}';
+    final root = CURRENT_USER.create(r'Software\Classes');
+    addTearDown(() {
+      root.removeSubkey(scheme);
+      root.close();
+    });
+
+    const existing = r'"C:\Other App\FlClash.exe" "%1"';
+    final command = root.create('$scheme\\shell\\open\\command');
+    command.setValue('', const RegistryValue.string(existing));
+    command.close();
+
+    Protocol().register(scheme);
+
+    final registered = root.open('$scheme\\shell\\open\\command');
+    expect(registered.getString(''), existing);
+    registered.close();
+  }, skip: !Platform.isWindows);
+
+  test('Windows registration creates an unused handler', () {
+    final scheme = 'flclash-test-$pid-${DateTime.now().microsecondsSinceEpoch}';
+    final root = CURRENT_USER.create(r'Software\Classes');
+    addTearDown(() {
+      root.removeSubkey(scheme);
+      root.close();
+    });
+
+    Protocol().register(scheme);
+
+    final registered = root.open('$scheme\\shell\\open\\command');
+    expect(registered.getString(''), '"${Platform.resolvedExecutable}" "%1"');
+    registered.close();
+  }, skip: !Platform.isWindows);
+
   group('LinuxProtocolRegistrationPlan', () {
     const plan = LinuxProtocolRegistrationPlan(
       schemes: protocolSchemes,
@@ -27,7 +65,7 @@ void main() {
     test('writes a hidden desktop entry claiming every scheme', () {
       expect(
         plan.desktopPath,
-        '/home/me/.local/share/applications/flclash-url-handler.desktop',
+        '/home/me/.local/share/applications/flclash-fork-url-handler.desktop',
       );
       expect(
         plan.desktopEntry,
@@ -41,14 +79,13 @@ void main() {
       );
     });
 
-    test('makes the entry the default handler for every scheme', () {
-      expect(plan.xdgMimeArguments, [
-        'default',
-        'flclash-url-handler.desktop',
-        'x-scheme-handler/clash',
-        'x-scheme-handler/clashmeta',
-        'x-scheme-handler/flclash',
-      ]);
+    test('leaves another application as the default handler', () {
+      expect(canClaimProtocol('', plan.desktopId), isTrue);
+      expect(canClaimProtocol(plan.desktopId, plan.desktopId), isTrue);
+      expect(
+        canClaimProtocol('flclash-url-handler.desktop', plan.desktopId),
+        isFalse,
+      );
     });
 
     test('escapes reserved characters in the executable path', () {

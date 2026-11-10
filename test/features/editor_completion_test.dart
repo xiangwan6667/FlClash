@@ -105,6 +105,28 @@ void main() {
       expect(_labels(_complete(direct)), isNot(contains('server')));
     });
 
+    test('completes Miu proxy fields and REALITY options', () {
+      expect(_labels(_complete('proxies:\n  - type: mi|')), contains('miu'));
+      const prefix = 'proxies:\n  - name: a\n    type: miu\n';
+      expect(_labels(_complete('$prefix    ps|')), contains('psk'));
+      expect(
+        _labels(_complete('$prefix    reality-opts:\n      pub|')),
+        contains('public-key'),
+      );
+      expect(
+        _labels(_complete('$prefix    reality-opts:\n      mldsa|')),
+        contains('mldsa65-verify'),
+      );
+      expect(
+        _labels(_complete('$prefix    reality-opts:\n      client-ver|')),
+        contains('client-version'),
+      );
+      expect(
+        _labels(_complete('$prefix    pass|')),
+        isNot(contains('password')),
+      );
+    });
+
     test('offers the fields of the listener type', () {
       List<String> fields(String type) => _labels(
         _complete('listeners:\n  - name: a\n    type: $type\n    ws|'),

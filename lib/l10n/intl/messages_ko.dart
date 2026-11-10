@@ -344,6 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "이 백업은 더 최신 버전의 앱에서 만들어졌습니다. 복원하기 전에 앱을 업데이트하세요",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("백업 완료"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("기반 프로젝트"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("기본 정보"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("기본 전략"),
     "batchImport": MessageLookupByLibrary.simpleMessage("일괄 가져오기"),
@@ -392,7 +393,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "TLS 검증을 끄면 구독과 백업이 중간자 공격에 노출됩니다.",
     ),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("업데이트 확인"),
-    "checkUpdateError": MessageLookupByLibrary.simpleMessage("이미 최신 버전입니다"),
+    "checkUpdateError": MessageLookupByLibrary.simpleMessage(
+      "사용 가능한 업데이트가 없습니다",
+    ),
     "cipher": MessageLookupByLibrary.simpleMessage("암호화 방식"),
     "clearData": MessageLookupByLibrary.simpleMessage("데이터 지우기"),
     "clearDataAndExitTip": MessageLookupByLibrary.simpleMessage(

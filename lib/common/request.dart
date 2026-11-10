@@ -104,9 +104,10 @@ class Request {
     }
   }
 
-  /// Null when this build is current; throws when GitHub cannot be asked.
+  /// Null when there is no newer release; throws when GitHub cannot be asked.
   Future<Map<String, dynamic>?> checkForUpdate() async {
     final release = await latestRelease();
+    if (release == null) return null;
     final remoteVersion = release['tag_name'] as String;
     final version = globalState.packageInfo.version;
     final hasUpdate =
@@ -115,18 +116,23 @@ class Request {
   }
 
   /// The release page redirect still answers once the hourly API quota is spent.
-  Future<Map<String, dynamic>> latestRelease() async {
+  Future<Map<String, dynamic>?> latestRelease() async {
     try {
       final response = await dio.get<Map<String, dynamic>>(
         'https://api.github.com/repos/$repository/releases/latest',
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          followRedirects: false,
+        ),
       );
       return response.data!;
     } on DioException catch (error) {
-      commonPrint.log(
-        'latest release API failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
+      if (error.response?.statusCode != 404) {
+        commonPrint.log(
+          'latest release API failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+      }
     }
     final response = await dio.get<void>(
       'https://github.com/$repository/releases/latest',
@@ -136,12 +142,31 @@ class Request {
       ),
     );
     final location = response.headers.value(HttpHeaders.locationHeader);
-    final segments = Uri.tryParse(location ?? '')?.pathSegments ?? const [];
-    final tagIndex = segments.indexOf('tag') + 1;
-    if (tagIndex == 0 || tagIndex >= segments.length) {
+    if (location == null || location.isEmpty) {
+      throw FormatException('No release page redirect', location);
+    }
+    final base = Uri.https('github.com', '/$repository/releases');
+    final redirect = base.resolve(location);
+    if (redirect.scheme != 'https' ||
+        redirect.host != base.host ||
+        redirect.port != base.port ||
+        redirect.userInfo.isNotEmpty) {
+      throw FormatException('Unexpected release page redirect', location);
+    }
+    if (redirect.path == base.path || redirect.path == '${base.path}/') {
+      return null;
+    }
+    final segments = redirect.pathSegments;
+    final repoSegments = repository.split('/');
+    if (segments.length != 5 ||
+        segments[0] != repoSegments[0] ||
+        segments[1] != repoSegments[1] ||
+        segments[2] != 'releases' ||
+        segments[3] != 'tag' ||
+        segments[4].isEmpty) {
       throw FormatException('No release tag in the redirect', location);
     }
-    return {'tag_name': segments[tagIndex]};
+    return {'tag_name': segments[4]};
   }
 
   Future<String> downloadVerifiedRelease({

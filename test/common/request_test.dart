@@ -8,7 +8,9 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -26,6 +28,8 @@ class _HostAdapter implements HttpClientAdapter {
   _HostAdapter(this.byHost);
 
   final Map<String, ResponseBody Function()> byHost;
+  final requests = <Uri>[];
+  final followsRedirects = <bool>[];
 
   @override
   Future<ResponseBody> fetch(
@@ -33,7 +37,29 @@ class _HostAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options.uri);
+    followsRedirects.add(options.followRedirects);
     return byHost[options.uri.host]!();
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _OfflineAdapter implements HttpClientAdapter {
+  final requests = <Uri>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options.uri);
+    throw DioException.connectionError(
+      requestOptions: options,
+      reason: 'offline',
+    );
   }
 
   @override
@@ -109,6 +135,15 @@ void main() {
         'tag_name': 'v1.2.3',
         'body': 'notes',
       });
+      expect(
+        (request.dio.httpClientAdapter as _HostAdapter).requests.single
+            .toString(),
+        'https://api.github.com/repos/xiangwan6667/FlClash/releases/latest',
+      );
+      expect(
+        (request.dio.httpClientAdapter as _HostAdapter).followsRedirects.single,
+        isFalse,
+      );
     });
 
     test(
@@ -121,13 +156,116 @@ void main() {
             302,
             headers: {
               HttpHeaders.locationHeader: [
-                'https://github.com/owner/repo/releases/tag/v1.2.4',
+                'https://github.com/xiangwan6667/FlClash/releases/tag/v1.2.4',
               ],
             },
           ),
         });
 
         expect(await request.latestRelease(), {'tag_name': 'v1.2.4'});
+        expect(
+          (request.dio.httpClientAdapter as _HostAdapter).requests.last
+              .toString(),
+          'https://github.com/xiangwan6667/FlClash/releases/latest',
+        );
+      },
+    );
+
+    test('does not follow an API redirect to another repository', () async {
+      final request = requestAnswering({
+        'api.github.com': () => ResponseBody.fromString(
+          '',
+          301,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://api.github.com/repos/chen08209/FlClash/releases/latest',
+            ],
+          },
+        ),
+        'github.com': () => ResponseBody.fromString(
+          '',
+          302,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://github.com/xiangwan6667/FlClash/releases',
+            ],
+          },
+        ),
+      });
+
+      expect(await request.latestRelease(), isNull);
+      final adapter = request.dio.httpClientAdapter as _HostAdapter;
+      expect(adapter.followsRedirects.first, isFalse);
+      expect(adapter.requests.map((uri) => uri.toString()), [
+        'https://api.github.com/repos/xiangwan6667/FlClash/releases/latest',
+        'https://github.com/xiangwan6667/FlClash/releases/latest',
+      ]);
+    });
+
+    test(
+      'reports no release when GitHub redirects to the release list',
+      () async {
+        final request = requestAnswering({
+          'api.github.com': () => ResponseBody.fromString('{}', 404),
+          'github.com': () => ResponseBody.fromString(
+            '',
+            302,
+            headers: {
+              HttpHeaders.locationHeader: [
+                'https://github.com/xiangwan6667/FlClash/releases',
+              ],
+            },
+          ),
+        });
+
+        expect(await request.latestRelease(), isNull);
+        expect(await request.checkForUpdate(), isNull);
+      },
+    );
+
+    test('rejects a redirect to the upstream repository', () async {
+      final request = requestAnswering({
+        'api.github.com': () => ResponseBody.fromString('{}', 403),
+        'github.com': () => ResponseBody.fromString(
+          '',
+          302,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://github.com/chen08209/FlClash/releases/tag/v9.9.9',
+            ],
+          },
+        ),
+      });
+
+      await expectLater(request.latestRelease(), throwsFormatException);
+    });
+
+    test(
+      'does not mistake a response without a redirect for no release',
+      () async {
+        final request = requestAnswering({
+          'api.github.com': () => ResponseBody.fromString('{}', 403),
+          'github.com': () => ResponseBody.fromString('', 200),
+        });
+
+        await expectLater(request.latestRelease(), throwsFormatException);
+      },
+    );
+
+    test(
+      'propagates a network error when both endpoints are offline',
+      () async {
+        final adapter = _OfflineAdapter();
+        final request = Request()..dio.httpClientAdapter = adapter;
+
+        await expectLater(
+          request.checkForUpdate(),
+          throwsA(isA<DioException>()),
+        );
+        expect(adapter.requests.map((uri) => uri.host), [
+          'api.github.com',
+          'github.com',
+        ]);
       },
     );
 
@@ -138,6 +276,50 @@ void main() {
       });
 
       await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
+    });
+  });
+
+  group('checkForUpdate', () {
+    PackageInfo? previous;
+
+    setUp(() {
+      try {
+        previous = globalState.packageInfo;
+      } catch (_) {
+        previous = null;
+      }
+      globalState.packageInfo = PackageInfo(
+        appName: 'FlClash',
+        packageName: 'com.follow.clash',
+        version: '1.2.3',
+        buildNumber: '1',
+      );
+    });
+
+    tearDown(() {
+      if (previous case final info?) globalState.packageInfo = info;
+    });
+
+    test('compares the published tag with the running version', () async {
+      for (final (tag, hasUpdate) in [
+        ('v1.2.2', false),
+        ('v1.2.3', false),
+        ('v1.2.4', true),
+      ]) {
+        final request = Request()
+          ..dio.httpClientAdapter = _HostAdapter({
+            'api.github.com': () => ResponseBody.fromString(
+              '{"tag_name":"$tag"}',
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            ),
+          });
+
+        final result = await request.checkForUpdate();
+        expect(result?['tag_name'], hasUpdate ? tag : null);
+      }
     });
   });
 

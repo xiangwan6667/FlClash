@@ -401,6 +401,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "This backup comes from a newer version of the app. Update the app before restoring it",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("Backup successful"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Based on"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Basic info"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Basic strategies"),
     "batchImport": MessageLookupByLibrary.simpleMessage("Batch import"),
@@ -464,7 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Check for updates"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
-      "The app is already up to date",
+      "No updates available",
     ),
     "cipher": MessageLookupByLibrary.simpleMessage("Cipher"),
     "clearData": MessageLookupByLibrary.simpleMessage("Clear data"),

@@ -191,6 +191,79 @@ void main() {
     expect(missingReleaseTags(derived, derived), isEmpty);
   });
 
+  test('preserves published notes whose commits were squashed', () {
+    final original = build().changelog.versions.single;
+    final log = Process.runSync('git', [
+      'log',
+      '--format=%H',
+      'v1.0.0..v1.1.0',
+    ], workingDirectory: repo.path);
+    expect(log.exitCode, 0);
+    final hashes = (log.stdout as String).trim().split('\n');
+    git(['tag', '-d', 'v1.1.0']);
+    git(['checkout', '--quiet', '-b', 'squashed', 'v1.0.0']);
+    commit(
+      'chore: consolidate release\n\nChangelog: skip\n\n'
+      '${hashes.map((hash) => 'Squashed-Commit: $hash').join('\n')}\n'
+      'Squashed-Commit: invalid',
+    );
+    git(['tag', 'v1.1.0']);
+
+    final result = build();
+    final sourceIds = hashes.map((hash) => hash.substring(0, 7)).toSet();
+    expect(result.squashedIdsByTag['v1.1.0'], sourceIds);
+    expect(result.commitIdsByTag['v1.1.0'], containsAll(sourceIds));
+    expect(result.changelog.versions.single.isEmpty, isTrue);
+    expect(result.warnings, isEmpty);
+
+    final historic = ChangelogVersion(
+      version: '1.0.5',
+      tag: 'v1.0.5',
+      date: '2026-01-01',
+      groups: [original.groups.first],
+    );
+    const unrelated = ChangelogVersion(
+      version: '1.0.6',
+      tag: 'v1.0.6',
+      date: '2026-01-01',
+      groups: [
+        ChangelogGroup(
+          type: ChangelogType.feat,
+          entries: [ChangelogEntry(id: 'deadbee', text: 'Unrelated')],
+        ),
+      ],
+    );
+    final retained = preserveSquashedNotes(
+      result,
+      Changelog(versions: [original, historic, unrelated]),
+    );
+    expect(retained.versions.map((version) => version.tag), [
+      'v1.1.0',
+      'v1.0.5',
+    ]);
+    expect(retained.versions.first.toJson(), original.toJson());
+    expect(retained.versions.last.toJson(), historic.toJson());
+
+    final fresh = ChangelogVersion(
+      version: '1.1.0',
+      tag: 'v1.1.0',
+      date: '2026-01-02',
+      groups: unrelated.groups,
+    );
+    final withFreshNotes = ChangelogBuildResult(
+      changelog: Changelog(versions: [fresh]),
+      warnings: const [],
+      squashedIdsByTag: result.squashedIdsByTag,
+    );
+    expect(
+      preserveSquashedNotes(
+        withFreshNotes,
+        Changelog(versions: [original]),
+      ).versions.single.toJson(),
+      fresh.toJson(),
+    );
+  });
+
   test('is deterministic across runs', () {
     expect(
       encodeChangelog(build().changelog),

@@ -57,6 +57,13 @@ void main() {
     );
   });
 
+  test('release assets are downloaded from the maintained repository', () {
+    expect(
+      releaseAssetUri('v1.2.3', 'SHA256SUMS').toString(),
+      'https://github.com/xiangwan6667/FlClash/releases/download/v1.2.3/SHA256SUMS',
+    );
+  });
+
   group('releaseChecksum', () {
     const digest =
         'ff6a953c0f5c12e6bdc97b49428b565b64c4a62d85e50081823ba297407529b1';

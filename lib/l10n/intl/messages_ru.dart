@@ -417,6 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupSuccess": MessageLookupByLibrary.simpleMessage(
       "Резервная копия создана",
     ),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Основано на"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Основная информация"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Базовые политики"),
     "batchImport": MessageLookupByLibrary.simpleMessage("Массовый импорт"),
@@ -484,7 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "checkUpdate": MessageLookupByLibrary.simpleMessage("Проверить обновления"),
     "checkUpdateError": MessageLookupByLibrary.simpleMessage(
-      "У вас уже последняя версия",
+      "Нет доступных обновлений",
     ),
     "cipher": MessageLookupByLibrary.simpleMessage("Шифр"),
     "clearData": MessageLookupByLibrary.simpleMessage("Очистить данные"),

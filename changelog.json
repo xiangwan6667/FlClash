@@ -2,6 +2,58 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "0.9.5",
+      "tag": "v0.9.5",
+      "date": "2026-11-10",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "bb5f745",
+              "text": "Use independent Fork identities and remove the About section heading"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "e3cc6df",
+              "text": "Fix Android signing verification; this release also includes Miu and REALITY compatibility"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.9.4",
+      "tag": "v0.9.4",
+      "date": "2026-11-09",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "868cef6",
+              "text": "Miu proxy support and independent installation alongside FlClash"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "1734866",
+              "text": "Improve REALITY compatibility and project update information"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.3",
       "tag": "v0.9.3",
       "date": "2026-11-04",

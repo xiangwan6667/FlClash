@@ -1,0 +1,62 @@
+name: Verify Android signing
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify release signing certificate
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for value in "$KEYSTORE" "$KEY_ALIAS" "$STORE_PASSWORD" "$KEY_PASSWORD"; do
+            test -n "$value" || { echo 'An Android signing secret is missing.' >&2; exit 1; }
+          done
+          store="$RUNNER_TEMP/flclash-signing-check.p12"
+          trap 'rm -f "$store"' EXIT
+          printf '%s' "$KEYSTORE" | base64 --decode > "$store"
+          info="$(keytool -J-Duser.language=en -list -v -storetype PKCS12 -keystore "$store" -alias "$KEY_ALIAS" -storepass:env STORE_PASSWORD)"
+          fingerprint="$(printf '%s\n' "$info" | sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          test "$fingerprint" = '923e4c3eda8c6b516719b5b30f6e52e9faba273101368c6ce5a3bfdd74f40a33' || {
+            echo 'The configured signing certificate does not match.' >&2
+            exit 1
+          }
+          echo 'Android release signing certificate matches.'
+
+      - name: Verify APK signing tools
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          work="$(mktemp -d "$RUNNER_TEMP/flclash-signing-check.XXXXXX")"
+          trap 'rm -rf "$work"' EXIT
+          printf '%s' "$KEYSTORE" | base64 --decode > "$work/keystore.p12"
+          build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
+          android_jar="$(find "$ANDROID_HOME/platforms" -name android.jar | sort -V | tail -n 1)"
+          cat > "$work/AndroidManifest.xml" <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="app.flclash.fork">
+            <uses-sdk android:minSdkVersion="23" />
+            <application android:label="FlClash" />
+          </manifest>
+          EOF
+          "$build_tools/aapt" package -f -M "$work/AndroidManifest.xml" -I "$android_jar" -F "$work/unsigned.apk"
+          "$build_tools/apksigner" sign --ks "$work/keystore.p12" --ks-type PKCS12 --ks-key-alias "$KEY_ALIAS" --ks-pass env:STORE_PASSWORD --key-pass env:KEY_PASSWORD --out "$work/signed.apk" "$work/unsigned.apk"
+          "$build_tools/apksigner" verify --print-certs "$work/signed.apk" > "$work/certificates.txt"
+          if ! grep -Fi 'certificate SHA-256 digest: 923e4c3eda8c6b516719b5b30f6e52e9faba273101368c6ce5a3bfdd74f40a33' "$work/certificates.txt" >/dev/null; then
+            cat "$work/certificates.txt"
+            exit 1
+          fi
+          echo 'Android APK signing and certificate verification passed.'

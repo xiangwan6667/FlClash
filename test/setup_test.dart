@@ -67,6 +67,13 @@ hooks:
       expect(setup.createPackageTargets('macos', null), 'dmg');
     });
 
+    test('the macOS disk image installs FlClash in its own folder', () {
+      final spec = setup.macosDmgSpec('/tmp/FlClash-Fork');
+      final contents = spec['contents'] as List;
+      expect(contents, contains(containsPair('path', '/Applications')));
+      expect(contents, contains(containsPair('path', '/tmp/FlClash-Fork')));
+    });
+
     test('downloads the appimagetool build matching the host', () {
       expect(setup.appImageToolArch('arm64'), 'aarch64');
       expect(setup.appImageToolArch('amd64'), 'x86_64');

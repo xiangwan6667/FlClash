@@ -221,7 +221,72 @@ Future<int> _package(
     stderr.write(utf8.decode(data));
   });
   final exitCode = await process.exitCode;
+  if (exitCode == 0 &&
+      platform == 'macos' &&
+      targets.split(',').map((target) => target.trim()).contains('dmg')) {
+    return _isolateMacosDmg(rootDir, arch);
+  }
   return exitCode;
+}
+
+Map<String, Object> macosDmgSpec(String appDirectory) => {
+  'title': 'FlClash',
+  'contents': [
+    {'x': 448, 'y': 344, 'type': 'link', 'path': '/Applications'},
+    {'x': 192, 'y': 344, 'type': 'file', 'path': appDirectory},
+  ],
+};
+
+Future<int> _isolateMacosDmg(String rootDir, String arch) async {
+  final pubspec = loadYaml(
+    File(p.join(rootDir, 'pubspec.yaml')).readAsStringSync(),
+  );
+  final version = (pubspec['version'] as String).split('+').first;
+  final app = p.join(
+    rootDir,
+    'build',
+    'macos',
+    'Build',
+    'Products',
+    'Release',
+    'FlClash.app',
+  );
+  final dmg = File(p.join(rootDir, 'dist', 'FlClash-$version-macos-$arch.dmg'));
+  if (!Directory(app).existsSync() || !dmg.existsSync()) {
+    stderr.writeln('The macOS application or expected DMG is missing.');
+    return 1;
+  }
+
+  final staging = await Directory.systemTemp.createTemp('flclash-fork-dmg-');
+  try {
+    final folder = Directory(p.join(staging.path, 'FlClash-Fork'));
+    await folder.create();
+    final copy = await Process.run('ditto', [
+      app,
+      p.join(folder.path, 'FlClash.app'),
+    ]);
+    if (copy.exitCode != 0) {
+      stderr.write(copy.stderr);
+      return copy.exitCode;
+    }
+    final specification = File(p.join(staging.path, 'dmg.json'));
+    await specification.writeAsString(jsonEncode(macosDmgSpec(folder.path)));
+    final isolatedDmg = p.join(staging.path, 'FlClash.dmg');
+    final result = await Process.run('appdmg', [
+      specification.path,
+      isolatedDmg,
+    ]);
+    if (result.exitCode != 0) {
+      stderr.write(result.stderr);
+      return result.exitCode;
+    }
+    final replacement = '${dmg.path}.$pid.tmp';
+    await File(isolatedDmg).copy(replacement);
+    await File(replacement).rename(dmg.path);
+    return 0;
+  } finally {
+    await staging.delete(recursive: true);
+  }
 }
 
 String _detectArch() {

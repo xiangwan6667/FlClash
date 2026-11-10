@@ -295,7 +295,7 @@ void main() {
     });
   });
 
-  testWidgets('a manual check keeps the setting and reports a failure', (
+  testWidgets('a manual check keeps the setting and reports no update', (
     tester,
   ) async {
     final container = await pumpApp(tester);
@@ -306,6 +306,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Check for updates'), findsOneWidget);
+    expect(find.text('No updates available'), findsOneWidget);
 
     await tapCancel(tester);
     await shown;
