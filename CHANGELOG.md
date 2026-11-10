@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.9.6 (2026-11-10)
+
+**Bug Fixes**
+
+- **packaging** Hide the Windows installer publisher and correct Linux package maintainer metadata (9618fc5)
+
 ## v0.9.5 (2026-11-10)
 
 **Features**
