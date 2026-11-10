@@ -1,7 +1,7 @@
 script_template: inno_setup.iss
 app_id: 8ABD019F-E2F3-4633-A5B3-75AE7C389603
 app_name: FlClash
-publisher_name: xiangwan6667
+publisher_name: ''
 publisher_url: https://github.com/xiangwan6667/FlClash
 display_name: FlClash
 executable_name: FlClash.exe

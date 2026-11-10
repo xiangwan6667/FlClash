@@ -458,6 +458,16 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
         run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
+      - name: Verify Windows installer publisher
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $installers = @(Get-ChildItem -Path dist -Filter '*-windows-${{ matrix.arch }}-setup.exe' -File)
+          if ($installers.Count -ne 1 -or -not [string]::IsNullOrWhiteSpace($installers[0].VersionInfo.CompanyName)) {
+            throw 'Expected one Windows installer with an empty publisher.'
+          }
+
       - name: Verify macOS package identity
         if: matrix.platform == 'macos'
         shell: bash
@@ -481,8 +491,11 @@ jobs:
           deb="dist/FlClash-${version}-linux-${{ matrix.arch }}.deb"
           rpm="dist/FlClash-${version}-linux-${{ matrix.arch }}.rpm"
           test "$(dpkg-deb -f "$deb" Package)" = 'flclash-fork'
+          expected='xiangwan6667 <311408437+xiangwan6667@users.noreply.github.com>'
+          test "$(dpkg-deb -f "$deb" Maintainer)" = "$expected"
           dpkg-deb -c "$deb" | grep -F './opt/FlClash-Fork/FlClash-Fork' >/dev/null
           test "$(rpm -qp --qf '%{NAME}' "$rpm")" = 'flclash-fork'
+          test "$(rpm -qp --qf '%{PACKAGER}' "$rpm")" = "$expected"
           rpm -qpl "$rpm" | grep -Fx '/usr/share/applications/flclash-fork.desktop' >/dev/null
 
       - name: Verify Android package identity and signature
