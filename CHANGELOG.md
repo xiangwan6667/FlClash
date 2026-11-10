@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.9.7 (2026-11-10)
+
+**Bug Fixes**
+
+- **core** Rebuild the core with Go 1.27.3 security fixes (2e4ca9c)
+- **windows** Close an unresponsive Windows app before installing an update (619431b)
+
 ## v0.9.6 (2026-11-10)
 
 **Bug Fixes**

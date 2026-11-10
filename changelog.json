@@ -2,6 +2,29 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "0.9.7",
+      "tag": "v0.9.7",
+      "date": "2026-11-10",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "2e4ca9c",
+              "scope": "core",
+              "text": "Rebuild the core with Go 1.27.3 security fixes"
+            },
+            {
+              "id": "619431b",
+              "scope": "windows",
+              "text": "Close an unresponsive Windows app before installing an update"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.6",
       "tag": "v0.9.6",
       "date": "2026-11-10",
