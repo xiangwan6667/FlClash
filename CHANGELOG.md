@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.9.8 (2026-11-14)
+
+**Features**
+
+- **core** Update the core to Mihomo v1.19.34 stable with Snell v6 support (52b0ec2)
+- **core** Support multiple users in Shadowsocks listeners (52b0ec2)
+
+**Bug Fixes**
+
+- **core** Enable REALITY hybrid key exchange by default while honoring explicit opt-out, and align VLESS encrypted record limits with Xray (52b0ec2)
+- **core** Fix TUN automatic routing and TCP Fast Open compatibility with Go 1.27 (52b0ec2)
+- **core** Preserve buffered HTTP CONNECT data, close failed SSH connections, and convert HTTPUpgrade subscription links correctly (52b0ec2)
+- **core** Prevent EasyTier forwarding stalls and allow idle Mieru TCP connections to close (52b0ec2)
+- **core** Prevent SOCKS domain-length overflow and correct memory statistics on 32-bit Windows (52b0ec2)
+
 ## v0.9.7 (2026-11-10)
 
 **Bug Fixes**

@@ -2,6 +2,59 @@
   "schemaVersion": 2,
   "versions": [
     {
+      "version": "0.9.8",
+      "tag": "v0.9.8",
+      "date": "2026-11-14",
+      "prerelease": false,
+      "groups": [
+        {
+          "type": "feat",
+          "entries": [
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Update the core to Mihomo v1.19.34 stable with Snell v6 support"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Support multiple users in Shadowsocks listeners"
+            }
+          ]
+        },
+        {
+          "type": "fix",
+          "entries": [
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Enable REALITY hybrid key exchange by default while honoring explicit opt-out, and align VLESS encrypted record limits with Xray"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Fix TUN automatic routing and TCP Fast Open compatibility with Go 1.27"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Preserve buffered HTTP CONNECT data, close failed SSH connections, and convert HTTPUpgrade subscription links correctly"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Prevent EasyTier forwarding stalls and allow idle Mieru TCP connections to close"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Prevent SOCKS domain-length overflow and correct memory statistics on 32-bit Windows"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "version": "0.9.7",
       "tag": "v0.9.7",
       "date": "2026-11-10",
