@@ -344,6 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "このバックアップは新しいバージョンのアプリで作成されています。アプリを更新してから復元してください",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("バックアップが完了しました"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("ベースとなったプロジェクト"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基本情報"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基本ポリシー"),
     "batchImport": MessageLookupByLibrary.simpleMessage("一括インポート"),

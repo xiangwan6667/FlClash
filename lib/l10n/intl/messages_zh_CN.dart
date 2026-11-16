@@ -334,6 +334,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "该备份来自更高版本的应用，请先更新应用再恢复",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("备份成功"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("基于"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("基础信息"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("基础策略"),
     "batchImport": MessageLookupByLibrary.simpleMessage("批量导入"),

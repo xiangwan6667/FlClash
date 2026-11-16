@@ -966,6 +966,11 @@ class AppLocalizations {
     return Intl.message('Project', name: 'project', desc: '', args: []);
   }
 
+  /// `Based on`
+  String get basedOn {
+    return Intl.message('Based on', name: 'basedOn', desc: '', args: []);
+  }
+
   /// `Core`
   String get core {
     return Intl.message('Core', name: 'core', desc: '', args: []);

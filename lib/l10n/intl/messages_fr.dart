@@ -430,6 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Cette sauvegarde provient d’une version plus récente de l’app. Mettez l’app à jour avant de la restaurer",
     ),
     "backupSuccess": MessageLookupByLibrary.simpleMessage("Sauvegarde réussie"),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Basé sur"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Infos de base"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Stratégies de base"),
     "batchImport": MessageLookupByLibrary.simpleMessage("Importation groupée"),

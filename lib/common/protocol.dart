@@ -1,10 +1,14 @@
 import 'dart:io';
 
+import 'package:win32/win32.dart';
 import 'package:win32_registry/win32_registry.dart';
 
 import 'print.dart';
 
 const protocolSchemes = ['clash', 'clashmeta', 'flclash'];
+
+bool canClaimProtocol(String currentHandler, String ownHandler) =>
+    currentHandler.isEmpty || currentHandler == ownHandler;
 
 class ProtocolRegistrationPlan {
   final String scheme;
@@ -26,9 +30,7 @@ class ProtocolRegistrationPlan {
   String get command => '"$executable" "%1"';
 }
 
-/// A user-level desktop entry that claims the schemes for the running binary,
-/// so an AppImage or a development build is reachable without a packaged
-/// .desktop file. Rewritten on every launch, like the Windows registry keys.
+/// A user-level desktop entry for the running binary, including AppImages.
 class LinuxProtocolRegistrationPlan {
   final List<String> schemes;
   final String executable;
@@ -40,7 +42,7 @@ class LinuxProtocolRegistrationPlan {
     required this.applicationsDir,
   });
 
-  String get desktopId => 'flclash-url-handler.desktop';
+  String get desktopId => 'flclash-fork-url-handler.desktop';
 
   String get desktopPath => '$applicationsDir/$desktopId';
 
@@ -58,8 +60,6 @@ class LinuxProtocolRegistrationPlan {
     'MimeType=${mimeTypes.join(';')};',
     '',
   ].join('\n');
-
-  List<String> get xdgMimeArguments => ['default', desktopId, ...mimeTypes];
 
   static String _quoteExecArgument(String value) {
     return value
@@ -86,6 +86,20 @@ class Protocol {
       scheme: scheme,
       executable: Platform.resolvedExecutable,
     );
+    try {
+      final existing = CLASSES_ROOT.open('$scheme\\${plan.commandKey}');
+      try {
+        if ((existing.getString('') ?? '').isNotEmpty) return;
+      } finally {
+        existing.close();
+      }
+    } on WindowsException catch (error) {
+      if (error.hr != ERROR_FILE_NOT_FOUND.toHRESULT() &&
+          error.hr != ERROR_PATH_NOT_FOUND.toHRESULT()) {
+        commonPrint.log('protocol registration lookup failed: $error');
+        return;
+      }
+    }
     final regKey = CURRENT_USER.create(plan.protocolKey);
     try {
       regKey.setValue(
@@ -120,7 +134,28 @@ class Protocol {
       final file = File(plan.desktopPath);
       await file.parent.create(recursive: true);
       await file.writeAsString(plan.desktopEntry);
-      final result = await Process.run('xdg-mime', plan.xdgMimeArguments);
+      final available = <String>[];
+      for (final mimeType in plan.mimeTypes) {
+        final query = await Process.run('xdg-mime', [
+          'query',
+          'default',
+          mimeType,
+        ]);
+        if (query.exitCode != 0) {
+          commonPrint.log('xdg-mime query failed: ${query.stderr}'.trim());
+          continue;
+        }
+        final current = query.stdout.toString().trim();
+        if (canClaimProtocol(current, plan.desktopId)) {
+          available.add(mimeType);
+        }
+      }
+      if (available.isEmpty) return;
+      final result = await Process.run('xdg-mime', [
+        'default',
+        plan.desktopId,
+        ...available,
+      ]);
       if (result.exitCode != 0) {
         commonPrint.log('xdg-mime default failed: ${result.stderr}'.trim());
       }

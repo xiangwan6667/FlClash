@@ -33,6 +33,7 @@ class ChangelogBuildResult {
     required this.changelog,
     required this.warnings,
     this.commitIdsByTag = const <String, Set<String>>{},
+    this.squashedIdsByTag = const <String, Set<String>>{},
   });
 
   final Changelog changelog;
@@ -42,6 +43,7 @@ class ChangelogBuildResult {
   /// that produced no entry. `verify` uses it to allow hand written entries as
   /// long as they point at a commit that really is in the version's range.
   final Map<String, Set<String>> commitIdsByTag;
+  final Map<String, Set<String>> squashedIdsByTag;
 }
 
 class ChangelogBuilder {
@@ -59,13 +61,16 @@ class ChangelogBuilder {
     final parser = ChangelogParser();
     final versions = <ChangelogVersion>[];
     final commitIdsByTag = <String, Set<String>>{};
+    final squashedIdsByTag = <String, Set<String>>{};
 
     if (pending != null && !git.tagExists(pending.tag)) {
       final commits = git.commits(
         from: stable.isEmpty ? boundaryTag?.name : stable.first.name,
         to: 'HEAD',
       );
-      commitIdsByTag[pending.tag] = _idsOf(commits);
+      final squashed = _squashedIdsOf(commits);
+      squashedIdsByTag[pending.tag] = squashed;
+      commitIdsByTag[pending.tag] = {..._idsOf(commits), ...squashed};
       versions.add(
         ChangelogVersion(
           version: pending.version,
@@ -83,7 +88,9 @@ class ChangelogBuilder {
           ? stable[index + 1].name
           : boundaryTag?.name;
       final commits = git.commits(from: previous, to: tag.name);
-      commitIdsByTag[tag.name] = _idsOf(commits);
+      final squashed = _squashedIdsOf(commits);
+      squashedIdsByTag[tag.name] = squashed;
+      commitIdsByTag[tag.name] = {..._idsOf(commits), ...squashed};
       versions.add(
         ChangelogVersion(
           version: tag.version,
@@ -98,11 +105,59 @@ class ChangelogBuilder {
       changelog: Changelog(versions: versions),
       warnings: parser.warnings,
       commitIdsByTag: commitIdsByTag,
+      squashedIdsByTag: squashedIdsByTag,
     );
   }
 
   Set<String> _idsOf(List<RawCommit> commits) =>
       commits.map((commit) => commit.shortHash).toSet();
+
+  Set<String> _squashedIdsOf(List<RawCommit> commits) {
+    final trailer = RegExp(
+      r'^Squashed-Commit: ([0-9a-f]{40})$',
+      multiLine: true,
+    );
+    return {
+      for (final commit in commits)
+        for (final match in trailer.allMatches(commit.body))
+          match.group(1)!.substring(0, 7),
+    };
+  }
+}
+
+/// Keep published notes whose original commits are recorded in a squash.
+Changelog preserveSquashedNotes(
+  ChangelogBuildResult built,
+  Changelog recorded,
+) {
+  final versions = {
+    for (final version in built.changelog.versions) version.tag: version,
+  };
+  for (final version in recorded.versions) {
+    final tag = VersionTag.tryParse(version.tag);
+    final ids = {
+      for (final group in version.groups)
+        for (final entry in group.entries) entry.id,
+    };
+    if (tag == null || ids.isEmpty) continue;
+    final current = versions[version.tag];
+    if (current != null && !current.isEmpty) continue;
+    for (final source in built.squashedIdsByTag.entries) {
+      final owner = VersionTag.tryParse(source.key);
+      if (owner != null &&
+          tag.compareTo(owner) <= 0 &&
+          source.value.containsAll(ids)) {
+        versions[version.tag] = version;
+        break;
+      }
+    }
+  }
+  final ordered = versions.values.toList()
+    ..sort(
+      (a, b) =>
+          VersionTag.tryParse(b.tag)!.compareTo(VersionTag.tryParse(a.tag)!),
+    );
+  return Changelog(versions: ordered);
 }
 
 final _frozenComment = RegExp(r'\s*<!--.*?-->', dotAll: true);

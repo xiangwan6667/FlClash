@@ -430,6 +430,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupSuccess": MessageLookupByLibrary.simpleMessage(
       "Copia de seguridad completada",
     ),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Basado en"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Información básica"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage(
       "Estrategias básicas",

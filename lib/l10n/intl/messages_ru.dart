@@ -417,6 +417,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "backupSuccess": MessageLookupByLibrary.simpleMessage(
       "Резервная копия создана",
     ),
+    "basedOn": MessageLookupByLibrary.simpleMessage("Основано на"),
     "basicInfo": MessageLookupByLibrary.simpleMessage("Основная информация"),
     "basicStrategy": MessageLookupByLibrary.simpleMessage("Базовые политики"),
     "batchImport": MessageLookupByLibrary.simpleMessage("Массовый импорт"),

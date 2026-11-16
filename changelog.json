@@ -4,12 +4,32 @@
     {
       "version": "0.9.3",
       "tag": "v0.9.3",
-      "date": "2026-11-04",
+      "date": "2026-11-16",
       "prerelease": false,
       "groups": [
         {
           "type": "feat",
           "entries": [
+            {
+              "id": "868cef6",
+              "scope": "protocol",
+              "text": "Support Miu proxies in configurations and the editor"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Update the core to Mihomo v1.19.34 stable with Snell v6 and multi-user Shadowsocks listeners"
+            },
+            {
+              "id": "bb5f745",
+              "scope": "app",
+              "text": "Install independently alongside upstream FlClash with separate settings, services and startup registration"
+            },
+            {
+              "id": "1734866",
+              "scope": "update",
+              "text": "Use Fork release downloads and show Fork and upstream project links"
+            },
             {
               "id": "52b975f",
               "scope": "connections",
@@ -35,6 +55,56 @@
         {
           "type": "fix",
           "entries": [
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Improve REALITY compatibility, enable hybrid key exchange by default while honoring explicit opt-out, and align VLESS encrypted record limits with Xray"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Fix TUN automatic routing and TCP Fast Open compatibility with Go 1.27"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Preserve buffered HTTP CONNECT data, close failed SSH connections, and convert HTTPUpgrade subscription links correctly"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Prevent EasyTier forwarding stalls and allow idle Mieru TCP connections to close"
+            },
+            {
+              "id": "52b0ec2",
+              "scope": "core",
+              "text": "Prevent SOCKS domain-length overflow and correct memory statistics on 32-bit Windows"
+            },
+            {
+              "id": "2e4ca9c",
+              "scope": "core",
+              "text": "Build the core with Go 1.27.3 security fixes"
+            },
+            {
+              "id": "619431b",
+              "scope": "windows",
+              "text": "Exit Windows completely during updates, including tray, proxy and core cleanup"
+            },
+            {
+              "id": "9618fc5",
+              "scope": "packaging",
+              "text": "Hide the Windows installer publisher and correct Linux package maintainer metadata"
+            },
+            {
+              "id": "e3cc6df",
+              "scope": "update",
+              "text": "Verify Android release signing and handle unavailable GitHub releases safely"
+            },
+            {
+              "id": "5823fd6",
+              "scope": "ui",
+              "text": "Keep the dashboard open when a proxy-group sheet receives a close callback after dismissal"
+            },
             {
               "id": "7d5db7e",
               "scope": "core",

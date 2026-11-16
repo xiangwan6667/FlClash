@@ -23,6 +23,11 @@ void main() {
     expect(peer, contains('const PORT_VALUE: &str = "$helperPortValue";'));
   });
 
+  test('uses the native helper fallback port', () {
+    final hub = File('services/helper/src/service/hub.rs').readAsStringSync();
+    expect(hub, contains('const LISTEN_PORT: u16 = $helperPort;'));
+  });
+
   test(
     'start returns a Helper lease identity with matching session and PID',
     () async {

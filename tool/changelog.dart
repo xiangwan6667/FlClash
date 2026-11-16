@@ -66,8 +66,9 @@ int _release(String root, ArgResults command) {
     ),
   );
   _printWarnings(result.warnings);
-  _writeData(root, result.changelog);
-  _writeMarkdown(root, result.changelog);
+  final changelog = _preserveSquashed(root, result);
+  _writeData(root, changelog);
+  _writeMarkdown(root, changelog);
   stdout.writeln('Wrote $changelogMarkdownPath and $changelogDataPath');
   return 0;
 }
@@ -97,9 +98,16 @@ int _build(String root, ArgResults command) {
   }
   final result = ChangelogBuilder(git).build(pending: pending);
   _printWarnings(result.warnings);
-  _writeData(root, result.changelog);
+  _writeData(root, _preserveSquashed(root, result));
   stdout.writeln('Wrote $changelogDataPath');
   return 0;
+}
+
+Changelog _preserveSquashed(String root, ChangelogBuildResult result) {
+  final file = resolve(root, changelogDataPath);
+  return file.existsSync()
+      ? preserveSquashedNotes(result, decodeChangelog(file.readAsStringSync()))
+      : result.changelog;
 }
 
 int _render(String root, ArgResults command) {

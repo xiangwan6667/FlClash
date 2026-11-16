@@ -361,6 +361,20 @@ func TestHandleValidateProxiesReportsEachProxyInPlace(t *testing.T) {
 	}
 }
 
+func TestHandleValidateMiuProxy(t *testing.T) {
+	issues := handleValidateProxies(ProxiesParams{Proxies: []map[string]any{
+		{"name": "valid", "type": "miu", "server": "example.com", "port": 443, "psk": "0123456789abcdef", "udp": true},
+		{"name": "invalid", "type": "miu", "server": "example.com", "port": 443, "psk": "short"},
+	}})
+	got := issueAt(issues, 2)
+	if got[0] != "" {
+		t.Errorf("valid Miu proxy reported %q", got[0])
+	}
+	if !strings.Contains(got[1], "psk") {
+		t.Errorf("invalid Miu proxy reported %q, want PSK error", got[1])
+	}
+}
+
 func TestHandleConvertProxiesReadsABase64ShareLinkList(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "subscription")
 	links := "trojan://secret@example.com:443#first\nss://YWVzLTEyOC1nY206cGFzcw@example.com:8388#second\n"

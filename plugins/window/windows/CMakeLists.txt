@@ -36,3 +36,18 @@ set(window_bundled_libraries
   ""
   PARENT_SCOPE
 )
+
+if(BUILD_TESTING)
+  enable_testing()
+  add_executable(window_controller_test
+    "test/window_controller_test.cpp"
+    "window_controller.cpp"
+    "window_style.cpp"
+    "running_instance.cpp"
+  )
+  apply_standard_settings(window_controller_test)
+  target_include_directories(window_controller_test PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}")
+  target_link_libraries(window_controller_test PRIVATE dwmapi ole32)
+  add_test(NAME window_controller_test COMMAND window_controller_test)
+endif()

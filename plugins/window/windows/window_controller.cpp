@@ -410,6 +410,15 @@ std::optional<LRESULT> WindowController::HandleWindowMessage(
       return HTTOPRIGHT;
     }
     return HTTOP;
+  } else if (message == WM_QUERYENDSESSION) {
+    // Restart Manager queries before committing an installer shutdown. Cleanup
+    // must wait for WM_ENDSESSION because another application can cancel it.
+    return TRUE;
+  } else if (message == WM_ENDSESSION) {
+    if (wparam != FALSE) {
+      emit_event_("should-terminate");
+    }
+    return 0;
   } else if (message == WM_CLOSE) {
     emit_event_("close");
     if (is_prevent_close_) {

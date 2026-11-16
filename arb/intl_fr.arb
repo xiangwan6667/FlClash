@@ -122,6 +122,7 @@
   "safeMode": "Mode sans échec",
   "safeModeAppTitle": "{appName} (mode sans échec)",
   "project": "Projet",
+  "basedOn": "Basé sur",
   "core": "Cœur",
   "tabAnimation": "Animation des onglets",
   "desc": "Un client proxy multiplateforme basé sur ClashMeta, simple d’utilisation, open source et sans publicité.",

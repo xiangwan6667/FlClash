@@ -1,9 +1,13 @@
 # Changelog
 
-## v0.9.3 (2026-11-04)
+## v0.9.3 (2026-11-16)
 
 **Features**
 
+- **protocol** Support Miu proxies in configurations and the editor (868cef6)
+- **core** Update the core to Mihomo v1.19.34 stable with Snell v6 and multi-user Shadowsocks listeners (52b0ec2)
+- **app** Install independently alongside upstream FlClash with separate settings, services and startup registration (bb5f745)
+- **update** Use Fork release downloads and show Fork and upstream project links (1734866)
 - **connections** Merged requests and connections; quick edit lists (52b975f)
 - **ui** iOS 27 transitions, press and text selection; smoother pages (bb47f2c)
 - **update** Download and install updates in the app (b8f84b3)
@@ -11,6 +15,16 @@
 
 **Bug Fixes**
 
+- **core** Improve REALITY compatibility, enable hybrid key exchange by default while honoring explicit opt-out, and align VLESS encrypted record limits with Xray (52b0ec2)
+- **core** Fix TUN automatic routing and TCP Fast Open compatibility with Go 1.27 (52b0ec2)
+- **core** Preserve buffered HTTP CONNECT data, close failed SSH connections, and convert HTTPUpgrade subscription links correctly (52b0ec2)
+- **core** Prevent EasyTier forwarding stalls and allow idle Mieru TCP connections to close (52b0ec2)
+- **core** Prevent SOCKS domain-length overflow and correct memory statistics on 32-bit Windows (52b0ec2)
+- **core** Build the core with Go 1.27.3 security fixes (2e4ca9c)
+- **windows** Exit Windows completely during updates, including tray, proxy and core cleanup (619431b)
+- **packaging** Hide the Windows installer publisher and correct Linux package maintainer metadata (9618fc5)
+- **update** Verify Android release signing and handle unavailable GitHub releases safely (e3cc6df)
+- **ui** Keep the dashboard open when a proxy-group sheet receives a close callback after dismissal (5823fd6)
 - **core** Auto-select leaves an unusable first node at once (7d5db7e)
 - **access** Keep selections a filter hides (63aaf6d)
 
