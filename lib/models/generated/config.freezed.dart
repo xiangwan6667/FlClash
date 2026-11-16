@@ -2069,7 +2069,7 @@ return $default(_that.systemProxy,_that.bypassDomain,_that.pacMode,_that.pacScri
 @JsonSerializable()
 
 class _NetworkProps implements NetworkProps {
-  const _NetworkProps({this.systemProxy = true,  List<String> bypassDomain = defaultBypassDomain, this.pacMode = false, this.pacScript = defaultPacScript, this.bypassPrivateRoute = true, this.appendSystemDns = false, this.authentication = defaultAuthenticationProps}): _bypassDomain = bypassDomain;
+  const _NetworkProps({this.systemProxy = false,  List<String> bypassDomain = defaultBypassDomain, this.pacMode = false, this.pacScript = defaultPacScript, this.bypassPrivateRoute = true, this.appendSystemDns = false, this.authentication = defaultAuthenticationProps}): _bypassDomain = bypassDomain;
   factory _NetworkProps.fromJson(Map<String, dynamic> json) => _$NetworkPropsFromJson(json);
 
 @override@JsonKey() final  bool systemProxy;

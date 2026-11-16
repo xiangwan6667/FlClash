@@ -172,7 +172,7 @@ class CommonAction extends _$CommonAction {
       );
       if (res == true) {
         if (suffix == null) {
-          _openReleasePage();
+          _openReleasePage(tag);
         } else {
           unawaited(_downloadUpdate(tag, releaseAssetName(tag, suffix)));
         }
@@ -191,9 +191,13 @@ class CommonAction extends _$CommonAction {
     }
   }
 
-  void _openReleasePage() {
+  void _openReleasePage([String? tag]) {
     unawaited(
-      launchUrl(Uri.parse('https://github.com/$repository/releases/latest')),
+      launchUrl(
+        Uri.parse(
+          'https://github.com/$repository/releases${tag == null ? '' : '/tag/$tag'}',
+        ),
+      ),
     );
   }
 
@@ -203,12 +207,17 @@ class CommonAction extends _$CommonAction {
     if (suffix == null || ref.read(updateDownloadStateProvider) != null) {
       return;
     }
-    final release = await globalState.loadingRun(
-      request.latestRelease,
+    final result = await globalState.loadingRun(
+      () async => (release: await request.latestRelease()),
       title: currentAppLocalizations.updateDownloadTest,
       tag: LoadingTag.checkUpdate,
     );
-    if (release == null) return;
+    if (result == null) return;
+    final release = result.release;
+    if (release == null) {
+      await checkUpdateResultHandle(isUser: true);
+      return;
+    }
     final tag = release['tag_name'] as String;
     await _downloadUpdate(tag, releaseAssetName(tag, suffix));
   }

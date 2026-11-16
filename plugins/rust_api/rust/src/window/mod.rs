@@ -40,6 +40,8 @@ pub fn listen(sink: StreamSink<WindowSignal, SseCodec>) {
     allow(dead_code)
 )]
 fn emit(signal: WindowSignal) {
+    #[cfg(test)]
+    TEST_SIGNALS.with(|signals| signals.borrow_mut().push(signal));
     if let Some(sink) = SINK
         .lock()
         .unwrap_or_else(|poisoned| poisoned.into_inner())
@@ -47,6 +49,11 @@ fn emit(signal: WindowSignal) {
     {
         let _ = sink.add(signal);
     }
+}
+
+#[cfg(test)]
+thread_local! {
+    static TEST_SIGNALS: std::cell::RefCell<Vec<WindowSignal>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
 #[cfg_attr(

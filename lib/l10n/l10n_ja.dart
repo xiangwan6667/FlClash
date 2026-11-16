@@ -117,6 +117,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get defaultText => 'デフォルト';
 
   @override
+  String get basedOn => 'ベースとなったプロジェクト';
+
+  @override
   String get more => 'その他';
 
   @override

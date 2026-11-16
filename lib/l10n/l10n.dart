@@ -324,6 +324,12 @@ abstract class AppLocalizations {
   /// **'Default'**
   String get defaultText;
 
+  /// No description provided for @basedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on'**
+  String get basedOn;
+
   /// No description provided for @more.
   ///
   /// In en, this message translates to:

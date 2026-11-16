@@ -117,6 +117,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get defaultText => '기본값';
 
   @override
+  String get basedOn => '기반 프로젝트';
+
+  @override
   String get more => '더 보기';
 
   @override

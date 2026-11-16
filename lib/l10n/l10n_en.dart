@@ -117,6 +117,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get defaultText => 'Default';
 
   @override
+  String get basedOn => 'Based on';
+
+  @override
   String get more => 'More';
 
   @override

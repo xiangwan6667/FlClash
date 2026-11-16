@@ -6,6 +6,9 @@ import 'print.dart';
 
 const protocolSchemes = ['clash', 'clashmeta', 'flclash'];
 
+bool canClaimProtocol(String currentHandler, String ownHandler) =>
+    currentHandler.isEmpty || currentHandler == ownHandler;
+
 /// A user-level desktop entry that claims the schemes for the running binary,
 /// so an AppImage or a development build is reachable without a packaged
 /// .desktop file. Rewritten on every launch, like the Windows registry keys.
@@ -20,7 +23,7 @@ class LinuxProtocolRegistrationPlan {
     required this.applicationsDir,
   });
 
-  String get desktopId => 'flclash-url-handler.desktop';
+  String get desktopId => 'flclash-rs-url-handler.desktop';
 
   String get desktopPath => '$applicationsDir/$desktopId';
 
@@ -38,8 +41,6 @@ class LinuxProtocolRegistrationPlan {
     'MimeType=${mimeTypes.join(';')};',
     '',
   ].join('\n');
-
-  List<String> get xdgMimeArguments => ['default', desktopId, ...mimeTypes];
 
   static String _quoteExecArgument(String value) {
     return value
@@ -90,7 +91,28 @@ class Protocol {
       final file = File(plan.desktopPath);
       await file.parent.create(recursive: true);
       await file.writeAsString(plan.desktopEntry);
-      final result = await Process.run('xdg-mime', plan.xdgMimeArguments);
+      final available = <String>[];
+      for (final mimeType in plan.mimeTypes) {
+        final query = await Process.run('xdg-mime', [
+          'query',
+          'default',
+          mimeType,
+        ]);
+        if (query.exitCode != 0) {
+          commonPrint.log('xdg-mime query failed: ${query.stderr}'.trim());
+          continue;
+        }
+        final current = query.stdout.toString().trim();
+        if (canClaimProtocol(current, plan.desktopId)) {
+          available.add(mimeType);
+        }
+      }
+      if (available.isEmpty) return;
+      final result = await Process.run('xdg-mime', [
+        'default',
+        plan.desktopId,
+        ...available,
+      ]);
       if (result.exitCode != 0) {
         commonPrint.log('xdg-mime default failed: ${result.stderr}'.trim());
       }

@@ -10,19 +10,21 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/widgets.dart';
 
 const appName = 'FlClash';
+const autoLaunchName = 'FlClash-rs';
 const appHelperService = 'FlClashHelperService';
+const helperServiceName = 'FlClashRSHelperService';
 const coreManifestName = 'manifest.json';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 const packageName = 'com.follow.clash';
 final unixSocketPath = _privateSocketPath();
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomId()}';
-const helperPort = 47890;
+const helperPort = 47894;
 const helperPortKey =
-    'SYSTEM\\CurrentControlSet\\Services\\$appHelperService\\Runtime';
+    'SYSTEM\\CurrentControlSet\\Services\\$helperServiceName\\Runtime';
 const helperPortValue = 'Port';
-const helperSocketPath = '/run/flclash/helper.sock';
-const helperUnitPath = '/etc/systemd/system/flclash-helper.service';
+const helperSocketPath = '/run/flclash-rs/helper.sock';
+const helperUnitPath = '/etc/systemd/system/flclash-rs-helper.service';
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
 final helperProtocolVersion = Platform.isWindows ? '9' : '7';
 const maxTextScale = 1.4;
@@ -143,7 +145,10 @@ const configKey = 'config';
 const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const appliedConfigMd5Key = 'applied_config_md5';
-const repository = 'chen08209/FlClash';
+const repository = 'xiangwan6667/FlClash';
+const coreRepository = 'xiangwan6667/concord';
+const upstreamRepository = 'chen08209/FlClash';
+const upstreamCoreRepository = 'chen08209/concord';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 const defaultTestUrl = 'https://www.gstatic.com/generate_204';

@@ -35,6 +35,7 @@
   "settings": "设置",
   "language": "语言",
   "defaultText": "默认",
+  "basedOn": "基于",
   "more": "更多",
   "other": "其他",
   "about": "关于",

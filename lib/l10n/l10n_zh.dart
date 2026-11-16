@@ -117,6 +117,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get defaultText => '默认';
 
   @override
+  String get basedOn => '基于';
+
+  @override
   String get more => '更多';
 
   @override

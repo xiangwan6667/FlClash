@@ -35,6 +35,7 @@
   "settings": "설정",
   "language": "언어",
   "defaultText": "기본값",
+  "basedOn": "기반 프로젝트",
   "more": "더 보기",
   "other": "기타",
   "about": "정보",

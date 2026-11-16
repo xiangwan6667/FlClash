@@ -130,6 +130,12 @@ void main() {
       expect(compareVersions('1.0.0+2', '1.0.0+1'), greaterThan(0));
     });
 
+    test('orders rs prereleases and rebuild tags numerically', () {
+      expect(compareVersions('0.9.4-rs.10', '0.9.4-rs.2'), greaterThan(0));
+      expect(compareVersions('0.9.4-rs.1+2', '0.9.4-rs.1+1'), greaterThan(0));
+      expect(compareVersions('0.9.4', '0.9.4-rs.10'), greaterThan(0));
+    });
+
     test('handles missing minor/patch', () {
       expect(compareVersions('1', '1.0.0'), 0);
     });

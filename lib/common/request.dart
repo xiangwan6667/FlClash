@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' show join;
 
 class Request {
+  final bool prerelease;
   late final Dio dio;
   late final Dio _clashDio;
 
@@ -28,7 +29,7 @@ class Request {
     _read = read;
   }
 
-  Request() {
+  Request({this.prerelease = true}) {
     dio = Dio(BaseOptions(headers: {'User-Agent': browserUa}));
     _clashDio = Dio();
     _clashDio.httpClientAdapter = IOHttpClientAdapter(
@@ -104,31 +105,49 @@ class Request {
     }
   }
 
-  /// Null when this build is current; throws when GitHub cannot be asked.
+  /// Null when there is no newer release; throws when GitHub cannot be asked.
   Future<Map<String, dynamic>?> checkForUpdate() async {
     final release = await latestRelease();
-    // GitHub's latest release is the Go build, which the rs build must not offer.
-    if (rsFeature) return null;
+    if (release == null) return null;
     final remoteVersion = release['tag_name'] as String;
-    final version = globalState.packageInfo.version;
+    final package = globalState.packageInfo;
+    final remoteName = remoteVersion.substring(1).split('+').first;
+    final comparison = compareVersions(
+      prerelease && !package.version.contains('-')
+          ? remoteName.split('-').first
+          : remoteName,
+      package.version,
+    );
+    final build = RegExp(
+      r'<!-- flclash:build-number:(\d+) -->',
+    ).firstMatch(release['body'] as String? ?? '')?.group(1);
     final hasUpdate =
-        compareVersions(remoteVersion.replaceAll('v', ''), version) > 0;
+        comparison > 0 ||
+        (comparison == 0 &&
+            (int.tryParse(build ?? '') ?? 0) >
+                (int.tryParse(package.buildNumber) ?? 0));
     return hasUpdate ? release : null;
   }
 
   /// The release page redirect still answers once the hourly API quota is spent.
-  Future<Map<String, dynamic>> latestRelease() async {
+  Future<Map<String, dynamic>?> latestRelease() async {
+    if (prerelease) return _latestPrerelease();
     try {
       final response = await dio.get<Map<String, dynamic>>(
         'https://api.github.com/repos/$repository/releases/latest',
-        options: Options(responseType: ResponseType.json),
+        options: Options(
+          responseType: ResponseType.json,
+          followRedirects: false,
+        ),
       );
       return response.data!;
     } on DioException catch (error) {
-      commonPrint.log(
-        'latest release API failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
+      if (error.response?.statusCode != 404) {
+        commonPrint.log(
+          'latest release API failed: ${compactError(error)}',
+          logLevel: LogLevel.warning,
+        );
+      }
     }
     final response = await dio.get<void>(
       'https://github.com/$repository/releases/latest',
@@ -138,12 +157,64 @@ class Request {
       ),
     );
     final location = response.headers.value(HttpHeaders.locationHeader);
-    final segments = Uri.tryParse(location ?? '')?.pathSegments ?? const [];
-    final tagIndex = segments.indexOf('tag') + 1;
-    if (tagIndex == 0 || tagIndex >= segments.length) {
+    if (location == null || location.isEmpty) {
+      throw FormatException('No release page redirect', location);
+    }
+    final base = Uri.https('github.com', '/$repository/releases');
+    final redirect = base.resolve(location);
+    if (redirect.scheme != 'https' ||
+        redirect.host != base.host ||
+        redirect.port != base.port ||
+        redirect.userInfo.isNotEmpty) {
+      throw FormatException('Unexpected release page redirect', location);
+    }
+    if (redirect.path == base.path || redirect.path == '${base.path}/') {
+      return null;
+    }
+    final segments = redirect.pathSegments;
+    final repoSegments = repository.split('/');
+    if (segments.length != 5 ||
+        segments[0] != repoSegments[0] ||
+        segments[1] != repoSegments[1] ||
+        segments[2] != 'releases' ||
+        segments[3] != 'tag' ||
+        segments[4].isEmpty) {
       throw FormatException('No release tag in the redirect', location);
     }
-    return {'tag_name': segments[tagIndex]};
+    return {'tag_name': segments[4]};
+  }
+
+  Future<Map<String, dynamic>?> _latestPrerelease() async {
+    final pattern = RegExp(r'^v\d+\.\d+\.\d+-rs\.\d+(?:\+\d+)?$');
+    Map<String, dynamic>? latest;
+    for (var page = 1; ; page++) {
+      final response = await dio.get<List<dynamic>>(
+        'https://api.github.com/repos/$repository/releases?per_page=100&page=$page',
+        options: Options(
+          responseType: ResponseType.json,
+          followRedirects: false,
+        ),
+      );
+      final releases = response.data!;
+      for (final value in releases) {
+        final release = value as Map<String, dynamic>;
+        final tag = release['tag_name'] as String? ?? '';
+        if (release['draft'] == true ||
+            release['prerelease'] != true ||
+            !pattern.hasMatch(tag)) {
+          continue;
+        }
+        if (latest == null ||
+            compareVersions(
+                  tag.substring(1),
+                  (latest['tag_name'] as String).substring(1),
+                ) >
+                0) {
+          latest = release;
+        }
+      }
+      if (releases.length < 100) return latest;
+    }
   }
 
   Future<String> downloadVerifiedRelease({

@@ -20,6 +20,6 @@ categories:
 
 startup_notify: true
 
-startup_wm_class: com.follow.clash.rs
+startup_wm_class: app.flclash.fork.rs
 
 include: []
