@@ -846,6 +846,12 @@ abstract class AppLocalizations {
   /// **'Project'**
   String get project;
 
+  /// No description provided for @basedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Based on'**
+  String get basedOn;
+
   /// No description provided for @core.
   ///
   /// In en, this message translates to:

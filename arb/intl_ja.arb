@@ -122,6 +122,7 @@
   "safeMode": "セーフモード",
   "safeModeAppTitle": "{appName}（セーフモード）",
   "project": "プロジェクト",
+  "basedOn": "ベースとなったプロジェクト",
   "core": "コア",
   "tabAnimation": "タブアニメーション",
   "desc": "ClashMetaベースのマルチプラットフォーム対応プロキシクライアント。シンプルで使いやすく、オープンソースで広告もありません。",

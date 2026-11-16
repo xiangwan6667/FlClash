@@ -1,13 +1,16 @@
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/pages/home.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
+import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/dashboard/layout.dart';
 import 'package:fl_clash/views/dashboard/widgets/card.dart';
 import 'package:fl_clash/views/dashboard/widgets/proxy_groups.dart';
 import 'package:fl_clash/views/proxies/proxies.dart';
 import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +32,7 @@ Group _group(String name, List<String> proxies, {String? now}) => Group(
 
 void main() {
   late ProviderContainer container;
+  late Widget dashboard;
 
   setUp(() {
     container = ProviderContainer(
@@ -43,6 +47,22 @@ void main() {
           ]),
         ),
         coreStatusProvider.overrideWithBuild((_, _) => CoreStatus.connected),
+        navigationItemsStateProvider.overrideWithValue(
+          NavigationItemsState(
+            value: [
+              NavigationItem(
+                glyph: AppGlyphs.dashboard,
+                label: PageLabel.dashboard,
+                builder: (_) => dashboard,
+              ),
+              NavigationItem(
+                glyph: AppGlyphs.proxies,
+                label: PageLabel.proxies,
+                builder: (_) => const ProxiesView(),
+              ),
+            ],
+          ),
+        ),
       ],
     );
     globalState.container = container;
@@ -63,6 +83,7 @@ void main() {
     double? width,
     double height = 420,
     Widget card = const ProxyGroupsCard(),
+    bool homePage = false,
   }) async {
     container.read(viewSizeProvider.notifier).value = size;
     tester.view.physicalSize = size;
@@ -74,6 +95,11 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: TestApp(
+          theme: ThemeData(platform: TargetPlatform.windows),
+          homeBuilder: (child) {
+            dashboard = child;
+            return homePage ? const HomePage() : child;
+          },
           child: HostScaffold(
             body: Align(
               alignment: Alignment.topLeft,
@@ -304,11 +330,99 @@ void main() {
     expect(inSheet(name('SG-01')), findsOneWidget);
 
     container.read(query.notifier).value = 'SG';
-    Navigator.of(tester.element(find.byType(ProxiesView))).pop();
+    await tester.tap(inSheet(find.byTooltip('Close')));
     await tester.pumpAndSettle();
 
     expect(find.byType(ProxiesView), findsNothing);
     expect(container.read(query), 'HK');
+  });
+
+  for (final type in ProxiesType.values) {
+    testWidgets('closing the ${type.name} sheet keeps the dashboard mounted', (
+      tester,
+    ) async {
+      container
+          .read(proxiesStyleSettingProvider.notifier)
+          .update((state) => state.copyWith(type: type));
+      container.read(groupsProvider.notifier).value = [
+        _group('Auto', ['HK-01', 'SG-01']),
+      ];
+      await pumpCard(tester, homePage: true);
+      final dashboardContext = tester.element(find.byType(ProxyGroupsCard));
+      final navigator = Navigator.of(dashboardContext);
+
+      for (var attempt = 0; attempt < 2; attempt++) {
+        await tester.tap(find.byTooltip('Proxy group'));
+        await tester.pumpAndSettle();
+        expect(find.byType(ProxiesView), findsOneWidget);
+        expect(navigator.canPop(), isTrue);
+
+        final close = inSheet(find.byTooltip('Close'));
+        final closePosition = tester.getCenter(close);
+        await tester.tapAt(
+          closePosition + const Offset(100, 0),
+          kind: PointerDeviceKind.mouse,
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(ProxiesView), findsOneWidget);
+        await tester.tap(close, kind: PointerDeviceKind.mouse);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ProxiesView), findsNothing);
+        expect(dashboardContext.mounted, isTrue);
+        expect(name('Auto').hitTestable(), findsOneWidget);
+        expect(navigator.canPop(), isFalse);
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
+
+  testWidgets('a close delivered after barrier dismissal keeps the dashboard', (
+    tester,
+  ) async {
+    container.read(groupsProvider.notifier).value = [
+      _group('Auto', ['HK-01']),
+    ];
+    await pumpCard(tester, homePage: true);
+    final dashboardContext = tester.element(find.byType(ProxyGroupsCard));
+    final navigator = Navigator.of(dashboardContext);
+    await tester.tap(find.byTooltip('Proxy group'));
+    await tester.pumpAndSettle();
+
+    final sheetContext = tester.element(find.byType(ProxiesView));
+    final close = tester
+        .widget<AppBarActionButton>(
+          inSheet(
+            find.byWidgetPredicate(
+              (widget) =>
+                  widget is AppBarActionButton &&
+                  widget.data.tooltip == 'Close',
+            ),
+          ),
+        )
+        .data
+        .onPressed!;
+    final position = tester.getCenter(inSheet(find.byTooltip('Close')));
+    await tester.tapAt(
+      Offset(tester.getRect(find.byType(SideSheet)).left - 12, position.dy),
+      kind: PointerDeviceKind.mouse,
+    );
+    expect(sheetContext.mounted, isTrue);
+    expect(
+      routesCarrying(sheetContext).any((route) => !route.isCurrent),
+      isTrue,
+    );
+    // Deliver the queued close while the dismissed sheet is still mounted.
+    close();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ProxiesView), findsNothing);
+    expect(dashboardContext.mounted, isTrue);
+    expect(navigator.canPop(), isFalse);
+    expect(name('Auto').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    close();
+    expect(tester.takeException(), isNull);
   });
 
   for (final (type, desktop, searching, mobile) in [

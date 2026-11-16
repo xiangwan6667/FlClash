@@ -8,7 +8,9 @@ import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/request.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -26,6 +28,8 @@ class _HostAdapter implements HttpClientAdapter {
   _HostAdapter(this.byHost);
 
   final Map<String, ResponseBody Function()> byHost;
+  final requests = <Uri>[];
+  final followsRedirects = <bool>[];
 
   @override
   Future<ResponseBody> fetch(
@@ -33,7 +37,29 @@ class _HostAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options.uri);
+    followsRedirects.add(options.followRedirects);
     return byHost[options.uri.host]!();
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+class _OfflineAdapter implements HttpClientAdapter {
+  final requests = <Uri>[];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    requests.add(options.uri);
+    throw DioException.connectionError(
+      requestOptions: options,
+      reason: 'offline',
+    );
   }
 
   @override
@@ -91,7 +117,8 @@ void main() {
 
   group('latestRelease', () {
     Request requestAnswering(Map<String, ResponseBody Function()> byHost) {
-      return Request()..dio.httpClientAdapter = _HostAdapter(byHost);
+      return Request(prerelease: false)
+        ..dio.httpClientAdapter = _HostAdapter(byHost);
     }
 
     test('reads the release from the API', () async {
@@ -109,6 +136,15 @@ void main() {
         'tag_name': 'v1.2.3',
         'body': 'notes',
       });
+      expect(
+        (request.dio.httpClientAdapter as _HostAdapter).requests.single
+            .toString(),
+        'https://api.github.com/repos/xiangwan6667/FlClash/releases/latest',
+      );
+      expect(
+        (request.dio.httpClientAdapter as _HostAdapter).followsRedirects.single,
+        isFalse,
+      );
     });
 
     test(
@@ -121,13 +157,117 @@ void main() {
             302,
             headers: {
               HttpHeaders.locationHeader: [
-                'https://github.com/owner/repo/releases/tag/v1.2.4',
+                'https://github.com/xiangwan6667/FlClash/releases/tag/v1.2.4',
               ],
             },
           ),
         });
 
         expect(await request.latestRelease(), {'tag_name': 'v1.2.4'});
+        expect(
+          (request.dio.httpClientAdapter as _HostAdapter).requests.last
+              .toString(),
+          'https://github.com/xiangwan6667/FlClash/releases/latest',
+        );
+      },
+    );
+
+    test('does not follow an API redirect to another repository', () async {
+      final request = requestAnswering({
+        'api.github.com': () => ResponseBody.fromString(
+          '',
+          301,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://api.github.com/repos/chen08209/FlClash/releases/latest',
+            ],
+          },
+        ),
+        'github.com': () => ResponseBody.fromString(
+          '',
+          302,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://github.com/xiangwan6667/FlClash/releases',
+            ],
+          },
+        ),
+      });
+
+      expect(await request.latestRelease(), isNull);
+      final adapter = request.dio.httpClientAdapter as _HostAdapter;
+      expect(adapter.followsRedirects.first, isFalse);
+      expect(adapter.requests.map((uri) => uri.toString()), [
+        'https://api.github.com/repos/xiangwan6667/FlClash/releases/latest',
+        'https://github.com/xiangwan6667/FlClash/releases/latest',
+      ]);
+    });
+
+    test(
+      'reports no release when GitHub redirects to the release list',
+      () async {
+        final request = requestAnswering({
+          'api.github.com': () => ResponseBody.fromString('{}', 404),
+          'github.com': () => ResponseBody.fromString(
+            '',
+            302,
+            headers: {
+              HttpHeaders.locationHeader: [
+                'https://github.com/xiangwan6667/FlClash/releases',
+              ],
+            },
+          ),
+        });
+
+        expect(await request.latestRelease(), isNull);
+        expect(await request.checkForUpdate(), isNull);
+      },
+    );
+
+    test('rejects a redirect to the upstream repository', () async {
+      final request = requestAnswering({
+        'api.github.com': () => ResponseBody.fromString('{}', 403),
+        'github.com': () => ResponseBody.fromString(
+          '',
+          302,
+          headers: {
+            HttpHeaders.locationHeader: [
+              'https://github.com/chen08209/FlClash/releases/tag/v9.9.9',
+            ],
+          },
+        ),
+      });
+
+      await expectLater(request.latestRelease(), throwsFormatException);
+    });
+
+    test(
+      'does not mistake a response without a redirect for no release',
+      () async {
+        final request = requestAnswering({
+          'api.github.com': () => ResponseBody.fromString('{}', 403),
+          'github.com': () => ResponseBody.fromString('', 200),
+        });
+
+        await expectLater(request.latestRelease(), throwsFormatException);
+      },
+    );
+
+    test(
+      'propagates a network error when both endpoints are offline',
+      () async {
+        final adapter = _OfflineAdapter();
+        final request = Request(prerelease: false)
+          ..dio.httpClientAdapter = adapter;
+
+        await expectLater(
+          request.checkForUpdate(),
+          throwsA(isA<DioException>()),
+        );
+        expect(adapter.requests.map((uri) => uri.host), [
+          'api.github.com',
+          'github.com',
+        ]);
       },
     );
 
@@ -139,6 +279,127 @@ void main() {
 
       await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
     });
+  });
+
+  group('dev release updates', () {
+    const endpoint = '/repos/$repository/releases';
+
+    Request releases(List<Map<String, dynamic>> values) =>
+        Request(prerelease: true)
+          ..dio.httpClientAdapter = _PathAdapter({
+            endpoint: () => ResponseBody.fromString(
+              jsonEncode(values),
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            ),
+          });
+
+    Map<String, dynamic> release(
+      String tag, {
+      bool draft = false,
+      bool pre = true,
+    }) => {'tag_name': tag, 'draft': draft, 'prerelease': pre};
+
+    test(
+      'selects the newest dev prerelease and excludes stable and draft releases',
+      () async {
+        final request = releases([
+          release('v99.0.0', pre: false),
+          release('v0.9.4-pre.1'),
+          release('v0.9.4-rs.99'),
+          release('v0.9.4-pre.10'),
+          release('v0.9.5-pre.1', draft: true),
+        ]);
+        expect((await request.latestRelease())?['tag_name'], 'v0.9.4-pre.10');
+      },
+    );
+
+    test('a stable-only repository has no dev update', () async {
+      expect(
+        await releases([release('v99.0.0', pre: false)]).latestRelease(),
+        isNull,
+      );
+    });
+
+    test('continues to later pages to find an rs release', () async {
+      var pages = 0;
+      final request = Request(prerelease: true)
+        ..dio.httpClientAdapter = _PathAdapter({
+          endpoint: () => ResponseBody.fromString(
+            jsonEncode(
+              pages++ == 0
+                  ? List.generate(100, (_) => release('v0.9.3', pre: false))
+                  : [release('v0.9.4-pre.1')],
+            ),
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          ),
+        });
+
+      expect((await request.latestRelease())?['tag_name'], 'v0.9.4-pre.1');
+      expect(pages, 2);
+    });
+
+    test(
+      'checks newer dev versions and build numbers without repeating an update',
+      () async {
+        PackageInfo? previous;
+        try {
+          previous = globalState.packageInfo;
+        } catch (_) {
+          previous = null;
+        }
+        addTearDown(() {
+          if (previous case final info?) globalState.packageInfo = info;
+        });
+        globalState.packageInfo = PackageInfo(
+          appName: 'FlClash',
+          packageName: 'app.flclash.fork.dev',
+          version: '0.9.4-pre.1',
+          buildNumber: '2026111602',
+        );
+        for (final (tag, build, expected) in [
+          ('v0.9.4-pre.1', '2026111602', false),
+          ('v0.9.4-pre.1+1', '2026111603', true),
+          ('v0.9.4-pre.1+1', '2026111602', false),
+          ('v0.9.4-pre.2', '2026111601', true),
+        ]) {
+          final request = releases([
+            {...release(tag), 'body': '<!-- flclash:build-number:$build -->'},
+          ]);
+          expect(
+            await request.checkForUpdate(),
+            expected ? isNotNull : isNull,
+            reason: tag,
+          );
+        }
+        globalState.packageInfo = PackageInfo(
+          appName: 'FlClash',
+          packageName: 'app.flclash.fork.dev',
+          version: '0.9.4',
+          buildNumber: '2026111602',
+        );
+        for (final (tag, build, expected) in [
+          ('v0.9.4-pre.1', '2026111602', false),
+          ('v0.9.4-pre.2', '2026111603', true),
+          ('v0.9.3-pre.99', '2026111603', false),
+          ('v0.9.5-pre.1', '2026111601', true),
+        ]) {
+          final request = releases([
+            {...release(tag), 'body': '<!-- flclash:build-number:$build -->'},
+          ]);
+          expect(
+            await request.checkForUpdate(),
+            expected ? isNotNull : isNull,
+            reason: tag,
+          );
+        }
+      },
+    );
   });
 
   group('downloadVerifiedRelease', () {
@@ -154,7 +415,7 @@ void main() {
     tearDown(() => directory.delete(recursive: true));
 
     Request requestServing(String sums, List<int> asset) {
-      return Request()
+      return Request(prerelease: false)
         ..releaseDio.httpClientAdapter = _PathAdapter({
           '/$repository/releases/download/v1.2.3/SHA256SUMS': () =>
               ResponseBody.fromString(sums, 200),
@@ -252,7 +513,9 @@ void main() {
   ) async {
     late final Future<Response<String>> pending;
     HttpOverrides.runZoned(() {
-      pending = Request().getTextResponseForUrl('http://127.0.0.1/stalled');
+      pending = Request(
+        prerelease: false,
+      ).getTextResponseForUrl('http://127.0.0.1/stalled');
     }, createHttpClient: (_) => _StalledHttpClient());
     var settled = false;
     final outcome = expectLater(

@@ -40,7 +40,7 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'15baafcc30c4fd1bdaada3a060879e8430541bdc';
+String _$commonActionHash() => r'89de98285d0076738573c9cc971ba05421f4fa4a';
 
 abstract class _$CommonAction extends $Notifier<void> {
   void build();

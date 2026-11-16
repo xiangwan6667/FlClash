@@ -407,6 +407,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get project => 'Proyecto';
 
   @override
+  String get basedOn => 'Basado en';
+
+  @override
   String get core => 'Núcleo';
 
   @override

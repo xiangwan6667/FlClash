@@ -399,6 +399,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get project => 'Проект';
 
   @override
+  String get basedOn => 'Основано на';
+
+  @override
   String get core => 'Ядро';
 
   @override

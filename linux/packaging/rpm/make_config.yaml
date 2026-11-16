@@ -1,7 +1,8 @@
 display_name: FlClash
+package_name: flclash-dev
 
-packager: chen08209
-packagerEmail: chen08209@gmail.com
+packager: FlClash Fork
+packagerEmail: noreply@localhost
 license: Other
 
 priority: optional
@@ -26,8 +27,8 @@ postinstall_scripts:
 # its teardown belongs here; the binary is already gone when %postun runs.
 postuninstall_scripts:
   - '[ "$1" = 0 ] || exit 0'
-  - 'systemctl disable --now flclash-helper.service >/dev/null 2>&1 || true'
-  - 'rm -f /etc/systemd/system/flclash-helper.service'
+  - 'systemctl disable --now flclash-dev-helper.service >/dev/null 2>&1 || true'
+  - 'rm -f /etc/systemd/system/flclash-dev-helper.service'
   - 'systemctl daemon-reload >/dev/null 2>&1 || true'
 
 supported_mime_type:
@@ -47,4 +48,4 @@ group: Applications/Internet
 
 startup_notify: true
 
-startup_wm_class: com.follow.clash
+startup_wm_class: app.flclash.fork.dev

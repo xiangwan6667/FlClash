@@ -302,7 +302,7 @@ void main() {
 
     adapter.response.complete(
       ResponseBody.fromString(
-        jsonEncode({'tag_name': 'v0.0.0'}),
+        jsonEncode([]),
         200,
         headers: {
           Headers.contentTypeHeader: [Headers.jsonContentType],
@@ -314,7 +314,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isFalse);
-    expect(find.text('The app is already up to date'), findsOneWidget);
+    expect(find.text(currentAppLocalizations.checkUpdateError), findsOneWidget);
     expect(tester.takeException(), null);
   });
 

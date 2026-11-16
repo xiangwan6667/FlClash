@@ -443,8 +443,19 @@ class ScaffoldState extends State<Scaffold>
     );
   }
 
-  VoidCallback get _closeSheet =>
-      SheetProvider.of(context)?.onClose ?? () => context.safeNestedPop();
+  void _closeSheet() {
+    // A barrier dismissal can leave this button mounted during the exit.
+    // Its late callback must not pop the page now beneath the sheet.
+    if (!mounted || routesCarrying(context).any((route) => !route.isCurrent)) {
+      return;
+    }
+    final close = SheetProvider.of(context)?.onClose;
+    if (close != null) {
+      close();
+    } else {
+      context.safeNestedPop();
+    }
+  }
 
   Widget _buildPopButton({
     required bool useCloseIcon,

@@ -387,6 +387,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get project => 'プロジェクト';
 
   @override
+  String get basedOn => 'ベースとなったプロジェクト';
+
+  @override
   String get core => 'コア';
 
   @override

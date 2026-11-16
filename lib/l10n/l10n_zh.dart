@@ -385,6 +385,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get project => '项目';
 
   @override
+  String get basedOn => '基于';
+
+  @override
   String get core => '内核';
 
   @override

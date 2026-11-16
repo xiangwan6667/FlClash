@@ -386,6 +386,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get project => '프로젝트';
 
   @override
+  String get basedOn => '기반 프로젝트';
+
+  @override
   String get core => '코어';
 
   @override

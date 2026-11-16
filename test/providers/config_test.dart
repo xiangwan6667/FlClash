@@ -69,15 +69,15 @@ void main() {
   group('NetworkSetting provider', () {
     test('default values', () {
       final value = container.read(networkSettingProvider);
-      expect(value.systemProxy, true);
+      expect(value.systemProxy, false);
       expect(value.bypassDomain, defaultBypassDomain);
     });
 
     test('can update state', () {
       container
           .read(networkSettingProvider.notifier)
-          .update((_) => const NetworkProps(systemProxy: false));
-      expect(container.read(networkSettingProvider).systemProxy, false);
+          .update((_) => const NetworkProps(systemProxy: true));
+      expect(container.read(networkSettingProvider).systemProxy, true);
     });
   });
 
@@ -189,7 +189,7 @@ void main() {
       expect(config.appSettingProps.onlyStatisticsProxy, false);
       expect(config.windowProps.width, 0);
       expect(config.vpnProps.enable, true);
-      expect(config.networkProps.systemProxy, true);
+      expect(config.networkProps.systemProxy, false);
       expect(config.currentProfileId, null);
       expect(config.hotKeyActions, isEmpty);
       expect(config.patchClashConfig, const PatchClashConfig());
