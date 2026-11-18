@@ -7,10 +7,19 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      maintenance:
+        description: Publish existing artifacts without rebuilding
+        type: choice
+        default: none
+        options:
+          - none
+          - publish-dev
+          - refresh-rs-uploads
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.maintenance || 'none' }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/v') && inputs.maintenance != 'publish-dev' && inputs.maintenance != 'refresh-rs-uploads' }}
 
 env:
   IS_STABLE: ${{ !contains(github.ref, '-') }}
@@ -25,7 +34,7 @@ jobs:
     name: Dart
     # A private copy pays for its Actions minutes, so it runs the checks only when
     # started by hand.
-    if: &checks github.event_name == 'workflow_dispatch' || !github.event.repository.private
+    if: &checks (github.event_name == 'workflow_dispatch' || !github.event.repository.private) && inputs.maintenance != 'publish-dev' && inputs.maintenance != 'refresh-rs-uploads'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -111,7 +120,7 @@ jobs:
 
   desktop:
     name: Desktop ${{ matrix.platform }}
-    if: (github.event_name == 'workflow_dispatch' || !github.event.repository.private) && !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+    if: (github.event_name == 'workflow_dispatch' || !github.event.repository.private) && !(github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) && inputs.maintenance != 'publish-dev' && inputs.maintenance != 'refresh-rs-uploads'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -666,3 +675,206 @@ jobs:
           body_path: './release.md'
           prerelease: ${{ env.IS_STABLE != 'true' }}
           make_latest: ${{ env.IS_STABLE == 'true' }}
+
+  publish-existing:
+    name: Publish existing artifacts
+    if: github.repository == 'xiangwan6667/FlClash' && github.event_name == 'workflow_dispatch' && (inputs.maintenance == 'publish-dev' || inputs.maintenance == 'refresh-rs-uploads')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        if: inputs.maintenance == 'publish-dev'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: false
+
+      - name: Download successful dev artifacts
+        if: inputs.maintenance == 'publish-dev'
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 44331682087
+          pattern: artifact-*
+          path: artifacts
+
+      - name: Setup Flutter
+        if: inputs.maintenance == 'publish-dev'
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+
+      - name: Prepare existing dev packages and English notes
+        if: inputs.maintenance == 'publish-dev'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse v0.9.4-pre.2)" = 8774c99828db6d790ebb00bacd8af260d74b580d
+          flutter pub get
+          yq -i '.hooks.user_defines.setup.build_assets = false | .hooks.user_defines.rust_api.build_assets = false' pubspec.yaml
+          dart tool/package.dart merge artifacts/* --out dist
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path('dist/manifest.json').read_text())
+          entries = manifest['artifacts']
+          expected = {
+              *(f'android-{arch}.apk' for arch in ('amd64', 'arm64', 'armv7')),
+              *(f'windows-{arch}-{form}' for arch in ('amd64', 'arm64') for form in ('setup.exe', 'portable.zip')),
+              *(f'linux-{arch}.{form}' for arch in ('amd64', 'arm64') for form in ('AppImage', 'deb', 'rpm')),
+              'macos-amd64.dmg',
+          }
+          names = {'FlClash-dev-0.9.4-pre.2-' + suffix for suffix in expected}
+          assert {entry['name'] for entry in entries} == names
+          assert len(entries) == len(names) == 14
+          for entry in entries:
+              assert entry['line'] == 'dev'
+              assert entry['version'] == '0.9.4-pre.2'
+              assert entry['commit'] == '8774c99828db6d790ebb00bacd8af260d74b580d'
+              artifact = Path('dist') / entry['name']
+              assert artifact.stat().st_size == entry['size']
+              assert hashlib.sha256(artifact.read_bytes()).hexdigest() == entry['sha256']
+          PY
+          cd dist
+          jq -r '.artifacts[]
+            | select((.os == "windows" and .form == "setup") or .os == "android")
+            | [.name, "FlClash-\(.version)-" + (
+                if .os == "windows" then "windows-\(.arch)-setup.exe"
+                else "android-" + {arm64: "arm64-v8a", armv7: "armeabi-v7a", amd64: "x86_64"}[.arch] + ".apk"
+                end)] | @tsv' manifest.json |
+          while IFS=$'\t' read -r name legacy; do
+            cp "$name" "$legacy"
+            sha256sum "$legacy" >> SHA256SUMS
+          done
+          cd ..
+          dart tool/changelog.dart build --unreleased
+          dart tool/changelog.dart render release --out release.md
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          notes = Path('release.md').read_text()
+          pending = '### macOS ARM64 package pending\n\nThe macOS ARM64 package will be added later because GitHub-hosted runner capacity is currently unavailable.\n\n'
+          template = Path('.github/release_template.md').read_text()
+          template = template.replace('TAG', 'v0.9.4-pre.2').replace('LINE', 'dev').replace('VERSION', '0.9.4-pre.2')
+          template = re.sub(r'<a href="[^"\n]*FlClash-dev-0\.9\.4-pre\.2-macos-arm64\.dmg"[^\n]*</a>', 'macOS ARM64 package pending', template)
+          result = pending + notes + '\n<!-- flclash:build-number:2026111815 -->\n' + template
+          assert not re.search(r'[\u4e00-\u9fff]', result)
+          assert '/FlClash-dev-0.9.4-pre.2-macos-arm64.dmg' not in result
+          Path('release.md').write_text(result)
+          PY
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 22
+
+      - name: Remove only the superseded personal draft
+        if: inputs.maintenance == 'publish-dev'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/{owner}/{repo}/releases --paginate --jq '.[] | select(.tag_name == "v0.9.4-pre.2")' > previous-release.json
+          if test -s previous-release.json; then
+            if test "$(jq -r .author.login previous-release.json)" != 'github-actions[bot]'; then
+              test "$(jq -r .draft previous-release.json)" = true
+              gh api --method DELETE "repos/{owner}/{repo}/releases/$(jq -r .id previous-release.json)"
+            fi
+          fi
+
+      - name: Publish dev with the workflow identity
+        if: inputs.maintenance == 'publish-dev'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ github.token }}
+          tag_name: v0.9.4-pre.2
+          target_commitish: 8774c99828db6d790ebb00bacd8af260d74b580d
+          name: v0.9.4-pre.2
+          files: ./dist/*
+          body_path: release.md
+          draft: false
+          prerelease: true
+          make_latest: false
+          fail_on_unmatched_files: true
+
+      - name: Verify dev publication identity and digests
+        if: inputs.maintenance == 'publish-dev'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import re
+          import subprocess
+          from pathlib import Path
+
+          release = json.loads(subprocess.check_output([
+              'gh', 'api', 'repos/{owner}/{repo}/releases/tags/v0.9.4-pre.2',
+          ], text=True))
+          assert release['author']['login'] == 'github-actions[bot]'
+          assert release['prerelease'] and not release['draft']
+          assert not re.search(r'[\u4e00-\u9fff]', release['body'])
+          assert '<!-- flclash:build-number:2026111815 -->' in release['body']
+          files = {artifact.name: artifact for artifact in Path('dist').iterdir() if artifact.is_file()}
+          assert len(files) == len(release['assets']) == 22
+          assert set(files) == {asset['name'] for asset in release['assets']}
+          for asset in release['assets']:
+              content = files[asset['name']].read_bytes()
+              assert asset['uploader']['login'] == 'github-actions[bot]'
+              assert len(content) == asset['size']
+              assert 'sha256:' + hashlib.sha256(content).hexdigest() == asset['digest']
+          PY
+
+      - name: Refresh only the corrected Windows upload identity
+        if: inputs.maintenance == 'refresh-rs-uploads'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import subprocess
+          from pathlib import Path
+
+          def github(*arguments):
+              return subprocess.check_output(['gh', *arguments], text=True)
+
+          endpoint = 'repos/{owner}/{repo}/releases/tags/v0.9.4-rs.2'
+          before = json.loads(github('api', endpoint))
+          assert before['author']['login'] == 'github-actions[bot]'
+          assert len(before['assets']) == 17
+          names = {
+              'FlClash-rs-0.9.4-rs.2-windows-amd64-setup.exe',
+              'FlClash-rs-0.9.4-rs.2-windows-arm64-setup.exe',
+              'FlClash-rs-0.9.4-rs.2-SHA256SUMS',
+              'manifest.json',
+          }
+          directory = Path('corrected-windows')
+          directory.mkdir()
+          for name in sorted(names):
+              github('release', 'download', 'v0.9.4-rs.2', '--pattern', name, '--dir', str(directory))
+              asset = next(asset for asset in before['assets'] if asset['name'] == name)
+              content = (directory / name).read_bytes()
+              assert len(content) == asset['size']
+              assert 'sha256:' + hashlib.sha256(content).hexdigest() == asset['digest']
+          github('release', 'upload', 'v0.9.4-rs.2', *(str(directory / name) for name in sorted(names)), '--clobber')
+          after = json.loads(github('api', endpoint))
+          assert after['id'] == before['id']
+          assert after['author']['login'] == 'github-actions[bot]'
+          assert after['body'] == before['body']
+          assert len(after['assets']) == 17
+          for original in before['assets']:
+              current = next(asset for asset in after['assets'] if asset['name'] == original['name'])
+              assert current['digest'] == original['digest']
+              assert current['size'] == original['size']
+              if original['name'] in names:
+                  assert current['uploader']['login'] == 'github-actions[bot]'
+              else:
+                  assert current['id'] == original['id']
+          PY
