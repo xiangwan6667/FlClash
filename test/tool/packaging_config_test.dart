@@ -69,6 +69,40 @@ void main() {
     expect(script, isNot(contains('taskkill')));
   });
 
+  for (final arch in [ReleaseArch.amd64, ReleaseArch.arm64]) {
+    test('isolates ${arch.name} Windows shortcuts from upstream', () {
+      final context = _context(ReleaseOs.windows, arch);
+      final config = context.makeConfig('exe');
+      final template = File(
+        'windows/packaging/exe/${config['script_template']}',
+      ).readAsStringSync();
+      final script = renderInnoScript(
+        template,
+        innoVariables(
+          context,
+          config,
+          sourceDir: 'stage',
+          outputBaseName: 'out',
+        ),
+      );
+
+      expect(
+        script,
+        contains(
+          r'Name: "{autoprograms}\\FlClash-rs\\FlClash RS"; Filename: "{app}\\FlClash-RS.exe"',
+        ),
+      );
+      expect(
+        script,
+        contains(
+          r'Name: "{autodesktop}\\FlClash-rs\\FlClash RS"; Filename: "{app}\\FlClash-RS.exe"',
+        ),
+      );
+      expect(script, isNot(contains(r'Name: "{autoprograms}\\FlClash RS";')));
+      expect(script, isNot(contains(r'Name: "{autodesktop}\\FlClash RS";')));
+    });
+  }
+
   test('the release template links every package the current entry plans', () {
     final template = File('.github/release_template.md')
         .readAsStringSync()
