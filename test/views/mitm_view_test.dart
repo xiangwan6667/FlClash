@@ -25,11 +25,15 @@ import '../helpers/test_profiles.dart';
 class _FakeStore implements MitmTrustStore {
   _FakeStore(
     this.trust, {
+    this.installTrust = MitmTrust.ready,
+    this.installError,
     this.removeOutcome = MitmRemoveOutcome.removed,
     this.removeError,
   });
 
   MitmTrust trust;
+  final MitmTrust installTrust;
+  final Exception? installError;
   final MitmRemoveOutcome removeOutcome;
   final Exception? removeError;
   var checks = 0;
@@ -48,7 +52,10 @@ class _FakeStore implements MitmTrustStore {
   @override
   Future<MitmInstallOutcome> install(MitmCertificate ca) async {
     installed.add(ca);
-    trust = MitmTrust.ready;
+    trust = installTrust;
+    if (installError case final error?) {
+      throw error;
+    }
     return MitmInstallOutcome.installed;
   }
 
@@ -113,13 +120,15 @@ void main() {
     when(() => mocks.api.validateMitm(any())).thenAnswer((invocation) async {
       final config = invocation.positionalArguments.single as Map;
       return {
-        for (final list in MitmList.values)
-          list.key: [
-            for (final (index, line)
-                in (config[list.key] as List).cast<String>().indexed)
-              if (line.startsWith('bad'))
-                {'index': index, 'message': 'unknown type'},
-          ],
+        'issues': {
+          for (final list in MitmList.values)
+            list.key: [
+              for (final (index, line)
+                  in (config[list.key] as List).cast<String>().indexed)
+                if (line.startsWith('bad'))
+                  {'index': index, 'message': 'unknown type'},
+            ],
+        },
       };
     });
     container = ProviderContainer(
@@ -214,6 +223,21 @@ void main() {
       findsOneWidget,
     );
   });
+
+  for (final isAndroid in [true, false]) {
+    testWidgets(
+      'the MITM group ${isAndroid ? 'says' : 'does not say'} what root adds '
+      '${isAndroid ? 'on' : 'off'} Android',
+      (tester) async {
+        await pumpView(tester, view: AdvancedConfigView(isAndroid: isAndroid));
+
+        expect(
+          find.text(currentAppLocalizations.mitmAndroidRootDesc),
+          isAndroid ? findsOneWidget : findsNothing,
+        );
+      },
+    );
+  }
 
   testWidgets('turning on asks first and generates a missing certificate', (
     tester,
@@ -365,6 +389,28 @@ void main() {
 
     Color successColor(WidgetTester tester) =>
         tester.element(row()).colorScheme.success;
+
+    testWidgets('refreshes trust after a partial installation fails', (
+      tester,
+    ) async {
+      final store = _FakeStore(
+        MitmTrust.notInstalled,
+        installTrust: MitmTrust.untrusted,
+        installError: const MessageException('certutil missing'),
+      );
+      await pumpView(tester, certificate: _certificate, store: store);
+
+      await tester.tap(row());
+      await tester.pumpAndSettle();
+
+      expect(store.installed, [_certificate]);
+      expect(find.text('certutil missing'), findsOneWidget);
+      expect(
+        find.text(currentAppLocalizations.mitmTrustUntrusted),
+        findsOneWidget,
+      );
+      expect(saved().trustedFingerprint, isNull);
+    });
 
     testWidgets('installs on tap where FlClash has a trust store', (
       tester,

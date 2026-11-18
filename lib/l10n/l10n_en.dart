@@ -410,7 +410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get desc =>
-      'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.';
+      'A multi-platform proxy client based on the Concord core, simple and easy to use, open-source and ad-free.';
 
   @override
   String get startVpn => 'Starting VPN…';
@@ -510,6 +510,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get externalControllerSecret => 'External controller secret';
 
   @override
+  String get externalControllerCors => 'Allow cross-origin access';
+
+  @override
+  String get externalControllerCorsDesc =>
+      'Web dashboards can connect from other sites.';
+
+  @override
   String get ipv6Desc => 'IPv6 traffic is received only while IPv6 is on.';
 
   @override
@@ -537,16 +544,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tcpConcurrent => 'TCP concurrent';
 
   @override
-  String get geodataLoader => 'Geo low-memory mode';
-
-  @override
   String get requests => 'Requests';
 
   @override
   String get recentRequests => 'Recent requests';
 
   @override
-  String get findProcessMode => 'Find process';
+  String get alwaysFindProcess => 'Always find process';
 
   @override
   String get init => 'Init';
@@ -948,7 +952,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclaimerSoftwareContent =>
-      'The Software is an open-source network proxy client built on the Clash.Meta (mihomo) core. It only provides local tooling such as configuration management, rule-based routing, and traffic forwarding.';
+      'The Software is an open-source network proxy client built on the Concord core. It only provides local tooling such as configuration management, rule-based routing, and traffic forwarding.';
 
   @override
   String get disclaimerNoServiceStatement =>
@@ -1001,7 +1005,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get disclaimerLicenseContent =>
-      'The Software is open source under the GPL-3.0 license. Under that license you may run, study, modify, and distribute it; when you distribute the Software or a modified version, you must provide its source code under GPL-3.0 as well and keep the original copyright notices.\n\nThird-party components in the Software, including the Clash.Meta core, follow their own licenses. The original authors are not responsible for any problem arising from versions modified or distributed by others.';
+      'The Software is open source under the GPL-3.0 license. Under that license you may run, study, modify, and distribute it; when you distribute the Software or a modified version, you must provide its source code under GPL-3.0 as well and keep the original copyright notices.\n\nThird-party components in the Software, including the Concord core, follow their own licenses. The original authors are not responsible for any problem arising from versions modified or distributed by others.';
 
   @override
   String get disclaimerChangesTitle => 'Changes to this statement';
@@ -1103,9 +1107,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hideTimeoutProxies => 'Hide timed-out proxies';
-
-  @override
-  String get stackMode => 'Stack mode';
 
   @override
   String get network => 'Network';
@@ -1276,10 +1277,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ruleTarget => 'Rule target';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get exitDefault => 'Default';
 
   @override
-  String get followProfile => 'Follow profile';
+  String get customExit => 'Custom exit';
+
+  @override
+  String get inputExitName => 'Enter the exit name';
 
   @override
   String get scriptFailed => 'The script failed';
@@ -2740,10 +2744,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get congestionController => 'TCP congestion control';
 
   @override
-  String get congestionControllerDesc =>
-      'TCP congestion control works only with the mips stack.';
-
-  @override
   String get routeExcludeAddress => 'Route exclude addresses';
 
   @override
@@ -2817,8 +2817,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get udpTimeout => 'UDP timeout';
 
   @override
-  String get udpTimeoutDesc =>
-      'The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks.';
+  String get udpTimeoutDesc => 'The UDP timeout is in seconds.';
 
   @override
   String get dnsHijackDesc =>
@@ -3416,6 +3415,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only apps that trust user certificates, mostly browsers, are decrypted.';
 
   @override
+  String get mitmAndroidRootDesc =>
+      'Without root, only apps that trust user certificates, mostly browsers, can be decrypted. With root, every app can.';
+
+  @override
   String get mitmCertificateLinuxTip =>
       'Flatpak browsers need the exported certificate imported by hand.';
 
@@ -3427,6 +3430,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String mitmMissingStores(Object stores) {
     return 'Not yet in: $stores';
+  }
+
+  @override
+  String get httpRequestsReadFailed => 'Couldn\'t read the requests';
+
+  @override
+  String get requestBodyReadFailed => 'Couldn\'t read the request body';
+
+  @override
+  String get responseBodyReadFailed => 'Couldn\'t read the response body';
+
+  @override
+  String mitmGrpcOverLimit(Object size) {
+    return 'Inflates past $size MB; shown compressed';
+  }
+
+  @override
+  String mitmUntrustedStores(Object stores) {
+    return 'Installed but not trusted in: $stores';
   }
 
   @override
@@ -3530,6 +3552,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLocal => 'Map local';
 
   @override
+  String get requestBodyMock => 'Request body mock';
+
+  @override
+  String get clientSourceAddress => 'Client addresses';
+
+  @override
+  String get skipVerifyHostname => 'Hosts without certificate checks';
+
+  @override
   String get mitmModules => 'Modules';
 
   @override
@@ -3553,8 +3584,69 @@ class AppLocalizationsEn extends AppLocalizations {
       'Routing rules go in front of the profile’s own.';
 
   @override
+  String get mitmRequestRulesDesc =>
+      'The module’s URL-REGEX and USER-AGENT rules became URL rewrites, judged request by request: on every plain HTTP request, and on HTTPS only for hosts in the MITM hostname list.';
+
+  @override
   String mitmModuleSystemTip(Object system) {
     return 'Written for $system; some lines may not match apps on this device.';
+  }
+
+  @override
+  String mitmModuleRequirementTip(Object requirement) {
+    return 'The module requires $requirement, which this device does not meet; it may not work as intended.';
+  }
+
+  @override
+  String mitmExitModules(Object modules) {
+    return 'From modules: $modules';
+  }
+
+  @override
+  String get mitmModuleRiskTitle => 'Turn on this module?';
+
+  @override
+  String get mitmNetworkRisk =>
+      'When the config is generated, it changes the network settings below, ahead of what you set for the same ones in FlClash. Turning the module off or deleting it undoes this.';
+
+  @override
+  String mitmSkipVerifyRisk(Object hosts) {
+    return 'Turning it on stops checking the certificates of these hosts\' servers, so a server posing as one of them goes unnoticed: $hosts';
+  }
+
+  @override
+  String mitmClientSourceRisk(Object addresses) {
+    return 'It decrypts only for these clients: $addresses. With TUN on, this device\'s apps reach FlClash from the TUN\'s address, so they may be left out.';
+  }
+
+  @override
+  String get mitmClientSourceTunTip =>
+      'With TUN on, this device\'s apps come from the TUN\'s address; a list that leaves it out leaves their traffic undecrypted.';
+
+  @override
+  String get mitmNetworkChanges => 'Network settings';
+
+  @override
+  String mitmChangeReplace(Object values) {
+    return 'Replaced with $values';
+  }
+
+  @override
+  String mitmChangeInsert(Object values) {
+    return 'Adds $values first';
+  }
+
+  @override
+  String mitmChangeAppend(Object values) {
+    return 'Adds $values';
+  }
+
+  @override
+  String get mitmChangeOverridesYours => 'Goes over your setting';
+
+  @override
+  String mitmChangeReplacedBy(Object module) {
+    return 'Overridden by the module $module';
   }
 
   @override
@@ -3572,21 +3664,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mitmSkipRule => 'This rule type is not supported';
 
   @override
-  String get mitmSkipPolicy =>
-      'Only the DIRECT and REJECT policies are supported';
+  String get mitmSkipHttpRulePolicy =>
+      'URL-REGEX and USER-AGENT rules only take a REJECT policy';
 
   @override
-  String get mitmSkipJq => 'jq rewrites are not supported';
+  String get mitmSkipFinalRule =>
+      'Module rules go first, so a final rule would hide every rule after it';
 
   @override
-  String get mitmSkipJsonBody => 'JSON body rewrites are not supported';
+  String get mitmSkipDeviceRule =>
+      'This rule needs device or network details FlClash cannot read';
 
   @override
-  String get mitmSkipRawHeader =>
-      'Rewriting all headers as one text is not supported';
+  String get mitmSkipRequirement =>
+      'This line’s requirement is not met on this device';
+
+  @override
+  String get mitmSkipManagedCa =>
+      'FlClash manages the CA certificate; a module cannot change it';
+
+  @override
+  String get mitmSkipProxies =>
+      'A module cannot change proxies or proxy groups';
+
+  @override
+  String get mitmSkipAppOnly =>
+      'A feature of the app this was written for that FlClash does not have';
+
+  @override
+  String get mitmSkipReflect =>
+      'FlClash cannot send packets back to their sender';
 
   @override
   String get mitmSkipConditional => 'Conditional rewrites are not supported';
+
+  @override
+  String get mitmSkipSkipVerifyAll =>
+      'Certificate checks are not turned off for every host';
 
   @override
   String get mitmSkipRelativeData =>
@@ -3626,14 +3740,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mitmRunScript => 'Run now';
 
   @override
+  String get mitmScriptCron => 'Scheduled';
+
+  @override
+  String get mitmScriptEvent => 'Event';
+
+  @override
+  String get mitmScriptGeneric => 'Generic';
+
+  @override
+  String get mitmExcluded => 'Excluded';
+
+  @override
   String get mitmScriptNoOutput => 'The script finished without output';
 
   @override
   String get mitmScriptRiskTitle => 'Run this module\'s scripts?';
 
   @override
+  String get mitmModulesTurnedOff => 'Modules turned off';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return 'An update to $name brought scripts or network changes you have not agreed to';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count modules got updates with scripts or network changes you have not agreed to',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from. Once on, its updates take effect without asking again.';
+
+  @override
+  String get mitmModuleUnreadableRisk =>
+      'The module file could not be read, so what it changes is unknown. Turn it on only if you trust where it comes from.';
 
   @override
   String get skipServerCertVerify => 'Skip server certificate verification';
@@ -3761,6 +3910,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreStoppedDesc => 'The app lost its connection to the core';
 
   @override
+  String coreStoppedWithReason(Object reason) {
+    return 'The app lost its connection to the core: $reason';
+  }
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'The mixed port cannot be $value, so it was set back to $port';
+  }
+
+  @override
   String get restartCore => 'Restart core';
 
   @override
@@ -3822,4 +3981,25 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tunStartFailed =>
       'TUN could not start and will not be tried again in this run.';
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.';
+
+  @override
+  String get vpnServiceStartFailed => 'The VPN service could not start.';
+
+  @override
+  String get rootTun => 'Root mode';
+
+  @override
+  String get rootTunDesc => 'Uses root instead of the system VPN.';
+
+  @override
+  String get rootTunUnavailable => 'No root found on this device';
+
+  @override
+  String rootTunFallback(Object reason) {
+    return 'Root is unavailable ($reason), so this run uses the system VPN.';
+  }
 }

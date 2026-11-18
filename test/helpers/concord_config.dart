@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-final _schema =
-    jsonDecode(File('concord/schema/config-schema.json').readAsStringSync())
-        as Map<String, Object?>;
+import '../../tool/src/concord_schema.dart';
+
+final _schema = ConcordSchema.load();
 
 final _defaults =
     jsonDecode(
@@ -13,20 +13,12 @@ final _defaults =
         )
         as Map<String, Object?>;
 
-Set<String> concordKeys(String section) => {
-  for (final tier
-      in (_schema[section]! as Map<String, Object?>).values.cast<List>())
-    ...tier.cast<String>(),
-};
+Set<String> concordKeys(String section) => _schema.keys(section);
 
 /// The keys of [section] Concord applies, leaving out the T2 ones it only
-/// warns about.
-Set<String> concordSupportedKeys(String section) {
-  final tiers = _schema[section]! as Map<String, Object?>;
-  return {
-    for (final tier in ['t0', 't1']) ...(tiers[tier]! as List).cast<String>(),
-  };
-}
+/// warns about and the inert ones it reads without effect.
+Set<String> concordSupportedKeys(String section) =>
+    _schema.keys(section, concordAppliedTiers);
 
 Map<String, Object?> concordDefaults(String section) =>
     _defaults[section]! as Map<String, Object?>;

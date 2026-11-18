@@ -64,22 +64,43 @@ extension ModelApi on CoreApi {
   Future<MitmCertificate> createMitmCertificate() async =>
       MitmCertificate.fromJson(await generateMitmCertificate());
 
-  Future<Map<MitmList, Map<int, String>>> checkMitmRules(
-    MitmRules rules,
-  ) async {
-    final lists = await validateMitm(rules.toJson());
-    return {
-      for (final list in MitmList.values)
-        if (lists[list.key] case final List issues)
-          list: {
-            for (final item in issues)
-              if (item case {
-                'index': final num index,
-                'message': final String message,
-              })
-                index.toInt(): message,
-          },
+  Future<MitmCheck> checkMitmRules(MitmRules rules) async {
+    final result = await validateMitm(rules.toJson());
+    Map<MitmList, Map<int, T>> byLine<T>(
+      Object? lists,
+      T? Function(Map item) valueOf,
+    ) => {
+      if (lists is Map)
+        for (final list in MitmList.values)
+          if (lists[list.key] case final List items)
+            list: {
+              for (final item in items)
+                if (item case {'index': final num index})
+                  index.toInt(): ?valueOf(item),
+            },
     };
+    return (
+      issues: byLine(
+        result['issues'],
+        (item) => switch (item['message']) {
+          final String message => message,
+          _ => null,
+        },
+      ),
+      views: byLine(result['views'], (item) => _lineView(item['view'])),
+    );
+  }
+
+  /// Null for a kind of line this build does not know.
+  static MitmLineView? _lineView(Object? json) {
+    if (json is! Map) {
+      return null;
+    }
+    try {
+      return MitmLineView.fromJson(Map<String, Object?>.from(json));
+    } on Object {
+      return null;
+    }
   }
 
   Future<MitmExchangeList> getMitmExchanges(int connectionId) async =>

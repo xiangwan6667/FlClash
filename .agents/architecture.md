@@ -105,9 +105,8 @@ appends the private ranges to whatever `route-exclude-address` results. `dns-hij
 `any:53` beneath the overrides, so a profile's own value never applies, a picked key replaces it, and the key starts at
 that value. A key sing-tun reads on some platforms only is listed only there
 (`_isRead` in `lib/views/config/tun.dart`): strict route on Linux and Windows, the interface, user ID and port filters
-on Linux, and GSO, which Concord parses but never applies, nowhere under `rsFeature`; the general overrides drop
-`geodata-loader` the same way. `udp-timeout` reaches only the gvisor and system stacks and congestion control only mips, which their
-descriptions say. Route address sets are left out: sing-tun applies them only through `auto-redirect`.
+on Linux. Concord runs one userspace stack, takes Linux offload whenever it can and loads no geodata files, so
+FlClash offers no TUN stack, GSO or `geodata-loader` and drops them from a saved config. Route address sets are left out: sing-tun applies them only through `auto-redirect`.
 `test/models/tun_override_test.dart` fails if a key comes to overlap `Tun.coreJson`. Android starts its VPN without
 the section, so TUN is listed on desktop only. Being a part of the section, the page has no quick
 edit; see Quick Edit.
@@ -137,7 +136,10 @@ listener can change routing independently of the app's TUN toggle. These network
 boundary; they are not treated as arbitrary filesystem modification. The task disables `iptables` when its
 `inbound-interface` contains a space, because mihomo interpolates it into commands and splits their arguments on spaces.
 Safe mode clears these extra inbounds and iptables, closes DNS listening and disables NTP system time writes even after
-local overrides. The editor omits disabled alternate controllers and keeps listener completion.
+local overrides. The editor completes a key, proxy type, group type or rule type only where Concord applies it (T0 or
+T1): `lib/features/editor/generated/concord_tiers.dart` carries the tiers of `concord/schema/config-schema.json`, and
+after a Concord bump `dart run tool/generate_concord_tiers.dart` rewrites it, which `test/features/clash_schema_test.dart`
+checks. Fields the schema has no tiers for, inside proxies and listeners, are listed by hand.
 
 An open external controller always has a secret, because mihomo serves a controller with an empty one to every local
 user and, through CORS, to any page the user visits. `PatchClashConfig.secret` is that secret and it belongs to FlClash,
@@ -152,7 +154,7 @@ an editable row, which refuses an empty value.
 The loopback listener takes local connections without authentication by default: mandatory credentials would lock out
 every external local consumer a proxy client exists for. The binding only guarantees traffic originates on the device;
 it does not isolate programs already running there, so on Android any app holding `INTERNET` can use the proxy and learn
-the outbound IP (#1934). The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
+the outbound IP. The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
 four paths that must stay in sync: `_makeRealProfileTask` writes the credentials into `authentication` and force-clears
 `skip-auth-prefixes` so a profile cannot silently exempt loopback; `ConfigPatch.authentication` applies the same list
 to a running core; `FlClashHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
@@ -198,9 +200,9 @@ shows the mode picker and text field only on desktop.
 
 `Tun` holds what Android's VPN service starts from: the switch, device and stack, `mtu`, the mips stack's
 `congestion-controller` and the route lists. The desktop TUN takes only `Tun.coreJson` from it, written over the
-profile's `tun` section and patched on every update through `tunSchema`; MTU, congestion control, strict route and the
+profile's `tun` section; MTU, congestion control, strict route and the
 route lists reach it as TUN override keys (see DNS, NTP and Sniffer Overrides). `test/models/tun_test.dart` keeps every
-`Tun` key within mihomo's `RawTun` and `coreJson` equal to the keys of `tunSchema`.
+`Tun` key a key of the Core's `tun` section (`concordKeys('tun')`) and pins what `coreJson` sends.
 
 `NetworkProps.bypassPrivateRoute` adds `privateRouteAddress` to the excluded routes, through `TunExt.excludedRoutes` on
 Android and `_makeRealProfileTask` on desktop. VpnService can only add routes before Android 13, so
@@ -226,12 +228,11 @@ transport learns from the request context it dials with; clients are offered it 
 client that offers nothing the engine speaks is relayed as is. gRPC bodies are never rewritten, so their framing and
 trailers pass through.
 
-Consent to a module's scripts covers `mitmScriptScope`: every line declaring a script, as written, and every line run
-now, which names its script by a hash of the content. An update that adds to that scope turns the module off until the
-user accepts again, whether it comes by hand, which asks at once, or by auto update, which says so in a banner. None of
-this has met users: settle its interaction, listed in the MITM section of the core integration notes
-(`docs/rust-core/integration.md`, local only), before shipping `rsFeature` (`lib/common/constant.dart`), which opens MITM
-and drops the settings Concord does not read, the TUN stack among them.
+Turning a module on asks first when it declares scripts FlClash runs (`declaredScriptLines`) or when `asksConsent`
+holds: it changes network settings, skips certificate verification for some hosts, or sets client source addresses
+(`acceptMitmModule` in `lib/features/mitm/module_editor.dart`). A module added with either starts off; an update
+keeps whether it is on. None of this has met users: settle its interaction, listed in the MITM section of the core
+integration notes (`docs/rust-core/integration.md`, local only), before the rs build ships.
 
 ## Lifecycle Ownership And Convergence
 
@@ -311,7 +312,7 @@ Android deliberately keeps Flutter requests optimistic and the native layer auth
   flight, the latest intent, and `ServiceController.runtime`. A service that is up under a stop intent reads `STOPPING`, a
   start still waiting on a permission reads `STOPPED`, and `STARTED` needs both a running intent and a runtime. The tile
   and `getRunTime` both read this one value, so they cannot disagree with the service.
-- `ServiceController` owns exactly one `ManagedServiceBinding`, selects `VpnService` or `ProxyService` from `VpnOptions`,
+- `ServiceController` owns exactly one `ManagedServiceBinding`, selects `VpnService`, `RootTunService` or `ProxyService` from `VpnOptions`,
   binds with a five-second connection timeout, and invokes `ManagedService.start()`/`stop()` off the main thread. The
   binding and `runtime` (which service runs, and since when) are set and cleared together, by a stop, a failed start, or
   a lost connection and by nothing else. Flutter's `shutdown` only clears the Core event listener: Android keeps an
@@ -320,7 +321,7 @@ Android deliberately keeps Flutter requests optimistic and the native layer auth
 - The Core listens exactly while `runtime` is set: a successful start ends in `Core.startListener()` and every path
   that clears `runtime` calls `Core.stopListener()`. Both return at once when the Core is already there, which is the
   usual case, since `startTun`/`stopTun` and Flutter's own `startListener`/`stopListener` got there first. They matter
-  when nothing else does: a proxy-only run stopped from the tile used to keep the mixed port open with nothing
+  when nothing else does: without them a proxy-only run stopped from the tile keeps the mixed port open with nothing
   reported as running. A start closes after itself the same way: Flutter's `startListener` and the native `quickSetup`
   both open the ports before any service exists, so a start that ends without a `runtime`, refused or cancelled, stops
   the empty service once more, without passing through `STOPPING`. Flutter may be gone by then and never see the
@@ -329,6 +330,14 @@ Android deliberately keeps Flutter requests optimistic and the native layer auth
   newer request has claimed the service. A failed start therefore always ends in `STOPPED`, whichever step refused it.
   The one start that mints no request is a repeat on a settled run of the same kind, which Flutter sends every time it
   reattaches: a request refused at a permission prompt there would stop a service that was running fine.
+- Root mode (`VpnOptions.rootTun`) runs `RootTunService`: `RootTun` starts `libtun.so` through `su`, which opens the
+  device and installs its policy routes with Concord's `concord_tun_provision`, passes the descriptor back over an
+  abstract socket that accepts only uid 0, and answers socket owner lookups, since `getConnectionOwnerUid` answers only
+  the VPN owner. The helper keeps the routes only while that connection is open, so a dead app leaves none; a lost
+  helper sends `ROOT_TUN_LOST`, which stops the run like a revoke. A start that cannot get root returns
+  `ServiceStart.RootUnavailable`, and `ServiceStateMachine` falls back to `VpnService` for that run, asking for the VPN
+  permission and telling the user why; the setting stays on. The app's own uid is excluded from the routes, which is
+  what keeps the in-process Core's sockets off the device.
 - Generic service creation/destruction is lifecycle evidence, not user intent. New commands must flow through
   `ServiceState.requestStart()`/`requestStop()` or the explicit system-action handlers instead of inferring intent from a
   callback.
@@ -767,9 +776,9 @@ over it, as iOS's does, and lets go 0.2 s after the change, as LiquidGlassKit's 
   5.7 pixels from a copy shrunk to what the layer covers, so a band clears all of its rect before its slots draw: when
   it covered only its content, a slot growing or shrinking by a pixel as its pane moved, or one cut off by the screen's
   edge, shrank that copy by other than half, and at density 3 the docked search's standard frost jumped by 1.5/255 every
-  1.3 dp it moved. Each picture also lands on a whole pixel of the capture, as text rounds each line to one: a list
-  under the glass moving by part of a pixel jumped its lines one at a time while their rows glided, and the frost
-  shimmered every frame (up to 3.6/255 at density 2), where now it steps once a pixel of the capture, by under 0.7.
+  1.3 dp it moved. Each picture also lands on a whole pixel of the capture, as text rounds each line to one: otherwise a
+  list under the glass moving by part of a pixel jumps its lines one at a time while their rows glide, and the frost
+  shimmers every frame (up to 3.6/255 at density 2); rounded, it steps once a pixel of the capture, by under 0.7.
 - Measured on an Android emulator rendering in software (SwiftShader, 1080×2400 at density 420), as raster-thread time a
   frame counting the captures that FrameTiming's raster span leaves out, median of three runs, each capture against
   none in a run of its own: scrolling Tools takes 43 ms with none, 6 more with a sigma over one pixel of the capture and
@@ -1048,10 +1057,14 @@ in `lib/views/config/network.dart` and `_appSettingToggle` in `lib/views/config/
 second provider write — stay hand-written rather than growing extra parameters on the shared items.
 
 In an inset grouped list (`generateSection`, `generateAnimatedSection`), a row's subtitle shows its value or state,
-never what the setting does. As iOS settings do, the explanation goes in the group's `footer`, drawn by `ListFooter`,
-one sentence per setting that names it. A section header carries its title, set as iOS 27 sets a grouped list's header
-in `headline` and the footer's `onSurfaceVariant`, and at most a few actions on the group, as
-`IconButtonData`: `ListHeader` draws them as 36 dp tonal buttons (`TonalButtonSize.section`), the first two grouped,
+never what the setting does, and holds one piece of information: two facts are never joined into one subtitle with
+`·`. Most groups have no `footer`. A footer, when a group has one, is drawn by `ListFooter` and holds only what the
+row cannot say and what changes the outcome, one sentence per setting that names it, such as a platform limit; a
+note that depends on a state shows only in that state, and steps to install or do something belong in the dialog
+that starts them. A list or map edit page is the exception: its description says what to enter and when it takes
+effect. A section header carries its title, set as iOS 27 sets a grouped list's header in `headline` and the
+footer's `onSurfaceVariant`, and at most a few actions on the group, as `IconButtonData`: `ListHeader` draws them as
+36 dp tonal buttons (`TonalButtonSize.section`), the first two grouped,
 centered on the title. Every header stands as tall as one with a button, 6 dp clear of the group below, so headers
 match whether or not they carry actions. A group with a selection swaps them
 for delete and select all, never a text button. `generateSection` is the only section builder, and a sheet lays its groups inside the 16 dp inset the pages use.
@@ -1073,6 +1086,10 @@ control shows its value with `PopupValueText`, which blurs across to the new val
 width. A menu opened at a point, as a context menu or the editor's is, runs its pick at once. A menu capped by
 `maxVisibleItems`, such as the proxy group tabs' more menu with every group in it, builds only the rows in view and
 takes its width from its labels measured as `EmojiText` lays them out.
+
+Copy calls a proxy a proxy (`Proxy`, 代理) everywhere except the members of a custom profile's proxy group, the one
+place it says node (`Node`, 节点): the member list and the picker its add entry opens. A key names one concept in
+every locale, and a key two contexts share is split into two.
 
 ## Forms
 
@@ -1149,6 +1166,9 @@ the overlay or the whole section with them on every frame. `test/widgets/route_t
 `SnapSheetRoute` follows `UISheetPresentationController` as measured on the iOS 27 simulator (a UIKit probe app driven
 by the simulator's touch injection, logging the presented view's presentation layer every frame).
 
+- A sheet rests at 9/16 of the view and drags up to 0.9 (`snapSheetDetents` in `prism_ui/lib/snap_sheet.dart`), or
+  fits content shorter than that. A sheet that needs other heights passes `SheetProps(detents: ...)` where it is
+  shown, never a fixed `SizedBox` or `ConstrainedBox` inside its content.
 - One spring moves a sheet: UIKit's mass 3, stiffness 1000, which runs critically damped (ω ≈ 18.26 rad/s, done in
   about 0.5 s). Presenting, closing, a detent change and a spring back all trace it within a point. A release thrown
   toward its target keeps its velocity and lands with UIKit's slight overshoot, about damping ratio 0.8 at full
@@ -1167,7 +1187,7 @@ by the simulator's touch injection, logging the presented view's presentation la
 - Where the keyboard starts or stops carrying the sheet, that function rounds its corner (`_rounded`), so the sheet's
   speed changes smoothly. With a sharp corner a sheet stood still while the keyboard slid over the blank below short
   content and then jumped, and on the way down halted in mid-flight; the tallest detent hit the peek at the keyboard's
-  full speed. Short content now eases into the rise over half its blank, which can leave the sheet up to an eighth of
+  full speed. Short content instead eases into the rise over half its blank, which can leave the sheet up to an eighth of
   the blank higher than its content needs, and the tallest detent slows into the peek over as much keyboard again as
   it takes to get there, up to `_peakEase`.
 - Below its tallest detent a sheet floats as a card, as iOS 27's medium sheet does: it shrinks about its top to leave
@@ -1202,8 +1222,10 @@ than the frames a load costs. What a transition must not carry is work that repe
   without an image, so a grid of placeholders is never painted only to be replaced. `whenRouteSettled`
   (`prism_ui/lib/navigator.dart`) is left for sequencing navigation, such as opening a page once the sheet above it is gone.
 - Two views arrive after the motion. `EditorPage` keeps the document it opened until its route has settled and only
-  then mounts CodeForge, showing a spinner only if the file is still being read: the mount lays out, folds and
-  highlights a screen of text in one frame, which a phone cannot fit in a transition frame whatever the file's size.
+  then mounts CodeForge, sliding in with its spinner until then: the mount lays out, folds and highlights a screen of
+  text in one frame, which a phone cannot fit in a transition frame whatever the file's size. The spinner, with no
+  surface behind it, leaves in the frame the text mounts rather than fading: a fade there runs over the bar items
+  fading in after the route settles, and on a phone at 120 Hz the two together overran a frame.
   `AccessView` reads the installed apps only once its route has settled and its bar items have faded in
   (`whenNothingAnimates`, not counting its own spinner), and slides in with that spinner when this run has not read
   them yet (`NullStatusSwitcher` with `holdsArrival: false`): the read can outlast `arrivalHoldLimit`, and a list of
@@ -1350,8 +1372,7 @@ every file that imports the barrel for a string helper. Import the specific modu
 barrel never re-exports one of those four modules, nothing under `lib/common`,
 `lib/enum` or `lib/models` other than those four imports a desktop platform
 package, and `lib/common` never imports the `lib/manager/manager.dart` barrel
-(import the single manager needed, as `common/context.dart` does with
-`manager/status_manager.dart`). The fourth walks the barrel's whole transitive
+(import the single manager needed, not the barrel). The fourth walks the barrel's whole transitive
 closure and fails if *any* file in it imports one of those packages. That one is
 the real invariant — the local rules only stop the shortest path, and every leak
 found so far arrived through a longer one.
@@ -1645,9 +1666,8 @@ that asks the OS for a permission, a global shortcut or a registration, must con
 
 ## Build System
 
-`setup.dart` is the release build orchestrator: it writes `env.json` (`APP_ENV`), activates `flutter_distributor` from
-the `chen08209/flutter_distributor` fork pinned to a `v<version>-flclash.<n>` tag (cut a new tag there and bump
-`--git-ref` when the fork changes), and leaves the Core artifacts to the build hook.
+`tool/package.dart` is the release build orchestrator (see Packaging below): it writes `env.json` (`APP_ENV`), runs
+`flutter build`, and leaves the Core artifacts to the build hook.
 
 The desktop Concord core and the Rust helper are built by a Dart build hook; Android's Core is built by Gradle (see Android
 Core Build). `plugins/setup/hook/build.dart` only constructs
@@ -1665,7 +1685,7 @@ What the hook protocol forces:
 - The hook does not know the build mode: the protocol carries none and `linkingEnabled` only says whether link hooks
   run, so nothing in the hook branches on debug versus release. It cannot tell `flutter test` from a build either; the
   `build_assets: false` user-define in the root `pubspec.yaml` is the one switch (see `.agents/commands.md`), and
-  `setup.dart` refuses to package while it is set.
+  `tool/package.dart` refuses to package while it is set.
 - The hook declares the files it read but the *directories* it wrote: `hooks_runner` hashes a file by content and a
   directory by child names, so `libclash/macos/` catches a deleted artifact without MD5-ing a 55 MB Core on every
   build. A rebuild touches those directories after the runner's cutoff, so the next build runs the hook once more and
@@ -1742,9 +1762,35 @@ Windows helper integrity/version check:
   `hub.rs` uses it at every lock site, tests included, and two tests in that file pin the behaviour.
 
 Build configuration defaults live in `plugins/setup/setup_hooks/lib/src/options.dart` and can be overridden via the root
-`build_config.yaml`, which holds `concord_dir`, `core_name`, `product_name`, `output_dir`, `helper_dir` and `helper_name`.
+`build_config.yaml`, which holds `concord_dir`, `core_name`, `core_bundle_id`, `product_name`, `output_dir`, `helper_dir`
+and `helper_name`. On macOS the hook links `core_bundle_id` into the Core as its `__info_plist`, so codesign signs the
+Core under that identifier instead of `FlClashCore-<hash>`; macOS 27 shows a Core that is not root the sockets of other
+processes, which `PROCESS-NAME` rules need, only when its identifier contains a dot.
 
-Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `FlClash-0.8.93-macos-arm64.dmg`.
+### Packaging
+
+`tool/package.dart` (sources in `tool/src/package/`) replaced the forked `flutter_distributor`. It runs one
+`flutter build` per platform, then the native tool of each format: Inno Setup's `ISCC` for the installer, `appdmg`,
+`dpkg-deb`, `rpmbuild` and `appimagetool`; the portable zip is written in Dart. `--dry-run` prints every artifact name
+and step without building, for any platform.
+
+- Inputs stay per format in `<os>/packaging/<format>/make_config.yaml`; the packager reads only the keys it uses. The
+  Linux binary name and window class come from `BINARY_NAME` and `APPLICATION_ID` in `linux/CMakeLists.txt`.
+  `windows/packaging/exe/inno_setup.iss` takes `{{NAME}}` placeholders, filled by `innoVariables`, and nothing else.
+- Names come from `releaseAssetName` in `lib/common/release_asset.dart`, which the in-app updater also uses:
+  `FlClash-<line>-<version>-<os>-<arch>[-<form>].<ext>`. The line is `rs` when `build_config.yaml` names
+  `concord_dir` and `dev` when it names `core_dir`, whatever the branch. The version is the `v*` tag on `HEAD` without
+  its `v` and with `+` turned into `.` (GitHub rewrites `+` in asset names), else `<pubspec version>-nightly.<commit
+  date>.<sha7>`. The form is `setup` or `portable` on Windows and absent elsewhere.
+- Each run writes `dist/manifest.json` and `FlClash-<line>-<version>-SHA256SUMS`. The release job merges the
+  per-platform runs with `dart run tool/package.dart merge`, and its release notes, Homebrew cask and F-Droid copy
+  read names from the merged manifest. For the `dev` line it also uploads the Windows installers and APKs under their
+  old names plus a `SHA256SUMS`, which apps released before these names still fetch.
+- Kept from the fork's patches: package trees normalized to 0755/0644 before `dpkg-deb`, `rpmbuild` and
+  `appimagetool` (see Linux Helper below); `dpkg-deb -Zxz`, because the dpkg of UOS and other Debian derivatives
+  cannot unpack Ubuntu's default zstd; `StartupWMClass` in every desktop entry; an `AppRun` that passes its arguments
+  on and appends to `LD_LIBRARY_PATH`; and an AppImage that leaves `libstdc++`, glibc, the GL stack and the other
+  libraries in `appImageSystemLibraries` to the host, since a bundled `libstdc++` older than the host's breaks Mesa.
 
 #### Android Core Sessions
 
@@ -1797,7 +1843,7 @@ workspace (`target/` left out) stands in for the hook's cache.
 
 - `setup`: build-time harness for the Concord core and the Rust helper, driven by a Dart build hook; no runtime Dart API.
 - `proxy`: system proxy configuration. On Windows the package installer and uninstaller kill the app, and then run
-  `FlClash.exe --clear-stale-proxy`, the installer once the new files are in place; the runner hands it to the plugin
+  `FlClash-RS.exe --clear-stale-proxy`, the installer once the new files are in place; the runner hands it to the plugin
   before any engine starts, and it turns off only a proxy still set to FlClash's `127.0.0.1:<port>` with nothing
   listening on that port. In the app `SystemProxyQueue` sets the system proxy when the Core starts with it on, and
   stops it on a stop or exit only when this run set it, since a stop also clears a proxy, PAC or auto-detect setting
@@ -2077,7 +2123,7 @@ UTF-8 bytes rather than a `String` so that decoding them stays off the UI isolat
   each start adds a new `?v=` query so a system that caches PAC files by URL fetches the edited script. On
   Windows a hidden top-level window on its own thread turns a proxy this run set back off at `WM_ENDSESSION`, since
   shutdown kills the process before the Dart exit path runs. The package installer and uninstaller kill the app and
-  then run `FlClash.exe --clear-stale-proxy`, the installer once the new files are in place; the runner loads
+  then run `FlClash-RS.exe --clear-stale-proxy`, the installer once the new files are in place; the runner loads
   `rust_api.dll` and calls its exported `flclash_clear_stale_proxy` before any engine starts, which turns off only a
   proxy or `/flclash.pac` URL still set to FlClash's `127.0.0.1:<port>` with nothing listening on that port. In the app
   `SystemProxyQueue` (`lib/common/proxy.dart`) sets the system proxy when the Core starts with it on, and stops it on
@@ -2108,7 +2154,7 @@ shows its unavailable state when `RustLib` is not initialized rather than loadin
 returns the JSON the script produced. Nothing about the script runs in Dart.
 
 - QuickJS is compiled from source for the target being built, which is what removed the prebuilt `quickjs-c-bridge`
-  binaries: `flutter_js` shipped x64 Windows and desktop-only libraries, so Windows ARM64 could not start (#2361).
+  binaries: `flutter_js` shipped x64 Windows and desktop-only libraries, so Windows ARM64 could not start.
 - `rquickjs` carries pre-generated bindings for every target this project builds except the Android ones, so Android
   builds enable its `bindgen` feature. That needs the NDK's own libclang and sysroot: `native_toolchain_rust` exports
   the sysroot through `BINDGEN_EXTRA_CLANG_ARGS_<target>`, and `hook/build.dart` adds `LIBCLANG_PATH` from the NDK
@@ -2139,6 +2185,11 @@ The helper owns its Windows Service Control Manager lifecycle through two elevat
 The Dart layer only launches the helper's `install` command through `ShellExecuteW`; it does not compose `sc.exe`,
 `taskkill`, or `cmd.exe` command lines.
 
+While `rsSideBySide` (`lib/common/constant.dart`) is on, the rs Helper registers under its own names so it installs
+beside FlClash's: the Windows service `FlClashRsHelperService` (and its `Runtime` key), the systemd unit
+`flclash-rs-helper.service`, `RuntimeDirectory=flclash-rs` and `/run/flclash-rs/helper.sock`. The executable keeps the
+name `FlClashHelperService`, and the names below are FlClash's.
+
 Linux takes the same shape with systemd in place of the Service Control Manager, and the same install timing: nothing
 is registered at package install, and `Linux.registerService` asks for elevation only when TUN authorization needs it.
 Elevation goes through `pkexec` so polkit raises the system prompt. When pkexec is missing, or exits 127 because no
@@ -2151,7 +2202,7 @@ password the app asks for and hands to `sudo -S` on stdin. A 126 means the user 
   the socket to. It also refuses a Helper whose binary or directory is not root-owned and non-writable (a unit runs it
   as root at every boot, so an unpacked bundle would be a standing escalation), and refuses to replace a unit already
   installed for a different UID rather than restart the service out from under that account.
-- That ownership check is why the `flutter_distributor` fork normalizes the packaging tree to 0755/0644 before
+- That ownership check is why `tool/package.dart` normalizes the packaging tree to 0755/0644 before
   `dpkg-deb`, `rpmbuild` and `appimagetool` run: they record modes verbatim, and Ubuntu's per-user default umask
   of 002 would otherwise ship `/opt/FlClash` as 0775, which the installer rejects as group-writable.
 - The rpm spec sets `debug_package` and `__os_install_post` to nil for the same reason: rpmbuild's find-debuginfo and
@@ -2183,7 +2234,7 @@ version marked `+sx` is re-authorized on the next TUN enable.
 In every Flutter build mode `/start` opens the fixed Core executable beside the Helper without write/delete sharing,
 validates it against the SHA256 embedded only in the Helper, and keeps that handle open through process creation.
 `/ping` only compares the requested `coreSha256` with the Helper's embedded value and checks the fixed Core path exists;
-it never hashes the Core. Protocol version 7 (9 on Windows; the session ID now doubles as the Core's IPC token, so an
+it never hashes the Core. Protocol version 7 (9 on Windows; the session ID doubles as the Core's IPC token, so an
 older Helper must be reinstalled) uses 32-character lowercase-hex session ownership:
 
 - `GET /ping?coreSha256=...` returns the current Helper executable path with `x-flclash-helper-protocol` when the

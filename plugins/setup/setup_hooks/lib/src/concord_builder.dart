@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 
 import 'build_cache.dart';
+import 'error.dart';
 import 'fingerprint.dart';
 import 'options.dart';
 import 'path_remap.dart';
@@ -35,6 +36,8 @@ class ConcordBuilder {
 
   String get _workspace => p.join(rootDir, config.concordDir);
 
+  String get _infoPlistPath => p.join(cache.cacheDir, 'core-info.plist');
+
   Future<BuildExecution> build(Target target) async {
     final destDir = p.join(rootDir, config.outputDir, target.platformDir);
     ensureDir(destDir);
@@ -51,6 +54,11 @@ class ConcordBuilder {
       notice: notice,
       build: () async {
         _log.info('Building Rust core: $target');
+        if (target.goos == 'darwin') {
+          File(
+            _infoPlistPath,
+          ).writeAsStringSync(coreInfoPlist(config.coreBundleId));
+        }
         await runCommandStream(
           'cargo',
           args,
@@ -98,14 +106,21 @@ class ConcordBuilder {
     };
   }
 
+  // `cargo rustc` gives these flags to the executable alone, not its deps.
   List<String> _buildArguments(Target target) => [
-    'build',
+    if (target.goos == 'darwin') 'rustc' else 'build',
     '--release',
     '--locked',
     '--target',
     target.rustTriple,
     '-p',
     _package,
+    if (target.goos == 'darwin') ...[
+      '--bin',
+      _binary,
+      '--',
+      ...infoPlistLinkArguments(_infoPlistPath),
+    ],
   ];
 
   Future<Fingerprint> _calculateFingerprint(
@@ -136,3 +151,31 @@ class ConcordBuilder {
     return builder.finishWithInputs();
   }
 }
+
+/// A non-root Core sees other sockets on macOS 27 only under a dotted id.
+String coreInfoPlist(String bundleId) {
+  if (!RegExp(r'^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$').hasMatch(bundleId)) {
+    throw BuildException(
+      'core_bundle_id must be a reverse-DNS name with a dot: $bundleId',
+    );
+  }
+  return '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+\t<key>CFBundleIdentifier</key>
+\t<string>$bundleId</string>
+</dict>
+</plist>
+''';
+}
+
+List<String> infoPlistLinkArguments(String plistPath) => [
+  for (final argument in [
+    '-sectcreate',
+    '__TEXT',
+    '__info_plist',
+    plistPath,
+  ]) ...['-C', 'link-arg=-Xlinker', '-C', 'link-arg=$argument'],
+];

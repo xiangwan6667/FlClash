@@ -204,7 +204,9 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(ProfileOverrides()) ProfileOverrides overrides,
     @Default(false) bool bypassPrivateRoute,
     required bool appendSystemDns,
-    String? defaultTunDnsMode,
+
+    /// `Platform.operatingSystem` of the Core the config is for; null is this one.
+    String? os,
     required List<ProxyGroup> proxyGroups,
     required List<Rule> rules,
     required List<Rule> addedRules,
@@ -216,7 +218,11 @@ abstract class MakeRealProfileState with _$MakeRealProfileState {
     @Default(false) bool keepOverlay,
     @Default({}) Map<String, dynamic> injectedProxyProviders,
     @Default({}) Map<String, dynamic> injectedRuleProviders,
-    String? matchTarget,
+    @Default({}) Map<String, String> exitTargets,
+
+    /// The profile's own outbounds when [rawConfig] does not carry them.
+    Set<String>? outboundNames,
+    String? defaultExitTarget,
     @Default(false) bool safeMode,
     @Default([]) List<MitmModuleSource> mitmModules,
   }) = _MakeRealProfileState;
@@ -263,7 +269,7 @@ abstract class SetupState with _$SetupState {
     @Default({}) Map<String, int> profileProviders,
     @Default([]) List<CustomProxy> appProxies,
     @Default({}) Map<int, String> proxyDialers,
-    String? matchTarget,
+    @Default({}) Map<String, String> exitTargets,
     @Default([]) List<MitmModuleSource> mitmModules,
   }) = _SetupState;
 }

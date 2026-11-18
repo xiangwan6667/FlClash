@@ -90,6 +90,205 @@ Map<String, dynamic> _$MitmScriptOutputToJson(_MitmScriptOutput instance) =>
       'error': instance.error,
     };
 
+MitmUrlRewriteView _$MitmUrlRewriteViewFromJson(Map<String, dynamic> json) =>
+    MitmUrlRewriteView(
+      pattern: json['pattern'] as String,
+      action: json['action'] as String,
+      replacement: json['replacement'] as String?,
+      requestHead: json['requestHead'] as String?,
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmUrlRewriteViewToJson(MitmUrlRewriteView instance) =>
+    <String, dynamic>{
+      'pattern': instance.pattern,
+      'action': instance.action,
+      'replacement': instance.replacement,
+      'requestHead': instance.requestHead,
+      'type': instance.$type,
+    };
+
+MitmHeaderRewriteView _$MitmHeaderRewriteViewFromJson(
+  Map<String, dynamic> json,
+) => MitmHeaderRewriteView(
+  phase: json['phase'] as String,
+  pattern: json['pattern'] as String,
+  requestHead: json['requestHead'] as String?,
+  responseHead: json['responseHead'] as String?,
+  action: json['action'] as String,
+  name: json['name'] as String?,
+  value: json['value'] as String?,
+  regex: json['regex'] as String?,
+  replacement: json['replacement'] as String?,
+  $type: json['type'] as String?,
+);
+
+Map<String, dynamic> _$MitmHeaderRewriteViewToJson(
+  MitmHeaderRewriteView instance,
+) => <String, dynamic>{
+  'phase': instance.phase,
+  'pattern': instance.pattern,
+  'requestHead': instance.requestHead,
+  'responseHead': instance.responseHead,
+  'action': instance.action,
+  'name': instance.name,
+  'value': instance.value,
+  'regex': instance.regex,
+  'replacement': instance.replacement,
+  'type': instance.$type,
+};
+
+MitmBodyRewriteView _$MitmBodyRewriteViewFromJson(Map<String, dynamic> json) =>
+    MitmBodyRewriteView(
+      phase: json['phase'] as String,
+      pattern: json['pattern'] as String,
+      requestHead: json['requestHead'] as String?,
+      responseHead: json['responseHead'] as String?,
+      replacements:
+          (json['replacements'] as List<dynamic>?)
+              ?.map(
+                (e) => MitmBodyReplacement.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
+      jq: json['jq'] as String?,
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmBodyRewriteViewToJson(
+  MitmBodyRewriteView instance,
+) => <String, dynamic>{
+  'phase': instance.phase,
+  'pattern': instance.pattern,
+  'requestHead': instance.requestHead,
+  'responseHead': instance.responseHead,
+  'replacements': instance.replacements,
+  'jq': instance.jq,
+  'type': instance.$type,
+};
+
+MitmMapLocalView _$MitmMapLocalViewFromJson(Map<String, dynamic> json) =>
+    MitmMapLocalView(
+      pattern: json['pattern'] as String,
+      requestHead: json['requestHead'] as String?,
+      dataType: json['dataType'] as String,
+      data: json['data'] as String? ?? '',
+      status: (json['status'] as num?)?.toInt(),
+      headers:
+          (json['headers'] as List<dynamic>?)
+              ?.map((e) => MitmHeader.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      contentType: json['contentType'] as String? ?? '',
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmMapLocalViewToJson(MitmMapLocalView instance) =>
+    <String, dynamic>{
+      'pattern': instance.pattern,
+      'requestHead': instance.requestHead,
+      'dataType': instance.dataType,
+      'data': instance.data,
+      'status': instance.status,
+      'headers': instance.headers,
+      'contentType': instance.contentType,
+      'type': instance.$type,
+    };
+
+MitmScriptView _$MitmScriptViewFromJson(Map<String, dynamic> json) =>
+    MitmScriptView(
+      name: json['name'] as String,
+      kind: json['kind'] as String,
+      path: json['path'] as String? ?? '',
+      pattern: json['pattern'] as String?,
+      cronexp: json['cronexp'] as String?,
+      event: json['event'] as String?,
+      requiresBody: json['requiresBody'] as bool? ?? false,
+      timeoutMs: (json['timeoutMs'] as num?)?.toInt(),
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmScriptViewToJson(MitmScriptView instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'kind': instance.kind,
+      'path': instance.path,
+      'pattern': instance.pattern,
+      'cronexp': instance.cronexp,
+      'event': instance.event,
+      'requiresBody': instance.requiresBody,
+      'timeoutMs': instance.timeoutMs,
+      'type': instance.$type,
+    };
+
+MitmHostsView _$MitmHostsViewFromJson(Map<String, dynamic> json) =>
+    MitmHostsView(
+      entries:
+          (json['entries'] as List<dynamic>?)
+              ?.map((e) => MitmHostEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmHostsViewToJson(MitmHostsView instance) =>
+    <String, dynamic>{'entries': instance.entries, 'type': instance.$type};
+
+MitmSourcesView _$MitmSourcesViewFromJson(Map<String, dynamic> json) =>
+    MitmSourcesView(
+      entries:
+          (json['entries'] as List<dynamic>?)
+              ?.map((e) => MitmSourceEntry.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      $type: json['type'] as String?,
+    );
+
+Map<String, dynamic> _$MitmSourcesViewToJson(MitmSourcesView instance) =>
+    <String, dynamic>{'entries': instance.entries, 'type': instance.$type};
+
+_MitmBodyReplacement _$MitmBodyReplacementFromJson(Map<String, dynamic> json) =>
+    _MitmBodyReplacement(
+      regex: json['regex'] as String,
+      replacement: json['replacement'] as String,
+    );
+
+Map<String, dynamic> _$MitmBodyReplacementToJson(
+  _MitmBodyReplacement instance,
+) => <String, dynamic>{
+  'regex': instance.regex,
+  'replacement': instance.replacement,
+};
+
+_MitmHeader _$MitmHeaderFromJson(Map<String, dynamic> json) =>
+    _MitmHeader(name: json['name'] as String, value: json['value'] as String);
+
+Map<String, dynamic> _$MitmHeaderToJson(_MitmHeader instance) =>
+    <String, dynamic>{'name': instance.name, 'value': instance.value};
+
+_MitmHostEntry _$MitmHostEntryFromJson(Map<String, dynamic> json) =>
+    _MitmHostEntry(
+      host: json['host'] as String,
+      port: (json['port'] as num?)?.toInt(),
+      exclude: json['exclude'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$MitmHostEntryToJson(_MitmHostEntry instance) =>
+    <String, dynamic>{
+      'host': instance.host,
+      'port': instance.port,
+      'exclude': instance.exclude,
+    };
+
+_MitmSourceEntry _$MitmSourceEntryFromJson(Map<String, dynamic> json) =>
+    _MitmSourceEntry(
+      network: json['network'] as String,
+      exclude: json['exclude'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$MitmSourceEntryToJson(_MitmSourceEntry instance) =>
+    <String, dynamic>{'network': instance.network, 'exclude': instance.exclude};
+
 _MitmExchangeSummary _$MitmExchangeSummaryFromJson(Map<String, dynamic> json) =>
     _MitmExchangeSummary(
       id: (json['id'] as num).toInt(),
@@ -235,7 +434,6 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
   bypassDomain: (json['bypassDomain'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
-  stack: json['stack'] as String,
   routeAddress:
       (json['routeAddress'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -243,6 +441,7 @@ _VpnOptions _$VpnOptionsFromJson(Map<String, dynamic> json) => _VpnOptions(
       const [],
   mtu: (json['mtu'] as num?)?.toInt() ?? 0,
   congestionController: json['congestionController'] as String? ?? '',
+  rootTun: json['rootTun'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
@@ -255,10 +454,10 @@ Map<String, dynamic> _$VpnOptionsToJson(_VpnOptions instance) =>
       'allowBypass': instance.allowBypass,
       'systemProxy': instance.systemProxy,
       'bypassDomain': instance.bypassDomain,
-      'stack': instance.stack,
       'routeAddress': instance.routeAddress,
       'mtu': instance.mtu,
       'congestionController': instance.congestionController,
+      'rootTun': instance.rootTun,
     };
 
 _RouteHit _$RouteHitFromJson(Map<String, dynamic> json) => _RouteHit(

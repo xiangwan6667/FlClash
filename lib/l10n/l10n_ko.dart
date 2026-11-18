@@ -396,7 +396,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get desc =>
-      'ClashMeta 기반의 멀티 플랫폼 프록시 클라이언트로, 간편하게 사용할 수 있으며 오픈 소스이고 광고가 없습니다.';
+      'Concord 코어 기반의 멀티 플랫폼 프록시 클라이언트로, 간편하게 사용할 수 있으며 오픈 소스이고 광고가 없습니다.';
 
   @override
   String get startVpn => 'VPN 시작 중…';
@@ -493,6 +493,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get externalControllerSecret => '외부 컨트롤러 시크릿';
 
   @override
+  String get externalControllerCors => '교차 출처 접근 허용';
+
+  @override
+  String get externalControllerCorsDesc => '웹 대시보드가 다른 사이트에서 연결할 수 있습니다.';
+
+  @override
   String get ipv6Desc => 'IPv6 트래픽은 IPv6가 켜져 있을 때만 수신됩니다.';
 
   @override
@@ -520,16 +526,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get tcpConcurrent => 'TCP 동시 연결';
 
   @override
-  String get geodataLoader => 'Geo 저메모리 모드';
-
-  @override
   String get requests => '요청';
 
   @override
   String get recentRequests => '최근 요청';
 
   @override
-  String get findProcessMode => '프로세스 찾기';
+  String get alwaysFindProcess => '항상 프로세스 찾기';
 
   @override
   String get init => '초기화';
@@ -923,7 +926,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get disclaimerSoftwareContent =>
-      '본 소프트웨어는 Clash.Meta(mihomo) 코어를 기반으로 한 오픈 소스 네트워크 프록시 클라이언트입니다. 구성 관리, 규칙 기반 라우팅, 트래픽 전달과 같은 로컬 도구만 제공합니다.';
+      '본 소프트웨어는 Concord 코어를 기반으로 한 오픈 소스 네트워크 프록시 클라이언트입니다. 구성 관리, 규칙 기반 라우팅, 트래픽 전달과 같은 로컬 도구만 제공합니다.';
 
   @override
   String get disclaimerNoServiceStatement =>
@@ -976,7 +979,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get disclaimerLicenseContent =>
-      '본 소프트웨어는 GPL-3.0 라이선스로 공개된 오픈 소스입니다. 이 라이선스에 따라 실행, 연구, 수정, 배포할 수 있으며, 본 소프트웨어나 그 수정본을 배포할 때는 마찬가지로 GPL-3.0으로 소스 코드를 제공하고 원래의 저작권 고지를 유지해야 합니다.\n\n본 소프트웨어에 포함된 서드파티 구성 요소(Clash.Meta 코어 포함)는 각자의 라이선스를 따릅니다. 다른 사람이 수정하거나 배포한 버전에서 생긴 문제에 대해 원저작자는 책임지지 않습니다.';
+      '본 소프트웨어는 GPL-3.0 라이선스로 공개된 오픈 소스입니다. 이 라이선스에 따라 실행, 연구, 수정, 배포할 수 있으며, 본 소프트웨어나 그 수정본을 배포할 때는 마찬가지로 GPL-3.0으로 소스 코드를 제공하고 원래의 저작권 고지를 유지해야 합니다.\n\n본 소프트웨어에 포함된 서드파티 구성 요소(Concord 코어 포함)는 각자의 라이선스를 따릅니다. 다른 사람이 수정하거나 배포한 버전에서 생긴 문제에 대해 원저작자는 책임지지 않습니다.';
 
   @override
   String get disclaimerChangesTitle => '본 문서의 변경';
@@ -1075,9 +1078,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get hideTimeoutProxies => '시간 초과된 프록시 숨기기';
-
-  @override
-  String get stackMode => '스택 모드';
 
   @override
   String get network => '네트워크';
@@ -1246,10 +1246,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ruleTarget => '규칙 대상';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get exitDefault => '기본값';
 
   @override
-  String get followProfile => '프로필 따르기';
+  String get customExit => '사용자 지정 출구';
+
+  @override
+  String get inputExitName => '출구 이름을 입력하세요';
 
   @override
   String get scriptFailed => '스크립트 실행에 실패했습니다';
@@ -2673,9 +2676,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get congestionController => 'TCP 혼잡 제어';
 
   @override
-  String get congestionControllerDesc => 'TCP 혼잡 제어는 mips 스택에서만 작동합니다.';
-
-  @override
   String get routeExcludeAddress => '라우팅 제외 주소';
 
   @override
@@ -2749,8 +2749,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get udpTimeout => 'UDP 시간 제한';
 
   @override
-  String get udpTimeoutDesc =>
-      'UDP 시간 제한은 초 단위이며 gvisor, system, mixed 스택에서만 작동합니다.';
+  String get udpTimeoutDesc => 'UDP 시간 제한은 초 단위입니다.';
 
   @override
   String get dnsHijackDesc => '추가하지 않으면 53번 포트로 가는 모든 DNS 쿼리를 하이재킹합니다(any:53).';
@@ -3331,6 +3330,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '사용자 인증서를 신뢰하는 앱(주로 브라우저)만 복호화됩니다.';
 
   @override
+  String get mitmAndroidRootDesc =>
+      '루팅하지 않으면 사용자 인증서를 신뢰하는 앱(주로 브라우저)만 복호화할 수 있습니다. 루팅하면 모든 앱을 복호화할 수 있습니다.';
+
+  @override
   String get mitmCertificateLinuxTip => 'Flatpak 브라우저에는 내보낸 인증서를 직접 가져와야 합니다.';
 
   @override
@@ -3341,6 +3344,25 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String mitmMissingStores(Object stores) {
     return '아직 추가되지 않음: $stores';
+  }
+
+  @override
+  String get httpRequestsReadFailed => '요청을 읽을 수 없습니다';
+
+  @override
+  String get requestBodyReadFailed => '요청 본문을 읽을 수 없습니다';
+
+  @override
+  String get responseBodyReadFailed => '응답 본문을 읽을 수 없습니다';
+
+  @override
+  String mitmGrpcOverLimit(Object size) {
+    return '압축을 풀면 $size MB를 넘어 압축된 데이터를 표시합니다';
+  }
+
+  @override
+  String mitmUntrustedStores(Object stores) {
+    return '설치됐지만 신뢰하지 않음: $stores';
   }
 
   @override
@@ -3442,6 +3464,15 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mapLocal => '로컬 매핑';
 
   @override
+  String get requestBodyMock => '요청 본문 대체';
+
+  @override
+  String get clientSourceAddress => '클라이언트 주소';
+
+  @override
+  String get skipVerifyHostname => '인증서를 검증하지 않는 호스트';
+
+  @override
   String get mitmModules => '모듈';
 
   @override
@@ -3464,8 +3495,69 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mitmModuleRulesDesc => '라우팅 규칙은 프로필 자체 규칙보다 앞에 적용됩니다.';
 
   @override
+  String get mitmRequestRulesDesc =>
+      '이 모듈의 URL-REGEX 및 USER-AGENT 규칙은 URL 재작성으로 바뀌어 요청마다 판단됩니다. 평문 HTTP는 모든 요청이, HTTPS는 MITM 호스트 이름 목록에 있는 연결만 대상입니다.';
+
+  @override
   String mitmModuleSystemTip(Object system) {
     return '$system용으로 작성되었습니다. 일부 줄은 이 기기의 앱과 맞지 않을 수 있습니다.';
+  }
+
+  @override
+  String mitmModuleRequirementTip(Object requirement) {
+    return '이 모듈은 $requirement을(를) 요구하지만 이 기기는 충족하지 않아 의도대로 작동하지 않을 수 있습니다.';
+  }
+
+  @override
+  String mitmExitModules(Object modules) {
+    return '모듈: $modules';
+  }
+
+  @override
+  String get mitmModuleRiskTitle => '이 모듈을 켤까요?';
+
+  @override
+  String get mitmNetworkRisk =>
+      '구성을 생성할 때 아래 네트워크 설정을 변경하며, FlClash에서 같은 항목에 한 설정보다 우선합니다. 모듈을 끄거나 삭제하면 원래대로 돌아갑니다.';
+
+  @override
+  String mitmSkipVerifyRisk(Object hosts) {
+    return '켜면 다음 호스트의 서버 인증서를 더 이상 검증하지 않아, 이들을 사칭하는 서버를 알아차릴 수 없습니다: $hosts';
+  }
+
+  @override
+  String mitmClientSourceRisk(Object addresses) {
+    return '다음 클라이언트의 트래픽만 복호화합니다: $addresses. TUN이 켜져 있으면 이 기기의 앱은 TUN 주소에서 연결하므로 제외될 수 있습니다.';
+  }
+
+  @override
+  String get mitmClientSourceTunTip =>
+      'TUN이 켜져 있으면 이 기기의 앱은 TUN 주소에서 연결합니다. 목록에 그 주소가 없으면 앱의 트래픽은 복호화되지 않습니다.';
+
+  @override
+  String get mitmNetworkChanges => '네트워크 설정';
+
+  @override
+  String mitmChangeReplace(Object values) {
+    return '$values(으)로 바꿈';
+  }
+
+  @override
+  String mitmChangeInsert(Object values) {
+    return '앞에 $values 추가';
+  }
+
+  @override
+  String mitmChangeAppend(Object values) {
+    return '$values 추가';
+  }
+
+  @override
+  String get mitmChangeOverridesYours => '내 설정보다 우선 적용됨';
+
+  @override
+  String mitmChangeReplacedBy(Object module) {
+    return '모듈 $module이(가) 우선 적용됨';
   }
 
   @override
@@ -3483,19 +3575,36 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mitmSkipRule => '이 규칙 유형은 지원되지 않습니다';
 
   @override
-  String get mitmSkipPolicy => 'DIRECT 및 REJECT 정책만 지원됩니다';
+  String get mitmSkipHttpRulePolicy =>
+      'URL-REGEX 및 USER-AGENT 규칙은 REJECT 계열 정책만 사용할 수 있습니다';
 
   @override
-  String get mitmSkipJq => 'jq 재작성은 지원되지 않습니다';
+  String get mitmSkipFinalRule => '모듈 규칙은 맨 앞에 들어가므로 최종 규칙은 그 뒤의 모든 규칙을 가립니다';
 
   @override
-  String get mitmSkipJsonBody => 'JSON 본문 재작성은 지원되지 않습니다';
+  String get mitmSkipDeviceRule =>
+      '이 규칙에는 FlClash가 읽을 수 없는 기기 또는 네트워크 정보가 필요합니다';
 
   @override
-  String get mitmSkipRawHeader => '모든 헤더를 하나의 텍스트로 다시 쓰는 기능은 지원되지 않습니다';
+  String get mitmSkipRequirement => '이 기기는 이 줄의 사용 조건을 충족하지 않습니다';
+
+  @override
+  String get mitmSkipManagedCa => 'CA 인증서는 FlClash가 관리하며 모듈이 변경할 수 없습니다';
+
+  @override
+  String get mitmSkipProxies => '모듈은 프록시와 프록시 그룹을 변경할 수 없습니다';
+
+  @override
+  String get mitmSkipAppOnly => '원래 앱에만 있는 기능으로, FlClash에는 대응하는 항목이 없습니다';
+
+  @override
+  String get mitmSkipReflect => 'FlClash는 패킷을 보낸 쪽으로 되돌려 보낼 수 없습니다';
 
   @override
   String get mitmSkipConditional => '조건부 재작성은 지원되지 않습니다';
+
+  @override
+  String get mitmSkipSkipVerifyAll => '모든 호스트에 대해 인증서 검증을 끌 수는 없습니다';
 
   @override
   String get mitmSkipRelativeData =>
@@ -3535,14 +3644,48 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mitmRunScript => '지금 실행';
 
   @override
+  String get mitmScriptCron => '예약';
+
+  @override
+  String get mitmScriptEvent => '이벤트';
+
+  @override
+  String get mitmScriptGeneric => '일반';
+
+  @override
+  String get mitmExcluded => '제외';
+
+  @override
   String get mitmScriptNoOutput => '스크립트가 출력 없이 끝났습니다';
 
   @override
   String get mitmScriptRiskTitle => '이 모듈의 스크립트를 실행할까요?';
 
   @override
+  String get mitmModulesTurnedOff => '모듈이 꺼졌습니다';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return '$name 업데이트에 아직 동의하지 않은 스크립트나 네트워크 변경이 포함되어 있습니다';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '모듈 $count개의 업데이트에 아직 동의하지 않은 스크립트나 네트워크 변경이 포함되어 있습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       '스크립트가 일치하는 호스트의 트래픽을 읽고 바꿀 수 있으며, 쿠키와 토큰도 포함되고 직접 요청을 보낼 수도 있습니다. 출처를 신뢰할 때만 켜세요. 켜면 이후 업데이트는 다시 묻지 않고 적용됩니다.';
+
+  @override
+  String get mitmModuleUnreadableRisk =>
+      '모듈 파일을 읽을 수 없어 무엇을 바꾸는지 알 수 없습니다. 출처를 신뢰할 때만 켜세요.';
 
   @override
   String get skipServerCertVerify => '서버 인증서 검증 건너뛰기';
@@ -3663,6 +3806,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get coreStoppedDesc => '앱과 코어의 연결이 끊어졌습니다';
 
   @override
+  String coreStoppedWithReason(Object reason) {
+    return '앱과 코어의 연결이 끊어졌습니다: $reason';
+  }
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return '혼합 포트는 $value일 수 없어 $port(으)로 되돌렸습니다';
+  }
+
+  @override
   String get restartCore => '코어 다시 시작';
 
   @override
@@ -3721,4 +3874,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tunStartFailed => 'TUN을 시작하지 못했습니다. 이번 실행에서는 다시 시도하지 않습니다.';
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'VPN 권한이 허용되지 않아 VPN을 시작하지 않았습니다. 다른 앱이 상시 사용 VPN으로 설정되어 있어도 시작할 수 없습니다.';
+
+  @override
+  String get vpnServiceStartFailed => 'VPN 서비스를 시작하지 못했습니다.';
+
+  @override
+  String get rootTun => 'Root 모드';
+
+  @override
+  String get rootTunDesc => '시스템 VPN 대신 root를 사용합니다.';
+
+  @override
+  String get rootTunUnavailable => '이 기기에서 root를 찾지 못했습니다';
+
+  @override
+  String rootTunFallback(Object reason) {
+    return 'Root를 사용할 수 없어($reason) 이번에는 시스템 VPN을 사용합니다.';
+  }
 }

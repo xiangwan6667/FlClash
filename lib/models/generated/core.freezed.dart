@@ -1749,6 +1749,1944 @@ as String,
 
 }
 
+MitmLineView _$MitmLineViewFromJson(
+  Map<String, dynamic> json
+) {
+        switch (json['type']) {
+                  case 'urlRewrite':
+          return MitmUrlRewriteView.fromJson(
+            json
+          );
+                case 'headerRewrite':
+          return MitmHeaderRewriteView.fromJson(
+            json
+          );
+                case 'bodyRewrite':
+          return MitmBodyRewriteView.fromJson(
+            json
+          );
+                case 'mapLocal':
+          return MitmMapLocalView.fromJson(
+            json
+          );
+                case 'script':
+          return MitmScriptView.fromJson(
+            json
+          );
+                case 'hosts':
+          return MitmHostsView.fromJson(
+            json
+          );
+                case 'sources':
+          return MitmSourcesView.fromJson(
+            json
+          );
+        
+          default:
+            throw CheckedFromJsonException(
+  json,
+  'type',
+  'MitmLineView',
+  'Invalid union type "${json['type']}"!'
+);
+        }
+      
+}
+
+/// @nodoc
+mixin _$MitmLineView {
+
+
+
+  /// Serializes this MitmLineView to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmLineView);
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'MitmLineView()';
+}
+
+
+}
+
+/// @nodoc
+class $MitmLineViewCopyWith<$Res>  {
+$MitmLineViewCopyWith(MitmLineView _, $Res Function(MitmLineView) __);
+}
+
+
+/// Adds pattern-matching-related methods to [MitmLineView].
+extension MitmLineViewPatterns on MitmLineView {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( MitmUrlRewriteView value)?  urlRewrite,TResult Function( MitmHeaderRewriteView value)?  headerRewrite,TResult Function( MitmBodyRewriteView value)?  bodyRewrite,TResult Function( MitmMapLocalView value)?  mapLocal,TResult Function( MitmScriptView value)?  script,TResult Function( MitmHostsView value)?  hosts,TResult Function( MitmSourcesView value)?  sources,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case MitmUrlRewriteView() when urlRewrite != null:
+return urlRewrite(_that);case MitmHeaderRewriteView() when headerRewrite != null:
+return headerRewrite(_that);case MitmBodyRewriteView() when bodyRewrite != null:
+return bodyRewrite(_that);case MitmMapLocalView() when mapLocal != null:
+return mapLocal(_that);case MitmScriptView() when script != null:
+return script(_that);case MitmHostsView() when hosts != null:
+return hosts(_that);case MitmSourcesView() when sources != null:
+return sources(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( MitmUrlRewriteView value)  urlRewrite,required TResult Function( MitmHeaderRewriteView value)  headerRewrite,required TResult Function( MitmBodyRewriteView value)  bodyRewrite,required TResult Function( MitmMapLocalView value)  mapLocal,required TResult Function( MitmScriptView value)  script,required TResult Function( MitmHostsView value)  hosts,required TResult Function( MitmSourcesView value)  sources,}){
+final _that = this;
+switch (_that) {
+case MitmUrlRewriteView():
+return urlRewrite(_that);case MitmHeaderRewriteView():
+return headerRewrite(_that);case MitmBodyRewriteView():
+return bodyRewrite(_that);case MitmMapLocalView():
+return mapLocal(_that);case MitmScriptView():
+return script(_that);case MitmHostsView():
+return hosts(_that);case MitmSourcesView():
+return sources(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( MitmUrlRewriteView value)?  urlRewrite,TResult? Function( MitmHeaderRewriteView value)?  headerRewrite,TResult? Function( MitmBodyRewriteView value)?  bodyRewrite,TResult? Function( MitmMapLocalView value)?  mapLocal,TResult? Function( MitmScriptView value)?  script,TResult? Function( MitmHostsView value)?  hosts,TResult? Function( MitmSourcesView value)?  sources,}){
+final _that = this;
+switch (_that) {
+case MitmUrlRewriteView() when urlRewrite != null:
+return urlRewrite(_that);case MitmHeaderRewriteView() when headerRewrite != null:
+return headerRewrite(_that);case MitmBodyRewriteView() when bodyRewrite != null:
+return bodyRewrite(_that);case MitmMapLocalView() when mapLocal != null:
+return mapLocal(_that);case MitmScriptView() when script != null:
+return script(_that);case MitmHostsView() when hosts != null:
+return hosts(_that);case MitmSourcesView() when sources != null:
+return sources(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String pattern,  String action,  String? replacement,  String? requestHead)?  urlRewrite,TResult Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  String action,  String? name,  String? value,  String? regex,  String? replacement)?  headerRewrite,TResult Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  List<MitmBodyReplacement> replacements,  String? jq)?  bodyRewrite,TResult Function( String pattern,  String? requestHead,  String dataType,  String data,  int? status,  List<MitmHeader> headers,  String contentType)?  mapLocal,TResult Function( String name,  String kind,  String path,  String? pattern,  String? cronexp,  String? event,  bool requiresBody,  int? timeoutMs)?  script,TResult Function( List<MitmHostEntry> entries)?  hosts,TResult Function( List<MitmSourceEntry> entries)?  sources,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case MitmUrlRewriteView() when urlRewrite != null:
+return urlRewrite(_that.pattern,_that.action,_that.replacement,_that.requestHead);case MitmHeaderRewriteView() when headerRewrite != null:
+return headerRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.action,_that.name,_that.value,_that.regex,_that.replacement);case MitmBodyRewriteView() when bodyRewrite != null:
+return bodyRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.replacements,_that.jq);case MitmMapLocalView() when mapLocal != null:
+return mapLocal(_that.pattern,_that.requestHead,_that.dataType,_that.data,_that.status,_that.headers,_that.contentType);case MitmScriptView() when script != null:
+return script(_that.name,_that.kind,_that.path,_that.pattern,_that.cronexp,_that.event,_that.requiresBody,_that.timeoutMs);case MitmHostsView() when hosts != null:
+return hosts(_that.entries);case MitmSourcesView() when sources != null:
+return sources(_that.entries);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String pattern,  String action,  String? replacement,  String? requestHead)  urlRewrite,required TResult Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  String action,  String? name,  String? value,  String? regex,  String? replacement)  headerRewrite,required TResult Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  List<MitmBodyReplacement> replacements,  String? jq)  bodyRewrite,required TResult Function( String pattern,  String? requestHead,  String dataType,  String data,  int? status,  List<MitmHeader> headers,  String contentType)  mapLocal,required TResult Function( String name,  String kind,  String path,  String? pattern,  String? cronexp,  String? event,  bool requiresBody,  int? timeoutMs)  script,required TResult Function( List<MitmHostEntry> entries)  hosts,required TResult Function( List<MitmSourceEntry> entries)  sources,}) {final _that = this;
+switch (_that) {
+case MitmUrlRewriteView():
+return urlRewrite(_that.pattern,_that.action,_that.replacement,_that.requestHead);case MitmHeaderRewriteView():
+return headerRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.action,_that.name,_that.value,_that.regex,_that.replacement);case MitmBodyRewriteView():
+return bodyRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.replacements,_that.jq);case MitmMapLocalView():
+return mapLocal(_that.pattern,_that.requestHead,_that.dataType,_that.data,_that.status,_that.headers,_that.contentType);case MitmScriptView():
+return script(_that.name,_that.kind,_that.path,_that.pattern,_that.cronexp,_that.event,_that.requiresBody,_that.timeoutMs);case MitmHostsView():
+return hosts(_that.entries);case MitmSourcesView():
+return sources(_that.entries);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String pattern,  String action,  String? replacement,  String? requestHead)?  urlRewrite,TResult? Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  String action,  String? name,  String? value,  String? regex,  String? replacement)?  headerRewrite,TResult? Function( String phase,  String pattern,  String? requestHead,  String? responseHead,  List<MitmBodyReplacement> replacements,  String? jq)?  bodyRewrite,TResult? Function( String pattern,  String? requestHead,  String dataType,  String data,  int? status,  List<MitmHeader> headers,  String contentType)?  mapLocal,TResult? Function( String name,  String kind,  String path,  String? pattern,  String? cronexp,  String? event,  bool requiresBody,  int? timeoutMs)?  script,TResult? Function( List<MitmHostEntry> entries)?  hosts,TResult? Function( List<MitmSourceEntry> entries)?  sources,}) {final _that = this;
+switch (_that) {
+case MitmUrlRewriteView() when urlRewrite != null:
+return urlRewrite(_that.pattern,_that.action,_that.replacement,_that.requestHead);case MitmHeaderRewriteView() when headerRewrite != null:
+return headerRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.action,_that.name,_that.value,_that.regex,_that.replacement);case MitmBodyRewriteView() when bodyRewrite != null:
+return bodyRewrite(_that.phase,_that.pattern,_that.requestHead,_that.responseHead,_that.replacements,_that.jq);case MitmMapLocalView() when mapLocal != null:
+return mapLocal(_that.pattern,_that.requestHead,_that.dataType,_that.data,_that.status,_that.headers,_that.contentType);case MitmScriptView() when script != null:
+return script(_that.name,_that.kind,_that.path,_that.pattern,_that.cronexp,_that.event,_that.requiresBody,_that.timeoutMs);case MitmHostsView() when hosts != null:
+return hosts(_that.entries);case MitmSourcesView() when sources != null:
+return sources(_that.entries);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmUrlRewriteView implements MitmLineView {
+  const MitmUrlRewriteView({required this.pattern, required this.action, this.replacement, this.requestHead,  String? $type}): $type = $type ?? 'urlRewrite';
+  factory MitmUrlRewriteView.fromJson(Map<String, dynamic> json) => _$MitmUrlRewriteViewFromJson(json);
+
+ final  String pattern;
+ final  String action;
+ final  String? replacement;
+ final  String? requestHead;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmUrlRewriteViewCopyWith<MitmUrlRewriteView> get copyWith => _$MitmUrlRewriteViewCopyWithImpl<MitmUrlRewriteView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmUrlRewriteViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmUrlRewriteView&&(identical(other.pattern, pattern) || other.pattern == pattern)&&(identical(other.action, action) || other.action == action)&&(identical(other.replacement, replacement) || other.replacement == replacement)&&(identical(other.requestHead, requestHead) || other.requestHead == requestHead));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,pattern,action,replacement,requestHead);
+}
+
+@override
+String toString() {
+    return 'MitmLineView.urlRewrite(pattern: $pattern, action: $action, replacement: $replacement, requestHead: $requestHead)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmUrlRewriteViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmUrlRewriteViewCopyWith(MitmUrlRewriteView value, $Res Function(MitmUrlRewriteView) _then) = _$MitmUrlRewriteViewCopyWithImpl;
+@useResult
+$Res call({
+ String pattern, String action, String? replacement, String? requestHead
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmUrlRewriteViewCopyWithImpl<$Res>
+    implements $MitmUrlRewriteViewCopyWith<$Res> {
+  _$MitmUrlRewriteViewCopyWithImpl(this._self, this._then);
+
+  final MitmUrlRewriteView _self;
+  final $Res Function(MitmUrlRewriteView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? pattern = null,Object? action = null,Object? replacement = freezed,Object? requestHead = freezed,}) {
+  return _then(MitmUrlRewriteView(
+pattern: null == pattern ? _self.pattern : pattern // ignore: cast_nullable_to_non_nullable
+as String,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as String,replacement: freezed == replacement ? _self.replacement : replacement // ignore: cast_nullable_to_non_nullable
+as String?,requestHead: freezed == requestHead ? _self.requestHead : requestHead // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmHeaderRewriteView implements MitmLineView {
+  const MitmHeaderRewriteView({required this.phase, required this.pattern, this.requestHead, this.responseHead, required this.action, this.name, this.value, this.regex, this.replacement,  String? $type}): $type = $type ?? 'headerRewrite';
+  factory MitmHeaderRewriteView.fromJson(Map<String, dynamic> json) => _$MitmHeaderRewriteViewFromJson(json);
+
+ final  String phase;
+ final  String pattern;
+ final  String? requestHead;
+ final  String? responseHead;
+ final  String action;
+ final  String? name;
+ final  String? value;
+ final  String? regex;
+ final  String? replacement;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmHeaderRewriteViewCopyWith<MitmHeaderRewriteView> get copyWith => _$MitmHeaderRewriteViewCopyWithImpl<MitmHeaderRewriteView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmHeaderRewriteViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmHeaderRewriteView&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.pattern, pattern) || other.pattern == pattern)&&(identical(other.requestHead, requestHead) || other.requestHead == requestHead)&&(identical(other.responseHead, responseHead) || other.responseHead == responseHead)&&(identical(other.action, action) || other.action == action)&&(identical(other.name, name) || other.name == name)&&(identical(other.value, value) || other.value == value)&&(identical(other.regex, regex) || other.regex == regex)&&(identical(other.replacement, replacement) || other.replacement == replacement));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,phase,pattern,requestHead,responseHead,action,name,value,regex,replacement);
+}
+
+@override
+String toString() {
+    return 'MitmLineView.headerRewrite(phase: $phase, pattern: $pattern, requestHead: $requestHead, responseHead: $responseHead, action: $action, name: $name, value: $value, regex: $regex, replacement: $replacement)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmHeaderRewriteViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmHeaderRewriteViewCopyWith(MitmHeaderRewriteView value, $Res Function(MitmHeaderRewriteView) _then) = _$MitmHeaderRewriteViewCopyWithImpl;
+@useResult
+$Res call({
+ String phase, String pattern, String? requestHead, String? responseHead, String action, String? name, String? value, String? regex, String? replacement
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmHeaderRewriteViewCopyWithImpl<$Res>
+    implements $MitmHeaderRewriteViewCopyWith<$Res> {
+  _$MitmHeaderRewriteViewCopyWithImpl(this._self, this._then);
+
+  final MitmHeaderRewriteView _self;
+  final $Res Function(MitmHeaderRewriteView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? phase = null,Object? pattern = null,Object? requestHead = freezed,Object? responseHead = freezed,Object? action = null,Object? name = freezed,Object? value = freezed,Object? regex = freezed,Object? replacement = freezed,}) {
+  return _then(MitmHeaderRewriteView(
+phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
+as String,pattern: null == pattern ? _self.pattern : pattern // ignore: cast_nullable_to_non_nullable
+as String,requestHead: freezed == requestHead ? _self.requestHead : requestHead // ignore: cast_nullable_to_non_nullable
+as String?,responseHead: freezed == responseHead ? _self.responseHead : responseHead // ignore: cast_nullable_to_non_nullable
+as String?,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as String,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as String?,regex: freezed == regex ? _self.regex : regex // ignore: cast_nullable_to_non_nullable
+as String?,replacement: freezed == replacement ? _self.replacement : replacement // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmBodyRewriteView implements MitmLineView {
+  const MitmBodyRewriteView({required this.phase, required this.pattern, this.requestHead, this.responseHead,  List<MitmBodyReplacement> replacements = const [], this.jq,  String? $type}): _replacements = replacements,$type = $type ?? 'bodyRewrite';
+  factory MitmBodyRewriteView.fromJson(Map<String, dynamic> json) => _$MitmBodyRewriteViewFromJson(json);
+
+ final  String phase;
+ final  String pattern;
+ final  String? requestHead;
+ final  String? responseHead;
+ final  List<MitmBodyReplacement> _replacements;
+@JsonKey() List<MitmBodyReplacement> get replacements {
+  if (_replacements is EqualUnmodifiableListView) return _replacements;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_replacements);
+}
+
+ final  String? jq;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmBodyRewriteViewCopyWith<MitmBodyRewriteView> get copyWith => _$MitmBodyRewriteViewCopyWithImpl<MitmBodyRewriteView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmBodyRewriteViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmBodyRewriteView&&(identical(other.phase, phase) || other.phase == phase)&&(identical(other.pattern, pattern) || other.pattern == pattern)&&(identical(other.requestHead, requestHead) || other.requestHead == requestHead)&&(identical(other.responseHead, responseHead) || other.responseHead == responseHead)&&const DeepCollectionEquality().equals(other.replacements, _replacements)&&(identical(other.jq, jq) || other.jq == jq));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,phase,pattern,requestHead,responseHead,const DeepCollectionEquality().hash(_replacements),jq);
+}
+
+@override
+String toString() {
+    return 'MitmLineView.bodyRewrite(phase: $phase, pattern: $pattern, requestHead: $requestHead, responseHead: $responseHead, replacements: $replacements, jq: $jq)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmBodyRewriteViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmBodyRewriteViewCopyWith(MitmBodyRewriteView value, $Res Function(MitmBodyRewriteView) _then) = _$MitmBodyRewriteViewCopyWithImpl;
+@useResult
+$Res call({
+ String phase, String pattern, String? requestHead, String? responseHead, List<MitmBodyReplacement> replacements, String? jq
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmBodyRewriteViewCopyWithImpl<$Res>
+    implements $MitmBodyRewriteViewCopyWith<$Res> {
+  _$MitmBodyRewriteViewCopyWithImpl(this._self, this._then);
+
+  final MitmBodyRewriteView _self;
+  final $Res Function(MitmBodyRewriteView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? phase = null,Object? pattern = null,Object? requestHead = freezed,Object? responseHead = freezed,Object? replacements = null,Object? jq = freezed,}) {
+  return _then(MitmBodyRewriteView(
+phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
+as String,pattern: null == pattern ? _self.pattern : pattern // ignore: cast_nullable_to_non_nullable
+as String,requestHead: freezed == requestHead ? _self.requestHead : requestHead // ignore: cast_nullable_to_non_nullable
+as String?,responseHead: freezed == responseHead ? _self.responseHead : responseHead // ignore: cast_nullable_to_non_nullable
+as String?,replacements: null == replacements ? _self._replacements : replacements // ignore: cast_nullable_to_non_nullable
+as List<MitmBodyReplacement>,jq: freezed == jq ? _self.jq : jq // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmMapLocalView implements MitmLineView {
+  const MitmMapLocalView({required this.pattern, this.requestHead, required this.dataType, this.data = '', this.status,  List<MitmHeader> headers = const [], this.contentType = '',  String? $type}): _headers = headers,$type = $type ?? 'mapLocal';
+  factory MitmMapLocalView.fromJson(Map<String, dynamic> json) => _$MitmMapLocalViewFromJson(json);
+
+ final  String pattern;
+ final  String? requestHead;
+ final  String dataType;
+@JsonKey() final  String data;
+ final  int? status;
+ final  List<MitmHeader> _headers;
+@JsonKey() List<MitmHeader> get headers {
+  if (_headers is EqualUnmodifiableListView) return _headers;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_headers);
+}
+
+@JsonKey() final  String contentType;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmMapLocalViewCopyWith<MitmMapLocalView> get copyWith => _$MitmMapLocalViewCopyWithImpl<MitmMapLocalView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmMapLocalViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmMapLocalView&&(identical(other.pattern, pattern) || other.pattern == pattern)&&(identical(other.requestHead, requestHead) || other.requestHead == requestHead)&&(identical(other.dataType, dataType) || other.dataType == dataType)&&(identical(other.data, data) || other.data == data)&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.headers, _headers)&&(identical(other.contentType, contentType) || other.contentType == contentType));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,pattern,requestHead,dataType,data,status,const DeepCollectionEquality().hash(_headers),contentType);
+}
+
+@override
+String toString() {
+    return 'MitmLineView.mapLocal(pattern: $pattern, requestHead: $requestHead, dataType: $dataType, data: $data, status: $status, headers: $headers, contentType: $contentType)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmMapLocalViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmMapLocalViewCopyWith(MitmMapLocalView value, $Res Function(MitmMapLocalView) _then) = _$MitmMapLocalViewCopyWithImpl;
+@useResult
+$Res call({
+ String pattern, String? requestHead, String dataType, String data, int? status, List<MitmHeader> headers, String contentType
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmMapLocalViewCopyWithImpl<$Res>
+    implements $MitmMapLocalViewCopyWith<$Res> {
+  _$MitmMapLocalViewCopyWithImpl(this._self, this._then);
+
+  final MitmMapLocalView _self;
+  final $Res Function(MitmMapLocalView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? pattern = null,Object? requestHead = freezed,Object? dataType = null,Object? data = null,Object? status = freezed,Object? headers = null,Object? contentType = null,}) {
+  return _then(MitmMapLocalView(
+pattern: null == pattern ? _self.pattern : pattern // ignore: cast_nullable_to_non_nullable
+as String,requestHead: freezed == requestHead ? _self.requestHead : requestHead // ignore: cast_nullable_to_non_nullable
+as String?,dataType: null == dataType ? _self.dataType : dataType // ignore: cast_nullable_to_non_nullable
+as String,data: null == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
+as String,status: freezed == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as int?,headers: null == headers ? _self._headers : headers // ignore: cast_nullable_to_non_nullable
+as List<MitmHeader>,contentType: null == contentType ? _self.contentType : contentType // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmScriptView implements MitmLineView {
+  const MitmScriptView({required this.name, required this.kind, this.path = '', this.pattern, this.cronexp, this.event, this.requiresBody = false, this.timeoutMs,  String? $type}): $type = $type ?? 'script';
+  factory MitmScriptView.fromJson(Map<String, dynamic> json) => _$MitmScriptViewFromJson(json);
+
+ final  String name;
+ final  String kind;
+@JsonKey() final  String path;
+ final  String? pattern;
+ final  String? cronexp;
+ final  String? event;
+@JsonKey() final  bool requiresBody;
+ final  int? timeoutMs;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmScriptViewCopyWith<MitmScriptView> get copyWith => _$MitmScriptViewCopyWithImpl<MitmScriptView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmScriptViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmScriptView&&(identical(other.name, name) || other.name == name)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.path, path) || other.path == path)&&(identical(other.pattern, pattern) || other.pattern == pattern)&&(identical(other.cronexp, cronexp) || other.cronexp == cronexp)&&(identical(other.event, event) || other.event == event)&&(identical(other.requiresBody, requiresBody) || other.requiresBody == requiresBody)&&(identical(other.timeoutMs, timeoutMs) || other.timeoutMs == timeoutMs));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,name,kind,path,pattern,cronexp,event,requiresBody,timeoutMs);
+}
+
+@override
+String toString() {
+    return 'MitmLineView.script(name: $name, kind: $kind, path: $path, pattern: $pattern, cronexp: $cronexp, event: $event, requiresBody: $requiresBody, timeoutMs: $timeoutMs)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmScriptViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmScriptViewCopyWith(MitmScriptView value, $Res Function(MitmScriptView) _then) = _$MitmScriptViewCopyWithImpl;
+@useResult
+$Res call({
+ String name, String kind, String path, String? pattern, String? cronexp, String? event, bool requiresBody, int? timeoutMs
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmScriptViewCopyWithImpl<$Res>
+    implements $MitmScriptViewCopyWith<$Res> {
+  _$MitmScriptViewCopyWithImpl(this._self, this._then);
+
+  final MitmScriptView _self;
+  final $Res Function(MitmScriptView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? kind = null,Object? path = null,Object? pattern = freezed,Object? cronexp = freezed,Object? event = freezed,Object? requiresBody = null,Object? timeoutMs = freezed,}) {
+  return _then(MitmScriptView(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as String,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
+as String,pattern: freezed == pattern ? _self.pattern : pattern // ignore: cast_nullable_to_non_nullable
+as String?,cronexp: freezed == cronexp ? _self.cronexp : cronexp // ignore: cast_nullable_to_non_nullable
+as String?,event: freezed == event ? _self.event : event // ignore: cast_nullable_to_non_nullable
+as String?,requiresBody: null == requiresBody ? _self.requiresBody : requiresBody // ignore: cast_nullable_to_non_nullable
+as bool,timeoutMs: freezed == timeoutMs ? _self.timeoutMs : timeoutMs // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmHostsView implements MitmLineView {
+  const MitmHostsView({ List<MitmHostEntry> entries = const [],  String? $type}): _entries = entries,$type = $type ?? 'hosts';
+  factory MitmHostsView.fromJson(Map<String, dynamic> json) => _$MitmHostsViewFromJson(json);
+
+ final  List<MitmHostEntry> _entries;
+@JsonKey() List<MitmHostEntry> get entries {
+  if (_entries is EqualUnmodifiableListView) return _entries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_entries);
+}
+
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmHostsViewCopyWith<MitmHostsView> get copyWith => _$MitmHostsViewCopyWithImpl<MitmHostsView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmHostsViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmHostsView&&const DeepCollectionEquality().equals(other.entries, _entries));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries));
+}
+
+@override
+String toString() {
+    return 'MitmLineView.hosts(entries: $entries)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmHostsViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmHostsViewCopyWith(MitmHostsView value, $Res Function(MitmHostsView) _then) = _$MitmHostsViewCopyWithImpl;
+@useResult
+$Res call({
+ List<MitmHostEntry> entries
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmHostsViewCopyWithImpl<$Res>
+    implements $MitmHostsViewCopyWith<$Res> {
+  _$MitmHostsViewCopyWithImpl(this._self, this._then);
+
+  final MitmHostsView _self;
+  final $Res Function(MitmHostsView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? entries = null,}) {
+  return _then(MitmHostsView(
+entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
+as List<MitmHostEntry>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MitmSourcesView implements MitmLineView {
+  const MitmSourcesView({ List<MitmSourceEntry> entries = const [],  String? $type}): _entries = entries,$type = $type ?? 'sources';
+  factory MitmSourcesView.fromJson(Map<String, dynamic> json) => _$MitmSourcesViewFromJson(json);
+
+ final  List<MitmSourceEntry> _entries;
+@JsonKey() List<MitmSourceEntry> get entries {
+  if (_entries is EqualUnmodifiableListView) return _entries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_entries);
+}
+
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmSourcesViewCopyWith<MitmSourcesView> get copyWith => _$MitmSourcesViewCopyWithImpl<MitmSourcesView>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmSourcesViewToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmSourcesView&&const DeepCollectionEquality().equals(other.entries, _entries));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_entries));
+}
+
+@override
+String toString() {
+    return 'MitmLineView.sources(entries: $entries)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmSourcesViewCopyWith<$Res> implements $MitmLineViewCopyWith<$Res> {
+  factory $MitmSourcesViewCopyWith(MitmSourcesView value, $Res Function(MitmSourcesView) _then) = _$MitmSourcesViewCopyWithImpl;
+@useResult
+$Res call({
+ List<MitmSourceEntry> entries
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmSourcesViewCopyWithImpl<$Res>
+    implements $MitmSourcesViewCopyWith<$Res> {
+  _$MitmSourcesViewCopyWithImpl(this._self, this._then);
+
+  final MitmSourcesView _self;
+  final $Res Function(MitmSourcesView) _then;
+
+/// Create a copy of MitmLineView
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? entries = null,}) {
+  return _then(MitmSourcesView(
+entries: null == entries ? _self._entries : entries // ignore: cast_nullable_to_non_nullable
+as List<MitmSourceEntry>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$MitmBodyReplacement {
+
+ String get regex; String get replacement;
+/// Create a copy of MitmBodyReplacement
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmBodyReplacementCopyWith<MitmBodyReplacement> get copyWith => _$MitmBodyReplacementCopyWithImpl<MitmBodyReplacement>(this as MitmBodyReplacement, _$identity);
+
+  /// Serializes this MitmBodyReplacement to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MitmBodyReplacement;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmBodyReplacement&&(identical(other.regex, _this.regex) || other.regex == _this.regex)&&(identical(other.replacement, _this.replacement) || other.replacement == _this.replacement));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MitmBodyReplacement;
+  return Object.hash(runtimeType,_this.regex,_this.replacement);
+}
+
+@override
+String toString() {
+  final _this = this as MitmBodyReplacement;
+  return 'MitmBodyReplacement(regex: ${_this.regex}, replacement: ${_this.replacement})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmBodyReplacementCopyWith<$Res>  {
+  factory $MitmBodyReplacementCopyWith(MitmBodyReplacement value, $Res Function(MitmBodyReplacement) _then) = _$MitmBodyReplacementCopyWithImpl;
+@useResult
+$Res call({
+ String regex, String replacement
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmBodyReplacementCopyWithImpl<$Res>
+    implements $MitmBodyReplacementCopyWith<$Res> {
+  _$MitmBodyReplacementCopyWithImpl(this._self, this._then);
+
+  final MitmBodyReplacement _self;
+  final $Res Function(MitmBodyReplacement) _then;
+
+/// Create a copy of MitmBodyReplacement
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? regex = null,Object? replacement = null,}) {
+  return _then(MitmBodyReplacement(
+regex: null == regex ? _self.regex : regex // ignore: cast_nullable_to_non_nullable
+as String,replacement: null == replacement ? _self.replacement : replacement // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MitmBodyReplacement].
+extension MitmBodyReplacementPatterns on MitmBodyReplacement {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MitmBodyReplacement value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MitmBodyReplacement() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MitmBodyReplacement value)  $default,){
+final _that = this;
+switch (_that) {
+case _MitmBodyReplacement():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MitmBodyReplacement value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MitmBodyReplacement() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String regex,  String replacement)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MitmBodyReplacement() when $default != null:
+return $default(_that.regex,_that.replacement);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String regex,  String replacement)  $default,) {final _that = this;
+switch (_that) {
+case _MitmBodyReplacement():
+return $default(_that.regex,_that.replacement);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String regex,  String replacement)?  $default,) {final _that = this;
+switch (_that) {
+case _MitmBodyReplacement() when $default != null:
+return $default(_that.regex,_that.replacement);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MitmBodyReplacement implements MitmBodyReplacement {
+  const _MitmBodyReplacement({required this.regex, required this.replacement});
+  factory _MitmBodyReplacement.fromJson(Map<String, dynamic> json) => _$MitmBodyReplacementFromJson(json);
+
+@override final  String regex;
+@override final  String replacement;
+
+/// Create a copy of MitmBodyReplacement
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MitmBodyReplacementCopyWith<_MitmBodyReplacement> get copyWith => __$MitmBodyReplacementCopyWithImpl<_MitmBodyReplacement>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmBodyReplacementToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MitmBodyReplacement&&(identical(other.regex, regex) || other.regex == regex)&&(identical(other.replacement, replacement) || other.replacement == replacement));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,regex,replacement);
+}
+
+@override
+String toString() {
+    return 'MitmBodyReplacement(regex: $regex, replacement: $replacement)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MitmBodyReplacementCopyWith<$Res> implements $MitmBodyReplacementCopyWith<$Res> {
+  factory _$MitmBodyReplacementCopyWith(_MitmBodyReplacement value, $Res Function(_MitmBodyReplacement) _then) = __$MitmBodyReplacementCopyWithImpl;
+@override @useResult
+$Res call({
+ String regex, String replacement
+});
+
+
+
+
+}
+/// @nodoc
+class __$MitmBodyReplacementCopyWithImpl<$Res>
+    implements _$MitmBodyReplacementCopyWith<$Res> {
+  __$MitmBodyReplacementCopyWithImpl(this._self, this._then);
+
+  final _MitmBodyReplacement _self;
+  final $Res Function(_MitmBodyReplacement) _then;
+
+/// Create a copy of MitmBodyReplacement
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? regex = null,Object? replacement = null,}) {
+  return _then(_MitmBodyReplacement(
+regex: null == regex ? _self.regex : regex // ignore: cast_nullable_to_non_nullable
+as String,replacement: null == replacement ? _self.replacement : replacement // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$MitmHeader {
+
+ String get name; String get value;
+/// Create a copy of MitmHeader
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmHeaderCopyWith<MitmHeader> get copyWith => _$MitmHeaderCopyWithImpl<MitmHeader>(this as MitmHeader, _$identity);
+
+  /// Serializes this MitmHeader to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MitmHeader;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmHeader&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.value, _this.value) || other.value == _this.value));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MitmHeader;
+  return Object.hash(runtimeType,_this.name,_this.value);
+}
+
+@override
+String toString() {
+  final _this = this as MitmHeader;
+  return 'MitmHeader(name: ${_this.name}, value: ${_this.value})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmHeaderCopyWith<$Res>  {
+  factory $MitmHeaderCopyWith(MitmHeader value, $Res Function(MitmHeader) _then) = _$MitmHeaderCopyWithImpl;
+@useResult
+$Res call({
+ String name, String value
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmHeaderCopyWithImpl<$Res>
+    implements $MitmHeaderCopyWith<$Res> {
+  _$MitmHeaderCopyWithImpl(this._self, this._then);
+
+  final MitmHeader _self;
+  final $Res Function(MitmHeader) _then;
+
+/// Create a copy of MitmHeader
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? value = null,}) {
+  return _then(MitmHeader(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MitmHeader].
+extension MitmHeaderPatterns on MitmHeader {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MitmHeader value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MitmHeader() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MitmHeader value)  $default,){
+final _that = this;
+switch (_that) {
+case _MitmHeader():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MitmHeader value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MitmHeader() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  String value)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MitmHeader() when $default != null:
+return $default(_that.name,_that.value);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  String value)  $default,) {final _that = this;
+switch (_that) {
+case _MitmHeader():
+return $default(_that.name,_that.value);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  String value)?  $default,) {final _that = this;
+switch (_that) {
+case _MitmHeader() when $default != null:
+return $default(_that.name,_that.value);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MitmHeader implements MitmHeader {
+  const _MitmHeader({required this.name, required this.value});
+  factory _MitmHeader.fromJson(Map<String, dynamic> json) => _$MitmHeaderFromJson(json);
+
+@override final  String name;
+@override final  String value;
+
+/// Create a copy of MitmHeader
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MitmHeaderCopyWith<_MitmHeader> get copyWith => __$MitmHeaderCopyWithImpl<_MitmHeader>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmHeaderToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MitmHeader&&(identical(other.name, name) || other.name == name)&&(identical(other.value, value) || other.value == value));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,name,value);
+}
+
+@override
+String toString() {
+    return 'MitmHeader(name: $name, value: $value)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MitmHeaderCopyWith<$Res> implements $MitmHeaderCopyWith<$Res> {
+  factory _$MitmHeaderCopyWith(_MitmHeader value, $Res Function(_MitmHeader) _then) = __$MitmHeaderCopyWithImpl;
+@override @useResult
+$Res call({
+ String name, String value
+});
+
+
+
+
+}
+/// @nodoc
+class __$MitmHeaderCopyWithImpl<$Res>
+    implements _$MitmHeaderCopyWith<$Res> {
+  __$MitmHeaderCopyWithImpl(this._self, this._then);
+
+  final _MitmHeader _self;
+  final $Res Function(_MitmHeader) _then;
+
+/// Create a copy of MitmHeader
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? value = null,}) {
+  return _then(_MitmHeader(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$MitmHostEntry {
+
+ String get host; int? get port; bool get exclude;
+/// Create a copy of MitmHostEntry
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmHostEntryCopyWith<MitmHostEntry> get copyWith => _$MitmHostEntryCopyWithImpl<MitmHostEntry>(this as MitmHostEntry, _$identity);
+
+  /// Serializes this MitmHostEntry to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MitmHostEntry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmHostEntry&&(identical(other.host, _this.host) || other.host == _this.host)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.exclude, _this.exclude) || other.exclude == _this.exclude));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MitmHostEntry;
+  return Object.hash(runtimeType,_this.host,_this.port,_this.exclude);
+}
+
+@override
+String toString() {
+  final _this = this as MitmHostEntry;
+  return 'MitmHostEntry(host: ${_this.host}, port: ${_this.port}, exclude: ${_this.exclude})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmHostEntryCopyWith<$Res>  {
+  factory $MitmHostEntryCopyWith(MitmHostEntry value, $Res Function(MitmHostEntry) _then) = _$MitmHostEntryCopyWithImpl;
+@useResult
+$Res call({
+ String host, int? port, bool exclude
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmHostEntryCopyWithImpl<$Res>
+    implements $MitmHostEntryCopyWith<$Res> {
+  _$MitmHostEntryCopyWithImpl(this._self, this._then);
+
+  final MitmHostEntry _self;
+  final $Res Function(MitmHostEntry) _then;
+
+/// Create a copy of MitmHostEntry
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? host = null,Object? port = freezed,Object? exclude = null,}) {
+  return _then(MitmHostEntry(
+host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
+as String,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
+as int?,exclude: null == exclude ? _self.exclude : exclude // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MitmHostEntry].
+extension MitmHostEntryPatterns on MitmHostEntry {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MitmHostEntry value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MitmHostEntry() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MitmHostEntry value)  $default,){
+final _that = this;
+switch (_that) {
+case _MitmHostEntry():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MitmHostEntry value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MitmHostEntry() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String host,  int? port,  bool exclude)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MitmHostEntry() when $default != null:
+return $default(_that.host,_that.port,_that.exclude);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String host,  int? port,  bool exclude)  $default,) {final _that = this;
+switch (_that) {
+case _MitmHostEntry():
+return $default(_that.host,_that.port,_that.exclude);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String host,  int? port,  bool exclude)?  $default,) {final _that = this;
+switch (_that) {
+case _MitmHostEntry() when $default != null:
+return $default(_that.host,_that.port,_that.exclude);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MitmHostEntry implements MitmHostEntry {
+  const _MitmHostEntry({required this.host, this.port, this.exclude = false});
+  factory _MitmHostEntry.fromJson(Map<String, dynamic> json) => _$MitmHostEntryFromJson(json);
+
+@override final  String host;
+@override final  int? port;
+@override@JsonKey() final  bool exclude;
+
+/// Create a copy of MitmHostEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MitmHostEntryCopyWith<_MitmHostEntry> get copyWith => __$MitmHostEntryCopyWithImpl<_MitmHostEntry>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmHostEntryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MitmHostEntry&&(identical(other.host, host) || other.host == host)&&(identical(other.port, port) || other.port == port)&&(identical(other.exclude, exclude) || other.exclude == exclude));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,host,port,exclude);
+}
+
+@override
+String toString() {
+    return 'MitmHostEntry(host: $host, port: $port, exclude: $exclude)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MitmHostEntryCopyWith<$Res> implements $MitmHostEntryCopyWith<$Res> {
+  factory _$MitmHostEntryCopyWith(_MitmHostEntry value, $Res Function(_MitmHostEntry) _then) = __$MitmHostEntryCopyWithImpl;
+@override @useResult
+$Res call({
+ String host, int? port, bool exclude
+});
+
+
+
+
+}
+/// @nodoc
+class __$MitmHostEntryCopyWithImpl<$Res>
+    implements _$MitmHostEntryCopyWith<$Res> {
+  __$MitmHostEntryCopyWithImpl(this._self, this._then);
+
+  final _MitmHostEntry _self;
+  final $Res Function(_MitmHostEntry) _then;
+
+/// Create a copy of MitmHostEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? host = null,Object? port = freezed,Object? exclude = null,}) {
+  return _then(_MitmHostEntry(
+host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
+as String,port: freezed == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
+as int?,exclude: null == exclude ? _self.exclude : exclude // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$MitmSourceEntry {
+
+ String get network; bool get exclude;
+/// Create a copy of MitmSourceEntry
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MitmSourceEntryCopyWith<MitmSourceEntry> get copyWith => _$MitmSourceEntryCopyWithImpl<MitmSourceEntry>(this as MitmSourceEntry, _$identity);
+
+  /// Serializes this MitmSourceEntry to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MitmSourceEntry;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MitmSourceEntry&&(identical(other.network, _this.network) || other.network == _this.network)&&(identical(other.exclude, _this.exclude) || other.exclude == _this.exclude));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MitmSourceEntry;
+  return Object.hash(runtimeType,_this.network,_this.exclude);
+}
+
+@override
+String toString() {
+  final _this = this as MitmSourceEntry;
+  return 'MitmSourceEntry(network: ${_this.network}, exclude: ${_this.exclude})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MitmSourceEntryCopyWith<$Res>  {
+  factory $MitmSourceEntryCopyWith(MitmSourceEntry value, $Res Function(MitmSourceEntry) _then) = _$MitmSourceEntryCopyWithImpl;
+@useResult
+$Res call({
+ String network, bool exclude
+});
+
+
+
+
+}
+/// @nodoc
+class _$MitmSourceEntryCopyWithImpl<$Res>
+    implements $MitmSourceEntryCopyWith<$Res> {
+  _$MitmSourceEntryCopyWithImpl(this._self, this._then);
+
+  final MitmSourceEntry _self;
+  final $Res Function(MitmSourceEntry) _then;
+
+/// Create a copy of MitmSourceEntry
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? network = null,Object? exclude = null,}) {
+  return _then(MitmSourceEntry(
+network: null == network ? _self.network : network // ignore: cast_nullable_to_non_nullable
+as String,exclude: null == exclude ? _self.exclude : exclude // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [MitmSourceEntry].
+extension MitmSourceEntryPatterns on MitmSourceEntry {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MitmSourceEntry value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MitmSourceEntry() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MitmSourceEntry value)  $default,){
+final _that = this;
+switch (_that) {
+case _MitmSourceEntry():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MitmSourceEntry value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MitmSourceEntry() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String network,  bool exclude)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MitmSourceEntry() when $default != null:
+return $default(_that.network,_that.exclude);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String network,  bool exclude)  $default,) {final _that = this;
+switch (_that) {
+case _MitmSourceEntry():
+return $default(_that.network,_that.exclude);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String network,  bool exclude)?  $default,) {final _that = this;
+switch (_that) {
+case _MitmSourceEntry() when $default != null:
+return $default(_that.network,_that.exclude);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MitmSourceEntry implements MitmSourceEntry {
+  const _MitmSourceEntry({required this.network, this.exclude = false});
+  factory _MitmSourceEntry.fromJson(Map<String, dynamic> json) => _$MitmSourceEntryFromJson(json);
+
+@override final  String network;
+@override@JsonKey() final  bool exclude;
+
+/// Create a copy of MitmSourceEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MitmSourceEntryCopyWith<_MitmSourceEntry> get copyWith => __$MitmSourceEntryCopyWithImpl<_MitmSourceEntry>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MitmSourceEntryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MitmSourceEntry&&(identical(other.network, network) || other.network == network)&&(identical(other.exclude, exclude) || other.exclude == exclude));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,network,exclude);
+}
+
+@override
+String toString() {
+    return 'MitmSourceEntry(network: $network, exclude: $exclude)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MitmSourceEntryCopyWith<$Res> implements $MitmSourceEntryCopyWith<$Res> {
+  factory _$MitmSourceEntryCopyWith(_MitmSourceEntry value, $Res Function(_MitmSourceEntry) _then) = __$MitmSourceEntryCopyWithImpl;
+@override @useResult
+$Res call({
+ String network, bool exclude
+});
+
+
+
+
+}
+/// @nodoc
+class __$MitmSourceEntryCopyWithImpl<$Res>
+    implements _$MitmSourceEntryCopyWith<$Res> {
+  __$MitmSourceEntryCopyWithImpl(this._self, this._then);
+
+  final _MitmSourceEntry _self;
+  final $Res Function(_MitmSourceEntry) _then;
+
+/// Create a copy of MitmSourceEntry
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? network = null,Object? exclude = null,}) {
+  return _then(_MitmSourceEntry(
+network: null == network ? _self.network : network // ignore: cast_nullable_to_non_nullable
+as String,exclude: null == exclude ? _self.exclude : exclude // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$MitmExchangeSummary {
@@ -3223,7 +5161,7 @@ as String,
 /// @nodoc
 mixin _$VpnOptions {
 
- bool get enable; int get port; bool get ipv6; bool get dnsHijacking; AccessControlProps get accessControlProps; bool get allowBypass; bool get systemProxy; List<String> get bypassDomain; String get stack; List<String> get routeAddress; int get mtu; String get congestionController;
+ bool get enable; int get port; bool get ipv6; bool get dnsHijacking; AccessControlProps get accessControlProps; bool get allowBypass; bool get systemProxy; List<String> get bypassDomain; List<String> get routeAddress; int get mtu; String get congestionController; bool get rootTun;
 /// Create a copy of VpnOptions
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3237,20 +5175,20 @@ $VpnOptionsCopyWith<VpnOptions> get copyWith => _$VpnOptionsCopyWithImpl<VpnOpti
 @override
 bool operator ==(Object other) {
   final _this = this as VpnOptions;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnOptions&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.ipv6, _this.ipv6) || other.ipv6 == _this.ipv6)&&(identical(other.dnsHijacking, _this.dnsHijacking) || other.dnsHijacking == _this.dnsHijacking)&&(identical(other.accessControlProps, _this.accessControlProps) || other.accessControlProps == _this.accessControlProps)&&(identical(other.allowBypass, _this.allowBypass) || other.allowBypass == _this.allowBypass)&&(identical(other.systemProxy, _this.systemProxy) || other.systemProxy == _this.systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, _this.bypassDomain)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VpnOptions&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.ipv6, _this.ipv6) || other.ipv6 == _this.ipv6)&&(identical(other.dnsHijacking, _this.dnsHijacking) || other.dnsHijacking == _this.dnsHijacking)&&(identical(other.accessControlProps, _this.accessControlProps) || other.accessControlProps == _this.accessControlProps)&&(identical(other.allowBypass, _this.allowBypass) || other.allowBypass == _this.allowBypass)&&(identical(other.systemProxy, _this.systemProxy) || other.systemProxy == _this.systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, _this.bypassDomain)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&(identical(other.rootTun, _this.rootTun) || other.rootTun == _this.rootTun));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as VpnOptions;
-  return Object.hash(runtimeType,_this.enable,_this.port,_this.ipv6,_this.dnsHijacking,_this.accessControlProps,_this.allowBypass,_this.systemProxy,const DeepCollectionEquality().hash(_this.bypassDomain),_this.stack,const DeepCollectionEquality().hash(_this.routeAddress),_this.mtu,_this.congestionController);
+  return Object.hash(runtimeType,_this.enable,_this.port,_this.ipv6,_this.dnsHijacking,_this.accessControlProps,_this.allowBypass,_this.systemProxy,const DeepCollectionEquality().hash(_this.bypassDomain),const DeepCollectionEquality().hash(_this.routeAddress),_this.mtu,_this.congestionController,_this.rootTun);
 }
 
 @override
 String toString() {
   final _this = this as VpnOptions;
-  return 'VpnOptions(enable: ${_this.enable}, port: ${_this.port}, ipv6: ${_this.ipv6}, dnsHijacking: ${_this.dnsHijacking}, accessControlProps: ${_this.accessControlProps}, allowBypass: ${_this.allowBypass}, systemProxy: ${_this.systemProxy}, bypassDomain: ${_this.bypassDomain}, stack: ${_this.stack}, routeAddress: ${_this.routeAddress}, mtu: ${_this.mtu}, congestionController: ${_this.congestionController})';
+  return 'VpnOptions(enable: ${_this.enable}, port: ${_this.port}, ipv6: ${_this.ipv6}, dnsHijacking: ${_this.dnsHijacking}, accessControlProps: ${_this.accessControlProps}, allowBypass: ${_this.allowBypass}, systemProxy: ${_this.systemProxy}, bypassDomain: ${_this.bypassDomain}, routeAddress: ${_this.routeAddress}, mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, rootTun: ${_this.rootTun})';
 }
 
 
@@ -3261,7 +5199,7 @@ abstract mixin class $VpnOptionsCopyWith<$Res>  {
   factory $VpnOptionsCopyWith(VpnOptions value, $Res Function(VpnOptions) _then) = _$VpnOptionsCopyWithImpl;
 @useResult
 $Res call({
- bool enable, int port, bool ipv6, bool dnsHijacking, AccessControlProps accessControlProps, bool allowBypass, bool systemProxy, List<String> bypassDomain, String stack, List<String> routeAddress, int mtu, String congestionController
+ bool enable, int port, bool ipv6, bool dnsHijacking, AccessControlProps accessControlProps, bool allowBypass, bool systemProxy, List<String> bypassDomain, List<String> routeAddress, int mtu, String congestionController, bool rootTun
 });
 
 
@@ -3278,7 +5216,7 @@ class _$VpnOptionsCopyWithImpl<$Res>
 
 /// Create a copy of VpnOptions
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? port = null,Object? ipv6 = null,Object? dnsHijacking = null,Object? accessControlProps = null,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? stack = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? port = null,Object? ipv6 = null,Object? dnsHijacking = null,Object? accessControlProps = null,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? rootTun = null,}) {
   return _then(VpnOptions(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
@@ -3288,11 +5226,11 @@ as bool,accessControlProps: null == accessControlProps ? _self.accessControlProp
 as AccessControlProps,allowBypass: null == allowBypass ? _self.allowBypass : allowBypass // ignore: cast_nullable_to_non_nullable
 as bool,systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self.bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
-as List<String>,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as String,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
-as String,
+as String,rootTun: null == rootTun ? _self.rootTun : rootTun // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of VpnOptions
@@ -3386,10 +5324,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String stack,  List<String> routeAddress,  int mtu,  String congestionController)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  List<String> routeAddress,  int mtu,  String congestionController,  bool rootTun)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VpnOptions() when $default != null:
-return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController);case _:
+return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.routeAddress,_that.mtu,_that.congestionController,_that.rootTun);case _:
   return orElse();
 
 }
@@ -3407,10 +5345,10 @@ return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.acce
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String stack,  List<String> routeAddress,  int mtu,  String congestionController)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  List<String> routeAddress,  int mtu,  String congestionController,  bool rootTun)  $default,) {final _that = this;
 switch (_that) {
 case _VpnOptions():
-return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController);case _:
+return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.routeAddress,_that.mtu,_that.congestionController,_that.rootTun);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3427,10 +5365,10 @@ return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.acce
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  String stack,  List<String> routeAddress,  int mtu,  String congestionController)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  int port,  bool ipv6,  bool dnsHijacking,  AccessControlProps accessControlProps,  bool allowBypass,  bool systemProxy,  List<String> bypassDomain,  List<String> routeAddress,  int mtu,  String congestionController,  bool rootTun)?  $default,) {final _that = this;
 switch (_that) {
 case _VpnOptions() when $default != null:
-return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController);case _:
+return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.accessControlProps,_that.allowBypass,_that.systemProxy,_that.bypassDomain,_that.routeAddress,_that.mtu,_that.congestionController,_that.rootTun);case _:
   return null;
 
 }
@@ -3442,7 +5380,7 @@ return $default(_that.enable,_that.port,_that.ipv6,_that.dnsHijacking,_that.acce
 @JsonSerializable()
 
 class _VpnOptions implements VpnOptions {
-  const _VpnOptions({required this.enable, required this.port, required this.ipv6, required this.dnsHijacking, required this.accessControlProps, required this.allowBypass, required this.systemProxy, required  List<String> bypassDomain, required this.stack,  List<String> routeAddress = const [], this.mtu = 0, this.congestionController = ''}): _bypassDomain = bypassDomain,_routeAddress = routeAddress;
+  const _VpnOptions({required this.enable, required this.port, required this.ipv6, required this.dnsHijacking, required this.accessControlProps, required this.allowBypass, required this.systemProxy, required  List<String> bypassDomain,  List<String> routeAddress = const [], this.mtu = 0, this.congestionController = '', this.rootTun = false}): _bypassDomain = bypassDomain,_routeAddress = routeAddress;
   factory _VpnOptions.fromJson(Map<String, dynamic> json) => _$VpnOptionsFromJson(json);
 
 @override final  bool enable;
@@ -3459,7 +5397,6 @@ class _VpnOptions implements VpnOptions {
   return EqualUnmodifiableListView(_bypassDomain);
 }
 
-@override final  String stack;
  final  List<String> _routeAddress;
 @override@JsonKey() List<String> get routeAddress {
   if (_routeAddress is EqualUnmodifiableListView) return _routeAddress;
@@ -3469,6 +5406,7 @@ class _VpnOptions implements VpnOptions {
 
 @override@JsonKey() final  int mtu;
 @override@JsonKey() final  String congestionController;
+@override@JsonKey() final  bool rootTun;
 
 /// Create a copy of VpnOptions
 /// with the given fields replaced by the non-null parameter values.
@@ -3483,18 +5421,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.dnsHijacking, dnsHijacking) || other.dnsHijacking == dnsHijacking)&&(identical(other.accessControlProps, accessControlProps) || other.accessControlProps == accessControlProps)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, _bypassDomain)&&(identical(other.stack, stack) || other.stack == stack)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VpnOptions&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.port, port) || other.port == port)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.dnsHijacking, dnsHijacking) || other.dnsHijacking == dnsHijacking)&&(identical(other.accessControlProps, accessControlProps) || other.accessControlProps == accessControlProps)&&(identical(other.allowBypass, allowBypass) || other.allowBypass == allowBypass)&&(identical(other.systemProxy, systemProxy) || other.systemProxy == systemProxy)&&const DeepCollectionEquality().equals(other.bypassDomain, _bypassDomain)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&(identical(other.rootTun, rootTun) || other.rootTun == rootTun));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enable,port,ipv6,dnsHijacking,accessControlProps,allowBypass,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),stack,const DeepCollectionEquality().hash(_routeAddress),mtu,congestionController);
+    return Object.hash(runtimeType,enable,port,ipv6,dnsHijacking,accessControlProps,allowBypass,systemProxy,const DeepCollectionEquality().hash(_bypassDomain),const DeepCollectionEquality().hash(_routeAddress),mtu,congestionController,rootTun);
 }
 
 @override
 String toString() {
-    return 'VpnOptions(enable: $enable, port: $port, ipv6: $ipv6, dnsHijacking: $dnsHijacking, accessControlProps: $accessControlProps, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, stack: $stack, routeAddress: $routeAddress, mtu: $mtu, congestionController: $congestionController)';
+    return 'VpnOptions(enable: $enable, port: $port, ipv6: $ipv6, dnsHijacking: $dnsHijacking, accessControlProps: $accessControlProps, allowBypass: $allowBypass, systemProxy: $systemProxy, bypassDomain: $bypassDomain, routeAddress: $routeAddress, mtu: $mtu, congestionController: $congestionController, rootTun: $rootTun)';
 }
 
 
@@ -3505,7 +5443,7 @@ abstract mixin class _$VpnOptionsCopyWith<$Res> implements $VpnOptionsCopyWith<$
   factory _$VpnOptionsCopyWith(_VpnOptions value, $Res Function(_VpnOptions) _then) = __$VpnOptionsCopyWithImpl;
 @override @useResult
 $Res call({
- bool enable, int port, bool ipv6, bool dnsHijacking, AccessControlProps accessControlProps, bool allowBypass, bool systemProxy, List<String> bypassDomain, String stack, List<String> routeAddress, int mtu, String congestionController
+ bool enable, int port, bool ipv6, bool dnsHijacking, AccessControlProps accessControlProps, bool allowBypass, bool systemProxy, List<String> bypassDomain, List<String> routeAddress, int mtu, String congestionController, bool rootTun
 });
 
 
@@ -3522,7 +5460,7 @@ class __$VpnOptionsCopyWithImpl<$Res>
 
 /// Create a copy of VpnOptions
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? port = null,Object? ipv6 = null,Object? dnsHijacking = null,Object? accessControlProps = null,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? stack = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? port = null,Object? ipv6 = null,Object? dnsHijacking = null,Object? accessControlProps = null,Object? allowBypass = null,Object? systemProxy = null,Object? bypassDomain = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? rootTun = null,}) {
   return _then(_VpnOptions(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
@@ -3532,11 +5470,11 @@ as bool,accessControlProps: null == accessControlProps ? _self.accessControlProp
 as AccessControlProps,allowBypass: null == allowBypass ? _self.allowBypass : allowBypass // ignore: cast_nullable_to_non_nullable
 as bool,systemProxy: null == systemProxy ? _self.systemProxy : systemProxy // ignore: cast_nullable_to_non_nullable
 as bool,bypassDomain: null == bypassDomain ? _self._bypassDomain : bypassDomain // ignore: cast_nullable_to_non_nullable
-as List<String>,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as String,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as List<String>,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
-as String,
+as String,rootTun: null == rootTun ? _self.rootTun : rootTun // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

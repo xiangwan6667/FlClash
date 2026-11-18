@@ -85,8 +85,7 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       },
     );
     ref.listenManual(mitmModulesProvider, (prev, next) {
-      if (rsFeature &&
-          prev?.value != null &&
+      if (prev?.value != null &&
           next.hasValue &&
           ref.read(patchClashConfigProvider).mitm.enable) {
         ref
@@ -367,6 +366,8 @@ class _CoreContainerState extends ConsumerState<CoreManager>
       return;
     }
     ref.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
+    ref.read(coreStopReasonProvider.notifier).value = message;
+    ref.read(setupActionProvider.notifier).onCoreLost();
     if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       dialogs.showBanner(message, level: BannerLevel.error);
     }

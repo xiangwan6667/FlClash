@@ -6,7 +6,6 @@ extension on GeneralOverrideKey {
     GeneralOverrideKey.unifiedDelay => l.unifiedDelay,
     GeneralOverrideKey.tcpConcurrent => l.tcpConcurrent,
     GeneralOverrideKey.ipv6 => 'IPv6',
-    GeneralOverrideKey.geodataLoader => l.geodataLoader,
   };
 }
 
@@ -24,11 +23,6 @@ String _generalOverrideDescription(AppLocalizations l) => l.generalOverrideDesc;
 
 String? _validateTestUrl(String? value, AppLocalizations l) =>
     value?.isUrl == true ? null : l.urlTip(l.testUrl);
-
-final _generalOverrideKeys = [
-  for (final key in GeneralOverrideKey.values)
-    if (!rsFeature || key != GeneralOverrideKey.geodataLoader) key,
-];
 
 const _generalOverrideSpec = _GeneralOverrideSpec();
 
@@ -48,7 +42,7 @@ class _GeneralOverrideSpec
   String title(AppLocalizations l) => l.core;
 
   @override
-  List<GeneralOverrideKey> get values => _generalOverrideKeys;
+  List<GeneralOverrideKey> get values => GeneralOverrideKey.values;
 
   @override
   NullStatusIllustration get illustration => NullStatusIllustration.data;
@@ -86,14 +80,6 @@ class _GeneralOverrideSpec
         GeneralOverrideKey.ipv6 => ToggleOverrideField(
           (config) => config.ipv6,
           (config, value) => config.copyWith(ipv6: value),
-        ),
-        GeneralOverrideKey.geodataLoader => ToggleOverrideField(
-          (config) => config.geodataLoader == GeodataLoader.memconservative,
-          (config, value) => config.copyWith(
-            geodataLoader: value
-                ? GeodataLoader.memconservative
-                : GeodataLoader.standard,
-          ),
         ),
       };
 }

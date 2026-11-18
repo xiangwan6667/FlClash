@@ -208,6 +208,7 @@ void main() {
               ruleAction: RuleAction.DOMAIN_SUFFIX,
               content: 'added.example',
               ruleTarget: 'MATCH',
+              customExit: true,
             ),
           ],
           defaultUA: 'FlClash-Test',
@@ -251,48 +252,257 @@ void main() {
     expect(lastMatchTarget(['DOMAIN,x.test,B']), isNull);
   });
 
-  test(
-    'makeRealProfileTask routes MATCH placeholders to matchTarget',
-    () async {
+  group('custom exits', () {
+    Rule exitRule(String content, String exit) => Rule(
+      ruleAction: RuleAction.DOMAIN_SUFFIX,
+      content: content,
+      ruleTarget: exit,
+      customExit: true,
+    );
+
+    Future<List<Object?>> addedRulesOf({
+      List<String> groups = const [],
+      Map<String, String> exitTargets = const {},
+      Set<String>? outboundNames,
+      String? defaultExitTarget,
+      List<Rule>? addedRules,
+    }) async {
       final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
         jsonEncode({
-          'proxies': [],
-          'rules': ['DOMAIN,existing.example,DIRECT', 'MATCH,Original'],
+          'proxies': [
+            {'name': 'HK', 'type': 'ss'},
+          ],
+          'proxy-groups': [
+            for (final name in ['Proxy', ...groups])
+              {'name': name, 'type': 'select'},
+          ],
+          'rules': ['DOMAIN,existing.example,DIRECT', 'MATCH,Proxy'],
         }),
       );
-      final state = MakeRealProfileState(
-        profilesPath: '/profiles',
-        profileId: 7,
-        rawConfig: rawConfig,
-        realPatchConfig: const PatchClashConfig(),
-        appendSystemDns: false,
-        proxyGroups: const [],
-        rules: const [],
-        addedRules: const [
-          Rule(
-            ruleAction: RuleAction.DOMAIN_SUFFIX,
-            content: 'added.example',
-            ruleTarget: 'MATCH',
-          ),
-        ],
-        defaultUA: 'FlClash-Test',
-        matchTarget: 'HK',
+      final real = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 7,
+          rawConfig: rawConfig,
+          realPatchConfig: const PatchClashConfig(),
+          appendSystemDns: false,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules:
+              addedRules ??
+              [exitRule('a.example', 'Media'), exitRule('b.example', 'AI')],
+          defaultUA: 'FlClash-Test',
+          exitTargets: exitTargets,
+          outboundNames: outboundNames,
+          defaultExitTarget: defaultExitTarget,
+        ),
       );
+      final rules = (loadYaml(real.yaml) as YamlMap)['rules'] as List;
+      return rules.take(rules.length - 2).toList();
+    }
 
-      final overridden = await makeRealProfileTask(state);
-      expect((loadYaml(overridden.yaml) as YamlMap)['rules'], [
-        'DOMAIN-SUFFIX,added.example,HK',
-        'DOMAIN,existing.example,DIRECT',
-        'MATCH,Original',
+    test('go where each is mapped', () async {
+      expect(await addedRulesOf(exitTargets: {'Media': 'HK', 'AI': 'DIRECT'}), [
+        'DOMAIN-SUFFIX,a.example,HK',
+        'DOMAIN-SUFFIX,b.example,DIRECT',
       ]);
+    });
 
-      final blank = await makeRealProfileTask(state.copyWith(matchTarget: ' '));
+    test('go by default where the last MATCH rule goes', () async {
+      expect(await addedRulesOf(exitTargets: {'AI': 'HK'}), [
+        'DOMAIN-SUFFIX,a.example,Proxy',
+        'DOMAIN-SUFFIX,b.example,HK',
+      ]);
+    });
+
+    test('take a group of their name only while left on default', () async {
       expect(
-        (loadYaml(blank.yaml) as YamlMap)['rules'].first,
-        'DOMAIN-SUFFIX,added.example,Original',
+        await addedRulesOf(groups: ['Media', 'AI'], exitTargets: {'AI': 'HK'}),
+        ['DOMAIN-SUFFIX,a.example,Media', 'DOMAIN-SUFFIX,b.example,HK'],
       );
-    },
-  );
+    });
+
+    test('fall back in the same order from a target that is gone', () async {
+      expect(
+        await addedRulesOf(
+          groups: ['AI'],
+          exitTargets: {'Media': 'Gone', 'AI': 'Gone'},
+        ),
+        ['DOMAIN-SUFFIX,a.example,Proxy', 'DOMAIN-SUFFIX,b.example,AI'],
+      );
+    });
+
+    test('read the outbounds and default given for a merged profile', () async {
+      expect(
+        await addedRulesOf(
+          outboundNames: {'US'},
+          defaultExitTarget: 'US',
+          exitTargets: {'AI': 'HK'},
+        ),
+        ['DOMAIN-SUFFIX,a.example,US', 'DOMAIN-SUFFIX,b.example,US'],
+      );
+    });
+
+    test('leave a rule that names its target alone', () async {
+      expect(
+        await addedRulesOf(
+          addedRules: const [
+            Rule(
+              ruleAction: RuleAction.DOMAIN,
+              content: 'c.example',
+              ruleTarget: 'Media',
+            ),
+          ],
+          exitTargets: {'Media': 'HK'},
+        ),
+        ['DOMAIN,c.example,Media'],
+      );
+    });
+  });
+
+  group('module exits', () {
+    const module = MitmModuleSource(
+      content: '''
+[Rule]
+DOMAIN,a.example,Media
+DOMAIN,b.example,PROXY
+RULE-SET,https://example.com/ai.list,AI,no-resolve
+DOMAIN,c.example,REJECT
+''',
+    );
+
+    List<Object?> moduleRulesOf(YamlMap config) =>
+        (config['rules'] as List).take(4).toList();
+
+    Future<YamlMap> normal(Map<String, String> exitTargets) async {
+      final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+        jsonEncode({
+          'proxies': [
+            {'name': 'HK', 'type': 'ss'},
+          ],
+          'proxy-groups': [
+            for (final name in ['Proxy', 'Media'])
+              {'name': name, 'type': 'select'},
+          ],
+          'rules': ['MATCH,Proxy'],
+        }),
+      );
+      final real = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 7,
+          rawConfig: rawConfig,
+          realPatchConfig: const PatchClashConfig(mitm: Mitm(enable: true)),
+          appendSystemDns: false,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules: const [],
+          defaultUA: 'FlClash-Test',
+          exitTargets: exitTargets,
+          mitmModules: const [module],
+        ),
+      );
+      return loadYaml(real.yaml) as YamlMap;
+    }
+
+    test('go to a group of their name, then where MATCH goes', () async {
+      final config = await normal(const {});
+      final rules = moduleRulesOf(config);
+      expect(rules.take(2), [
+        'DOMAIN,a.example,Media',
+        'DOMAIN,b.example,Proxy',
+      ]);
+      expect('${rules[2]}', matches(r'^RULE-SET,mitm-\w+,Proxy,no-resolve$'));
+      expect(rules[3], 'DOMAIN,c.example,REJECT');
+      final set = '${rules[2]}'.split(',')[1];
+      expect(
+        (config['rule-providers'] as YamlMap)[set]['url'],
+        'https://example.com/ai.list',
+      );
+    });
+
+    test(
+      'go where the profile maps them, and back from a target gone',
+      () async {
+        final rules = moduleRulesOf(
+          await normal({'PROXY': 'HK', 'AI': 'DIRECT', 'Media': 'Gone'}),
+        );
+        expect(rules[0], 'DOMAIN,a.example,Media');
+        expect(rules[1], 'DOMAIN,b.example,HK');
+        expect('${rules[2]}', endsWith(',DIRECT,no-resolve'));
+      },
+    );
+
+    test('read an attached rule set where it is, not confined', () async {
+      final rawConfig = await decodeJSONTask<Map<String, dynamic>>(
+        jsonEncode({
+          'rules': ['MATCH,DIRECT'],
+        }),
+      );
+      final real = await makeRealProfileTask(
+        MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 7,
+          rawConfig: rawConfig,
+          realPatchConfig: const PatchClashConfig(mitm: Mitm(enable: true)),
+          appendSystemDns: false,
+          proxyGroups: const [],
+          rules: const [],
+          addedRules: const [],
+          defaultUA: 'FlClash-Test',
+          mitmModules: const [
+            MitmModuleSource(
+              content: '[Rule]\nDOMAIN-SET,reject.conf,REJECT\n',
+              resources: {'reject.conf': 'ab12.conf'},
+            ),
+          ],
+        ),
+      );
+      final config = loadYaml(real.yaml) as YamlMap;
+      final set = '${(config['rules'] as List).first}'.split(',')[1];
+      expect(Map.of((config['rule-providers'] as YamlMap)[set] as YamlMap), {
+        'type': 'file',
+        'behavior': 'domain',
+        'format': 'domain-set',
+        'path': 'mitm/resources/ab12.conf',
+      });
+    });
+
+    test('in a custom profile go to its own groups', () async {
+      final real = await makeRealProfileTask(
+        const MakeRealProfileState(
+          profilesPath: '/profiles',
+          profileId: 9,
+          rawConfig: {},
+          realPatchConfig: PatchClashConfig(mitm: Mitm(enable: true)),
+          appendSystemDns: false,
+          proxyGroups: [
+            ProxyGroup(
+              id: 1,
+              name: 'Media',
+              type: GroupType.Selector,
+              proxies: ['DIRECT'],
+            ),
+            ProxyGroup(
+              id: 2,
+              name: 'Select',
+              type: GroupType.Selector,
+              proxies: ['DIRECT'],
+            ),
+          ],
+          rules: [Rule(ruleAction: RuleAction.MATCH, ruleTarget: 'Select')],
+          addedRules: [],
+          defaultUA: 'FlClash-Test',
+          exitTargets: {'AI': 'Media'},
+          mitmModules: [module],
+        ),
+      );
+      final rules = moduleRulesOf(loadYaml(real.yaml) as YamlMap);
+      expect(rules[0], 'DOMAIN,a.example,Media');
+      expect(rules[1], 'DOMAIN,b.example,Select');
+      expect('${rules[2]}', endsWith(',Media,no-resolve'));
+    });
+  });
 
   // The core re-reads these two keys out of the generated config on every
   // profile apply and adopts whatever it finds, so a subscription that ships
@@ -725,14 +935,37 @@ void main() {
     });
   });
 
+  group('transparent ports', () {
+    test('follow what each platform can open', () {
+      expect(transparentPortsOf('linux'), (redir: true, tproxy: true));
+      expect(transparentPortsOf('android'), (redir: true, tproxy: true));
+      expect(transparentPortsOf('macos'), (redir: true, tproxy: false));
+      expect(transparentPortsOf('windows'), (redir: false, tproxy: false));
+    });
+
+    test('a port the platform cannot open is sent as 0 and kept', () {
+      const config = PatchClashConfig(redirPort: 7892, tproxyPort: 7894);
+      Map<String, dynamic> inbound(TransparentPorts ports) =>
+          inboundConfigOf(config, authentication: [], transparent: ports);
+
+      final all = inbound((redir: true, tproxy: true));
+      expect([all['redir-port'], all['tproxy-port']], [7892, 7894]);
+      final none = inbound((redir: false, tproxy: false));
+      expect([none['redir-port'], none['tproxy-port']], [0, 0]);
+      expect([config.redirPort, config.tproxyPort], [7892, 7894]);
+    });
+  });
+
   group('makeRealProfileTask network settings', () {
     Future<YamlMap> runWith(
       PatchClashConfig realPatchConfig,
       Map<String, dynamic> rawConfig, {
       List<MitmModuleSource> mitmModules = const [],
+      String? os,
     }) async {
       final result = await makeRealProfileTask(
         MakeRealProfileState(
+          os: os,
           profilesPath: '/profiles',
           profileId: 14,
           rawConfig: await decodeJSONTask<Map<String, dynamic>>(
@@ -752,7 +985,7 @@ void main() {
 
     test('tun leaves the stack and the rest to the profile', () async {
       final config = await runWith(
-        const PatchClashConfig(tun: Tun(stack: TunStack.gvisor, mtu: 1400)),
+        const PatchClashConfig(tun: Tun(mtu: 1400)),
         {
           'tun': {
             'stack': 'system',
@@ -798,6 +1031,29 @@ void main() {
 
       expect(config['routing-mark'], 6666);
       expect(config['disable-keep-alive'], true);
+    });
+
+    group('a desktop backup with a bound interface and a routing mark', () {
+      const desktop = PatchClashConfig(
+        interfaceNameMode: InterfaceNameMode.custom,
+        interfaceName: 'en0',
+        routingMark: 6666,
+      );
+      const profile = {'interface-name': 'wlan0', 'routing-mark': 1};
+
+      test('binds and marks nothing on Android', () async {
+        final config = await runWith(desktop, profile, os: 'android');
+
+        expect(config['interface-name'], '');
+        expect(config['routing-mark'], 0);
+      });
+
+      test('keeps both on Linux', () async {
+        final config = await runWith(desktop, profile, os: 'linux');
+
+        expect(config['interface-name'], 'en0');
+        expect(config['routing-mark'], 6666);
+      });
     });
 
     test('the mitm section is the app setting, never the profile', () async {
@@ -863,6 +1119,80 @@ DOMAIN-SUFFIX,ads.example.com,REJECT
       expect(config['rules'], [
         'DOMAIN-SUFFIX,ads.example.com,REJECT',
         'MATCH,DIRECT',
+      ]);
+    });
+
+    test('module network settings go over the profile and the user', () async {
+      const module = MitmModuleSource(
+        content: '''
+[General]
+dns-server = 9.9.9.9
+always-real-ip = %APPEND% *.game.test
+tun-excluded-routes = %APPEND% 10.0.0.0/8
+tun-included-routes = 172.16.0.0/12
+
+[Host]
+ad.test = 0.0.0.0
+own.test = 0.0.0.0
+''',
+      );
+      Future<YamlMap> run(ProfileOverrides overrides) async {
+        final result = await makeRealProfileTask(
+          MakeRealProfileState(
+            profilesPath: '/profiles',
+            profileId: 14,
+            rawConfig: await decodeJSONTask<Map<String, dynamic>>(
+              jsonEncode({
+                'dns': {
+                  'enable': true,
+                  'nameserver': ['1.1.1.1'],
+                  'fake-ip-filter': ['*.lan'],
+                },
+                'tun': {
+                  'route-exclude-address': ['192.168.0.0/16'],
+                },
+                'rules': ['MATCH,DIRECT'],
+              }),
+            ),
+            realPatchConfig: const PatchClashConfig(
+              mitm: Mitm(enable: true),
+              hosts: {'own.test': '127.0.0.1'},
+            ),
+            appendSystemDns: false,
+            proxyGroups: const [],
+            rules: const [],
+            addedRules: const [],
+            defaultUA: 'FlClash-Test',
+            overrides: overrides,
+            mitmModules: const [module],
+          ),
+        );
+        return loadYaml(result.yaml) as YamlMap;
+      }
+
+      final config = await run(const ProfileOverrides());
+      expect(config['dns']['nameserver'], ['9.9.9.9']);
+      expect(config['dns']['fake-ip-filter'], ['*.lan', '*.game.test']);
+      expect(config['hosts']['ad.test'], ['0.0.0.0']);
+      expect(config['hosts']['own.test'], ['0.0.0.0']);
+      expect(config['tun']['route-exclude-address'], [
+        '192.168.0.0/16',
+        '10.0.0.0/8',
+      ]);
+      expect(config['tun']['route-address'], isNull);
+
+      final overridden = await run(
+        const ProfileOverrides(
+          dns: Dns(nameserver: ['8.8.8.8']),
+          dnsOverrideKeys: {DnsOverrideKey.nameserver},
+          tun: ProfileTun(routeExcludeAddress: ['100.64.0.0/10']),
+          tunOverrideKeys: {TunOverrideKey.routeExcludeAddress},
+        ),
+      );
+      expect(overridden['dns']['nameserver'], ['9.9.9.9']);
+      expect(overridden['tun']['route-exclude-address'], [
+        '100.64.0.0/10',
+        '10.0.0.0/8',
       ]);
     });
 

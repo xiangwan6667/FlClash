@@ -136,7 +136,9 @@ void main() {
       service.frames.disconnect(StateError('gone'));
       await Future<void>.delayed(Duration.zero);
 
-      expect(reasons, ['Bad state: gone']);
+      expect(reasons, [
+        'The app lost its connection to the core: Bad state: gone',
+      ]);
       await subscription.cancel();
     });
 

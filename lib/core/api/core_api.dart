@@ -30,21 +30,29 @@ final class CoreOptionsArg {
 final class TunPatchArg {
   final bool enable;
   final String? device;
-  final String? stack;
   final bool? autoRoute;
 
-  const TunPatchArg({
-    required this.enable,
-    this.device,
-    this.stack,
-    this.autoRoute,
-  });
+  const TunPatchArg({required this.enable, this.device, this.autoRoute});
 
   JsonMap toJson() => {
     'enable': enable,
     'device': ?device,
-    'stack': ?stack,
     'autoRoute': ?autoRoute,
+  };
+}
+
+final class ControllerCorsArg {
+  final List<String> allowOrigins;
+  final bool allowPrivateNetwork;
+
+  const ControllerCorsArg({
+    required this.allowOrigins,
+    required this.allowPrivateNetwork,
+  });
+
+  JsonMap toJson() => {
+    'allowOrigins': allowOrigins,
+    'allowPrivateNetwork': allowPrivateNetwork,
   };
 }
 
@@ -60,6 +68,7 @@ final class ConfigPatch {
   final bool? tcpConcurrent;
   final String? externalController;
   final String? secret;
+  final ControllerCorsArg? externalControllerCors;
   final bool? unifiedDelay;
   final List<String>? authentication;
   final bool? geoAutoUpdate;
@@ -78,6 +87,7 @@ final class ConfigPatch {
     this.tcpConcurrent,
     this.externalController,
     this.secret,
+    this.externalControllerCors,
     this.unifiedDelay,
     this.authentication,
     this.geoAutoUpdate,
@@ -97,6 +107,7 @@ final class ConfigPatch {
     'tcpConcurrent': ?tcpConcurrent,
     'externalController': ?externalController,
     'secret': ?secret,
+    'externalControllerCors': ?externalControllerCors?.toJson(),
     'unifiedDelay': ?unifiedDelay,
     'authentication': ?authentication,
     'geoAutoUpdate': ?geoAutoUpdate,

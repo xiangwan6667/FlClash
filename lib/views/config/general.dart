@@ -3,6 +3,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/form/form.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/config/on_demand.dart';
 import 'package:fl_clash/views/config/override.dart';
@@ -101,6 +102,9 @@ class HostsItem extends ConsumerWidget {
     final hosts = ref.watch(
       patchClashConfigProvider.select((state) => state.hosts),
     );
+    final taken =
+        ref.watch(mitmTakeoverProvider).value?.hosts ??
+        const <String, String>{};
     return ListItem.open(
       title: const Text('Hosts'),
       subtitle: Text(
@@ -114,7 +118,13 @@ class HostsItem extends ConsumerWidget {
         keyMaxLength: TextInputLimits.domain,
         valueMaxLength: TextInputLimits.hostValue,
         titleBuilder: (item) => Text(item.key),
-        subtitleBuilder: (item) => Text(item.value),
+        subtitleBuilder: (item) => Text(
+          [
+            item.value,
+            if (taken[item.key] case final module?)
+              appLocalizations.mitmChangeReplacedBy(module),
+          ].join('\n'),
+        ),
       ),
       onChanged: (value) {
         if (value is! Map<String, String>) {
@@ -308,7 +318,15 @@ class GeneralView extends ConsumerWidget {
             )
             .ensureControllerSecret(),
       ),
-      if (externalController) const ExternalControllerSecretItem(),
+      if (externalController) ...[
+        const ExternalControllerSecretItem(),
+        _clashToggle(
+          title: (l) => l.externalControllerCors,
+          select: (state) => state.externalControllerCors,
+          update: (state, value) =>
+              state.copyWith(externalControllerCors: value),
+        ),
+      ],
       const AuthenticationItem(),
       if (authentication) ...const [
         AuthenticationAccountItem(),
@@ -321,10 +339,12 @@ class GeneralView extends ConsumerWidget {
     return [
       const DelayTestTimeoutItem(),
       _clashToggle(
-        title: (l) => l.findProcessMode,
+        title: (l) => l.alwaysFindProcess,
         select: (state) => state.findProcessMode == FindProcessMode.always,
         update: (state, value) => state.copyWith(
-          findProcessMode: value ? FindProcessMode.always : FindProcessMode.off,
+          findProcessMode: value
+              ? FindProcessMode.always
+              : FindProcessMode.strict,
         ),
       ),
       _appSettingToggle(
@@ -418,7 +438,11 @@ class GeneralView extends ConsumerWidget {
               authentication: authentication,
               externalController: externalController,
             ),
-            footer: appLocalizations.externalControllerDesc,
+            footer: [
+              appLocalizations.externalControllerDesc,
+              if (externalController)
+                appLocalizations.externalControllerCorsDesc,
+            ].join('\n'),
           ),
           generateSection(
             title: appLocalizations.connection,

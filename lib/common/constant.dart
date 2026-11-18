@@ -10,9 +10,24 @@ import 'package:fl_clash/models/models.dart';
 import 'package:flutter/widgets.dart';
 
 const appName = 'FlClash';
-const autoLaunchName = 'FlClash-rs';
+
+/// What the system shows for the installed package, as the packaging files
+/// name it.
+const packageDisplayName = rsSideBySide ? 'FlClash RS' : appName;
+
+const sideBySideName = rsSideBySide ? 'FlClash-rs' : appName;
+const _appSlug = rsSideBySide ? 'flclash-rs' : 'flclash';
+
+/// Root mode stays out of the network page until its TUN start is fixed.
+const rootTunOffered = false;
+
+/// Kept on every line: subscription servers match it in the User-Agent and
+/// the Helper accepts a Core socket only under a directory of this name.
+const productName = 'FlClash';
 const appHelperService = 'FlClashHelperService';
-const helperServiceName = 'FlClashRSHelperService';
+const helperServiceName = rsSideBySide
+    ? 'FlClashRSHelperService'
+    : 'FlClashHelperService';
 const coreManifestName = 'manifest.json';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
@@ -23,8 +38,9 @@ const helperPort = 47894;
 const helperPortKey =
     'SYSTEM\\CurrentControlSet\\Services\\$helperServiceName\\Runtime';
 const helperPortValue = 'Port';
-const helperSocketPath = '/run/flclash-rs/helper.sock';
-const helperUnitPath = '/etc/systemd/system/flclash-rs-helper.service';
+const helperSocketPath = '/run/$_appSlug/helper.sock';
+const helperUnitPath = '/etc/systemd/system/$_appSlug-helper.service';
+const linuxUrlHandlerDesktopId = '$_appSlug-url-handler.desktop';
 const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
 final helperProtocolVersion = Platform.isWindows ? '9' : '7';
 const maxTextScale = 1.4;
@@ -34,9 +50,14 @@ const watchExecution = false;
 
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
 
-/// Marks what the rs build adds or drops; the code it turns off goes once rs
-/// ships, with this flag.
-const rsFeature = true;
+/// Gates what only the Concord core of the rs line can serve, such as MITM.
+/// The rs line strips each check with `tool/strip_rs_feature.dart` instead of
+/// turning it on, so a check must take a form that tool reads.
+const rsFeature = false;
+
+/// Native and packaging files cannot read this;
+/// `test/tool/side_by_side_identity_test.dart` lists each and both its values.
+const rsSideBySide = true;
 
 const disclaimerVersion = 1;
 
@@ -52,7 +73,7 @@ String _privateSocketPath() {
         ? Directory.systemTemp.path
         : runtime;
   }
-  return '$base/$appName/${_randomId()}.sock';
+  return '$base/$productName/${_randomId()}.sock';
 }
 
 String _randomId() {

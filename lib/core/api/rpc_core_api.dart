@@ -520,11 +520,8 @@ final class RpcCoreApi implements CoreApi {
   );
 
   @override
-  Future<JsonMap> validateMitm(JsonMap config) => _call(
-    'mitm.validate',
-    (r) => _object(_object(r)['issues']),
-    params: {'config': config},
-  );
+  Future<JsonMap> validateMitm(JsonMap config) =>
+      _call('mitm.validate', (r) => _object(r), params: {'config': config});
 
   @override
   Future<String> issueMitmCertificate(String host) => _call(

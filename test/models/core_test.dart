@@ -49,7 +49,6 @@ void main() {
       allowBypass: true,
       systemProxy: true,
       bypassDomain: ['localhost'],
-      stack: 'mixed',
       routeAddress: ['0.0.0.0/0'],
       mtu: 9000,
     );
@@ -62,7 +61,6 @@ void main() {
         options.copyWith(allowBypass: false),
         options.copyWith(systemProxy: false),
         options.copyWith(bypassDomain: const ['example.com']),
-        options.copyWith(stack: 'gvisor'),
         options.copyWith(routeAddress: const ['10.0.0.0/8']),
         options.copyWith(mtu: 1500),
         options.copyWith(congestionController: 'bbr'),
@@ -122,7 +120,7 @@ void main() {
       final proxyOnly = options.copyWith(enable: false);
 
       expect(
-        proxyOnly.copyWith(ipv6: true, stack: 'gvisor', mtu: 1500).effective,
+        proxyOnly.copyWith(ipv6: true, mtu: 1500).effective,
         proxyOnly.effective,
       );
     });

@@ -274,7 +274,6 @@ Map<String, dynamic> _$SnifferConfigToJson(_SnifferConfig instance) =>
 _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
   enable: json['enable'] as bool? ?? false,
   device: json['device'] as String? ?? defaultTunDevice,
-  stack: $enumDecodeNullable(_$TunStackEnumMap, json['stack']) ?? TunStack.mips,
   routeAddress:
       (json['route-address'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -296,18 +295,10 @@ _Tun _$TunFromJson(Map<String, dynamic> json) => _Tun(
 Map<String, dynamic> _$TunToJson(_Tun instance) => <String, dynamic>{
   'enable': instance.enable,
   'device': instance.device,
-  'stack': _$TunStackEnumMap[instance.stack]!,
   'route-address': instance.routeAddress,
   'mtu': instance.mtu,
   'congestion-controller': instance.congestionController,
   'route-exclude-address': instance.routeExcludeAddress,
-};
-
-const _$TunStackEnumMap = {
-  TunStack.gvisor: 'gvisor',
-  TunStack.system: 'system',
-  TunStack.mixed: 'mixed',
-  TunStack.mips: 'mips',
 };
 
 _FallbackFilter _$FallbackFilterFromJson(
@@ -500,7 +491,6 @@ _ProfileTun _$ProfileTunFromJson(Map<String, dynamic> json) => _ProfileTun(
       defaultDnsHijack,
   udpTimeout: (json['udp-timeout'] as num?)?.toInt() ?? defaultTunUdpTimeout,
   disableIcmpForwarding: json['disable-icmp-forwarding'] as bool? ?? false,
-  gso: json['gso'] as bool? ?? false,
   includeInterface:
       (json['include-interface'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -543,7 +533,6 @@ Map<String, dynamic> _$ProfileTunToJson(_ProfileTun instance) =>
       'dns-hijack': instance.dnsHijack,
       'udp-timeout': instance.udpTimeout,
       'disable-icmp-forwarding': instance.disableIcmpForwarding,
-      'gso': instance.gso,
       'include-interface': instance.includeInterface,
       'exclude-interface': instance.excludeInterface,
       'include-uid': instance.includeUid,
@@ -678,7 +667,6 @@ const _$TunOverrideKeyEnumMap = {
   TunOverrideKey.dnsHijack: 'dns-hijack',
   TunOverrideKey.udpTimeout: 'udp-timeout',
   TunOverrideKey.disableIcmpForwarding: 'disable-icmp-forwarding',
-  TunOverrideKey.gso: 'gso',
   TunOverrideKey.includeInterface: 'include-interface',
   TunOverrideKey.excludeInterface: 'exclude-interface',
   TunOverrideKey.includeUid: 'include-uid',
@@ -772,6 +760,7 @@ _Rule _$RuleFromJson(Map<String, dynamic> json) => _Rule(
   noResolve: json['noResolve'] as bool? ?? false,
   src: json['src'] as bool? ?? false,
   order: json['order'] as String?,
+  customExit: json['customExit'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$RuleToJson(_Rule instance) => <String, dynamic>{
@@ -784,6 +773,7 @@ Map<String, dynamic> _$RuleToJson(_Rule instance) => <String, dynamic>{
   'noResolve': instance.noResolve,
   'src': instance.src,
   'order': instance.order,
+  'customExit': instance.customExit,
 };
 
 const _$RuleActionEnumMap = {
@@ -861,7 +851,9 @@ Map<String, dynamic> _$ClashConfigToJson(_ClashConfig instance) =>
 
 _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
     _PatchClashConfig(
-      mixedPort: (json['mixed-port'] as num?)?.toInt() ?? defaultMixedPort,
+      mixedPort: json['mixed-port'] == null
+          ? defaultMixedPort
+          : _mixedPortFromJson(json['mixed-port']),
       socksPort: (json['socks-port'] as num?)?.toInt() ?? 0,
       port: (json['port'] as num?)?.toInt() ?? 0,
       redirPort: (json['redir-port'] as num?)?.toInt() ?? 0,
@@ -876,9 +868,9 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
           $enumDecodeNullable(
             _$FindProcessModeEnumMap,
             json['find-process-mode'],
-            unknownValue: FindProcessMode.off,
+            unknownValue: FindProcessMode.strict,
           ) ??
-          FindProcessMode.off,
+          FindProcessMode.strict,
       interfaceNameMode:
           $enumDecodeNullable(
             _$InterfaceNameModeEnumMap,
@@ -915,9 +907,6 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
       geoXUrl: json['geox-url'] == null
           ? defaultGeoXUrl
           : _geoXUrlFromJson(json['geox-url'] as Map<String, Object?>?),
-      geodataLoader:
-          $enumDecodeNullable(_$GeodataLoaderEnumMap, json['geodata-loader']) ??
-          GeodataLoader.memconservative,
       globalUa: json['global-ua'] as String?,
       externalController:
           $enumDecodeNullable(
@@ -926,12 +915,13 @@ _PatchClashConfig _$PatchClashConfigFromJson(Map<String, dynamic> json) =>
           ) ??
           ExternalControllerStatus.close,
       secret: json['secret'] as String? ?? '',
+      externalControllerCors: json['external-controller-cors'] as bool? ?? true,
       hosts:
           (json['hosts'] as Map<String, dynamic>?)?.map(
             (k, e) => MapEntry(k, e as String),
           ) ??
           const {},
-      geoAutoUpdate: json['geo-auto-update'] as bool? ?? false,
+      geoAutoUpdate: json['geo-auto-update'] as bool? ?? true,
       geoUpdateInterval: (json['geo-update-interval'] as num?)?.toInt() ?? 24,
       testUrl: json['test-url'] as String? ?? defaultTestUrl,
       generalOverrideKeys: json['general-override-keys'] == null
@@ -973,11 +963,11 @@ Map<String, dynamic> _$PatchClashConfigToJson(_PatchClashConfig instance) =>
           .map((e) => _$TunOverrideKeyEnumMap[e]!)
           .toList(),
       'geox-url': _geoXUrlToJson(instance.geoXUrl),
-      'geodata-loader': _$GeodataLoaderEnumMap[instance.geodataLoader]!,
       'global-ua': instance.globalUa,
       'external-controller':
           _$ExternalControllerStatusEnumMap[instance.externalController]!,
       'secret': instance.secret,
+      'external-controller-cors': instance.externalControllerCors,
       'hosts': instance.hosts,
       'geo-auto-update': instance.geoAutoUpdate,
       'geo-update-interval': instance.geoUpdateInterval,
@@ -1004,18 +994,13 @@ const _$LogLevelEnumMap = {
 
 const _$FindProcessModeEnumMap = {
   FindProcessMode.always: 'always',
-  FindProcessMode.off: 'off',
+  FindProcessMode.strict: 'strict',
 };
 
 const _$InterfaceNameModeEnumMap = {
   InterfaceNameMode.clear: 'clear',
   InterfaceNameMode.follow: 'follow',
   InterfaceNameMode.custom: 'custom',
-};
-
-const _$GeodataLoaderEnumMap = {
-  GeodataLoader.standard: 'standard',
-  GeodataLoader.memconservative: 'memconservative',
 };
 
 const _$ExternalControllerStatusEnumMap = {
@@ -1028,7 +1013,6 @@ const _$GeneralOverrideKeyEnumMap = {
   GeneralOverrideKey.unifiedDelay: 'unified-delay',
   GeneralOverrideKey.tcpConcurrent: 'tcp-concurrent',
   GeneralOverrideKey.ipv6: 'ipv6',
-  GeneralOverrideKey.geodataLoader: 'geodata-loader',
 };
 
 _Mitm _$MitmFromJson(Map<String, dynamic> json) => _Mitm(

@@ -59,12 +59,7 @@ final Map<String, _Call> _calls = {
   ),
   'config.patch': (api) => api.patchConfig(
     const ConfigPatch(
-      tun: TunPatchArg(
-        enable: true,
-        device: 'd',
-        stack: 'mixed',
-        autoRoute: true,
-      ),
+      tun: TunPatchArg(enable: true, device: 'd', autoRoute: true),
       allowLan: true,
       mixedPort: 7890,
       findProcessMode: 'strict',

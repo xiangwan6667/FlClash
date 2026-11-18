@@ -41,6 +41,8 @@ class SetupAction extends _$SetupAction {
   final _listenerScheduler = SerialTaskScheduler();
   _RunRequest? _latestRunRequest;
   DateTime? _startTime;
+  var _resumeOnRestart = false;
+  ({String digest, Set<String> names})? _outboundNames;
   _SetupInputs? _appliedInputs;
   var _lastPushDuration = Duration.zero;
   var _pendingForceApply = false;
@@ -48,7 +50,7 @@ class SetupAction extends _$SetupAction {
   Future<void> _loadConfigWarnings() async {
     try {
       final warnings = await _core.getConfigWarnings();
-      ref.read(configWarningsStateProvider.notifier).value = warnings;
+      ref.read(configWarningsStateProvider.notifier).report(warnings);
     } catch (error) {
       commonPrint.log(
         'config warnings unavailable: ${compactError(error)}',
@@ -172,6 +174,23 @@ class SetupAction extends _$SetupAction {
     }
   }
 
+  bool get wantsRunning => ref.read(isStartProvider) || _resumeOnRestart;
+
+  /// The lost session gets no stop; work begun for the old run stops counting.
+  void onCoreLost() {
+    if (_startTime == null) {
+      return;
+    }
+    _resumeOnRestart = true;
+    _latestRunRequest = null;
+    _setLocalRunning(false);
+    ref.read(runningVpnOptionsProvider.notifier).value = null;
+  }
+
+  void resumeOnRestart() {
+    _resumeOnRestart = true;
+  }
+
   Future<bool> setRunning(bool running, {bool initialize = false}) {
     if (running && !initialize && !ref.read(initProvider)) {
       return Future.value(true);
@@ -191,6 +210,7 @@ class SetupAction extends _$SetupAction {
       previousStartTime: _startTime,
     );
     _latestRunRequest = request;
+    _resumeOnRestart = false;
     _setLocalRunning(running);
     if (request.initialize) {
       globalState.needInitStatus = false;
@@ -206,8 +226,13 @@ class SetupAction extends _$SetupAction {
           force: !request.resume,
           preloadInvoke: () => _startCoreRunning(request),
         );
-      } catch (_) {
-        applied = false;
+      } catch (error) {
+        if (_isCurrent(request)) {
+          dialogs.showBanner(
+            userFacingErrorMessage(error, currentAppLocalizations),
+            level: BannerLevel.error,
+          );
+        }
       }
       if (!applied && _isCurrent(request)) {
         await globalState.safeRun(() => setRunning(false));
@@ -398,16 +423,24 @@ class SetupAction extends _$SetupAction {
         when mode != ref.read(patchClashConfigProvider).mode) {
       changeMode(mode);
     }
+    final mixedPort = change.mixedPort;
+    final refusedPort = mixedPort != null && !isUsableMixedPort(mixedPort);
+    final keptPort = ref.read(patchClashConfigProvider).mixedPort;
+    if (mixedPort != null && !refusedPort && mixedPort != keptPort) {
+      commonPrint.log('mixed-port $keptPort -> $mixedPort from the Core');
+    }
     ref.read(patchClashConfigProvider.notifier).update((state) {
       final overrides = state.generalOverrideKeys;
       return state.copyWith(
         logLevel:
             LogLevel.values.asNameMap()[change.logLevel] ?? state.logLevel,
         allowLan: change.allowLan ?? state.allowLan,
-        mixedPort: change.mixedPort ?? state.mixedPort,
-        findProcessMode:
-            FindProcessMode.values.asNameMap()[change.findProcessMode] ??
-            state.findProcessMode,
+        mixedPort: refusedPort ? state.mixedPort : mixedPort ?? state.mixedPort,
+        findProcessMode: switch (change.findProcessMode) {
+          null => state.findProcessMode,
+          final name =>
+            FindProcessMode.values.asNameMap()[name] ?? FindProcessMode.strict,
+        },
         ipv6: overrides.contains(GeneralOverrideKey.ipv6)
             ? change.ipv6 ?? state.ipv6
             : state.ipv6,
@@ -416,6 +449,10 @@ class SetupAction extends _$SetupAction {
             : state.tcpConcurrent,
       );
     });
+    if (refusedPort) {
+      dialogs.showMixedPortReset(mixedPort, keptPort);
+      updateConfigDebounce();
+    }
   }
 
   void changeMode(Mode mode) {
@@ -575,6 +612,9 @@ class SetupAction extends _$SetupAction {
       rawConfig = await handleEvaluate(scriptContent!, rawConfig);
     }
     final directory = await appPath.profilesPath;
+    final hasCustomExit =
+        setupState.addedRules.any((rule) => rule.customExit) ||
+        setupState.mitmModules.isNotEmpty;
     final injected = await _resolveInjectedProviders(
       setupState,
       proxyGroups: proxyGroups,
@@ -593,17 +633,15 @@ class SetupAction extends _$SetupAction {
         overrides: setupState.overrides,
         bypassPrivateRoute: networkSetting.bypassPrivateRoute,
         appendSystemDns: appendSystemDns,
-        // sing-tun points the system resolver at the TUN by default with
-        // auto-route everywhere but macOS, where native does it through a
-        // dynamic store entry that configd drops when the Core exits.
-        defaultTunDnsMode: system.isMacOS ? 'native' : null,
         addedRules: setupState.addedRules,
         defaultUA: defaultUA,
         authentication: networkSetting.authentication.credentials,
-        matchTarget:
-            profileBase == null ||
-                setupState.matchTarget?.trim().isNotEmpty == true
-            ? setupState.matchTarget
+        exitTargets: setupState.exitTargets,
+        outboundNames: profileBase != null && hasCustomExit
+            ? await _outboundNamesOf(profileId, profileBase.base.digest)
+            : null,
+        defaultExitTarget: profileBase == null
+            ? null
             : lastMatchTarget(profileBase.base.matchRules),
         safeMode: ref.read(safeModeProvider),
         mitmModules: setupState.mitmModules,
@@ -624,6 +662,17 @@ class SetupAction extends _$SetupAction {
       ),
       base: SetupBase(path: path, overlay: res.overlay ?? const {}),
     );
+  }
+
+  Future<Set<String>> _outboundNamesOf(int profileId, String digest) async {
+    final cached = _outboundNames;
+    if (cached != null && cached.digest == digest) {
+      return cached.names;
+    }
+    final outbounds = await _core.getProfileOutbounds(profileId);
+    final names = outboundNamesOf(outbounds);
+    _outboundNames = (digest: digest, names: names);
+    return names;
   }
 
   /// Only what the custom profile actually references is injected, so an
@@ -725,6 +774,9 @@ class SetupAction extends _$SetupAction {
         ConfigPatch(
           externalController: config.externalController.value,
           secret: config.secret,
+          externalControllerCors: controllerCorsOf(
+            config.externalControllerCors,
+          ),
         ),
       );
     } catch (error) {
@@ -740,9 +792,15 @@ class SetupAction extends _$SetupAction {
     return system.authorizeCore();
   }
 
+  /// Android's TUN comes from VpnService or the root mode, never from the
+  /// app's TUN setting, which a desktop backup can still carry there.
+  @protected
+  bool get tunNeedsAuthorization => system.isDesktop;
+
   @visibleForTesting
   Future<bool> requestAdmin(bool enableTun) async {
     if (!enableTun ||
+        !tunNeedsAuthorization ||
         ref.read(safeModeProvider) ||
         ref.read(tunDisabledThisRunProvider)) {
       return true;

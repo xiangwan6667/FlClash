@@ -4,7 +4,7 @@
 
 # FlClash
 
-基于 ClashMeta 的多平台代理客户端，简单易用，开源无广告。
+基于 Concord 内核的多平台代理客户端，简单易用，开源无广告。
 
 [English](README.md) · **简体中文**
 
@@ -27,7 +27,7 @@
 ## 功能
 
 - **一个应用覆盖 Android、Windows、macOS 和 Linux**，桌面端同时提供 x64 与 ARM64 版本。
-- **mihomo（Clash.Meta）内核**：规则分流、代理组、延迟测试、系统代理与 TUN 模式。
+- **Concord 内核**：规则分流、代理组、延迟测试、系统代理与 TUN 模式。
 - **配置管理**：通过订阅链接或文件导入配置，内置编辑器，支持覆写脚本以及自定义规则、代理和代理组。
 - **实时查看**连接、请求、DNS 查询和日志。
 - **Material You 设计，融合 Apple 式交互**：支持动态取色、浅色与深色主题，连续曲率圆角，弹出面板可在几档高度间吸附，布局随屏幕从手机到桌面自适应。
@@ -99,7 +99,7 @@ adb shell am start -a com.follow.clash.action.TOGGLE
 git clone --recursive https://github.com/chen08209/FlClash.git
 cd FlClash
 flutter pub get
-dart setup.dart android   # 或 windows、macos、linux
+dart run tool/package.dart android   # 或 windows、macos、linux
 ```
 
 安装包输出到 `dist/`。Go 内核和 Rust 库会在 Flutter 构建过程中一并编译。
@@ -111,7 +111,7 @@ dart setup.dart android   # 或 windows、macos、linux
 | macOS | Xcode 与 Node.js。脚本会通过 npm 安装 `appdmg`。 |
 | Linux | Debian 或 Ubuntu。脚本会用 apt 安装构建所需的软件包，并下载 `appimagetool`。 |
 
-其余选项可以运行 `dart setup.dart --help` 查看，例如用 `--targets` 只构建部分安装包格式。
+其余选项可以运行 `dart run tool/package.dart --help` 查看，例如用 `--targets` 只构建部分安装包格式，用 `--dry-run` 列出这次会生成的文件。
 
 ## 支持
 

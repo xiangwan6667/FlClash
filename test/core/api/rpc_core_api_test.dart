@@ -1,5 +1,8 @@
 import 'package:fl_clash/core/api/core_client.dart';
+import 'package:fl_clash/core/api/model_api.dart';
 import 'package:fl_clash/core/api/rpc_core_api.dart';
+import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fake_channel.dart';
@@ -19,6 +22,64 @@ void main() {
           channel.answer(message['id'], {
             'result': {'id': 7},
           });
+        case 'mitm.validate':
+          channel.answer(message['id'], {
+            'issues': {
+              'hostname': [
+                {'index': 0, 'kind': 'invalid', 'message': 'bad port'},
+              ],
+            },
+            'views': {
+              'hostname': [
+                {
+                  'index': 0,
+                  'view': {
+                    'type': 'hosts',
+                    'entries': [
+                      {'host': 'a.example.com', 'exclude': true},
+                    ],
+                  },
+                },
+              ],
+              'url-rewrite': [
+                {
+                  'index': 1,
+                  'view': {'type': 'fromALaterCore'},
+                },
+              ],
+              'script': [
+                {
+                  'index': 0,
+                  'view': {
+                    'type': 'script',
+                    'name': 'n',
+                    'kind': 'httpResponse',
+                    'path': 'n.js',
+                    'pattern': '^https://a',
+                    'requiresBody': true,
+                    'binaryBody': false,
+                    'timeoutMs': 10000,
+                  },
+                },
+              ],
+              'map-local': [
+                {
+                  'index': 0,
+                  'view': {
+                    'type': 'mapLocal',
+                    'pattern': '^https://b',
+                    'dataType': 'text',
+                    'data': '{}',
+                    'status': 200,
+                    'headers': [
+                      {'name': 'X-A', 'value': '1'},
+                    ],
+                    'contentType': 'application/json',
+                  },
+                },
+              ],
+            },
+          });
         case 'mitm.body':
           channel.fail(message['id'], {
             'code': -32000,
@@ -37,6 +98,47 @@ void main() {
 
   test('an MITM answer reaches the caller without its envelope', () async {
     expect(await api.mitmExchange(7), {'id': 7});
+  });
+
+  test('a partly applied MITM line has both its issue and its view', () async {
+    final check = await api.checkMitmRules(
+      const MitmRules(
+        hostname: ['-a.example.com, a.example.com:x'],
+        urlRewrite: ['', 'later'],
+        script: ['n'],
+        mapLocal: ['b'],
+      ),
+    );
+
+    expect(check.issues, {
+      MitmList.hostname: {0: 'bad port'},
+    });
+    expect(check.views[MitmList.hostname], {
+      0: const MitmLineView.hosts(
+        entries: [MitmHostEntry(host: 'a.example.com', exclude: true)],
+      ),
+    });
+    expect(check.views[MitmList.urlRewrite], isEmpty);
+    expect(check.views[MitmList.script], {
+      0: const MitmLineView.script(
+        name: 'n',
+        kind: 'httpResponse',
+        path: 'n.js',
+        pattern: '^https://a',
+        requiresBody: true,
+        timeoutMs: 10000,
+      ),
+    });
+    expect(check.views[MitmList.mapLocal], {
+      0: const MitmLineView.mapLocal(
+        pattern: '^https://b',
+        dataType: 'text',
+        data: '{}',
+        status: 200,
+        headers: [MitmHeader(name: 'X-A', value: '1')],
+        contentType: 'application/json',
+      ),
+    });
   });
 
   test('an MITM record the Core has dropped reads as null', () async {

@@ -12,7 +12,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 abstract mixin class ServiceListener {
-  void onServiceStopped() {}
+  void onServiceStopped([ServiceStartFailure? failure]) {}
+
+  void onRootTunFallback(String reason) {}
 }
 
 class Service {
@@ -60,12 +62,24 @@ class Service {
           }
           break;
         case 'stopped':
+          final report = call.arguments as Map<Object?, Object?>;
           // A report stamped before the newest command no longer describes it.
-          if (call.arguments != _commandRevision || !_startRequested) {
+          if (report['revision'] != _commandRevision || !_startRequested) {
             break;
           }
           _startRequested = false;
-          _dispatch('stop report', (listener) => listener.onServiceStopped());
+          final failure = ServiceStartFailure.fromCode(report['failure']);
+          _dispatch(
+            'stop report',
+            (listener) => listener.onServiceStopped(failure),
+          );
+          break;
+        case 'rootFallback':
+          final reason = call.arguments as String;
+          _dispatch(
+            'root fallback',
+            (listener) => listener.onRootTunFallback(reason),
+          );
           break;
         default:
           throw MissingPluginException();

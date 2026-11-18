@@ -1,21 +1,26 @@
 import 'dart:async';
-import 'package:fl_clash/core/core.dart';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:ui' show Locale;
 
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/plugins/app.dart';
+import 'package:fl_clash/providers/config.dart';
 import 'package:fl_clash/providers/core.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'generated/app.g.dart';
 
 @Riverpod(keepAlive: true)
 bool safeMode(Ref ref) => safeModeBuild;
+
+@Riverpod(keepAlive: true)
+App? packageIconSource(Ref ref) => app;
 
 /// Android: su is there and granted FlClash's last request.
 @Riverpod(keepAlive: true)
@@ -24,6 +29,15 @@ Future<bool> rootAccess(Ref ref) async {
     return false;
   }
   return app!.hasRootAccess();
+}
+
+/// Android: an su binary is installed, whether or not it grants FlClash.
+@Riverpod(keepAlive: true)
+Future<bool> suInstalled(Ref ref) async {
+  if (!system.isAndroid || app == null) {
+    return false;
+  }
+  return app!.hasSu();
 }
 
 @Riverpod(keepAlive: true)
@@ -69,6 +83,36 @@ class ConfigWarningsState extends _$ConfigWarningsState
       }
     });
     return const [];
+  }
+
+  void report(List<ConfigWarning> warnings) {
+    if (ref.read(coreStatusProvider) == CoreStatus.disconnected) {
+      return;
+    }
+    state = warnings;
+  }
+}
+
+@riverpod
+List<ConfigWarning> liveConfigWarnings(Ref ref) {
+  final openLogs = ref.watch(
+    appSettingProvider.select((settings) => settings.openLogs),
+  );
+  return openLogs
+      ? ref.watch(configWarningsStateProvider.select((items) => items.warnings))
+      : const [];
+}
+
+@Riverpod(keepAlive: true)
+class CoreStopReason extends _$CoreStopReason with AutoDisposeNotifierMixin {
+  @override
+  String? build() {
+    ref.listen(coreStatusProvider, (_, next) {
+      if (next != CoreStatus.disconnected) {
+        state = null;
+      }
+    });
+    return null;
   }
 }
 

@@ -66,19 +66,6 @@ void main() {
     expect(find.text(l.tcpConcurrent), findsOneWidget);
   });
 
-  testWidgets('offers no geodata loader, which Concord does not read', (
-    tester,
-  ) async {
-    await pumpGeneralView(tester);
-    final l = currentAppLocalizations;
-
-    await tester.tap(find.text(l.addOverrideEntry));
-    await tester.pumpAndSettle();
-
-    expect(find.text(l.tcpConcurrent), findsOneWidget);
-    expect(find.text(l.geodataLoader), findsNothing);
-  });
-
   testWidgets('removing an override resets its value', (tester) async {
     container
         .read(patchClashConfigProvider.notifier)
@@ -99,6 +86,24 @@ void main() {
     expect(config().generalOverrideKeys, isEmpty);
     expect(config().ipv6, defaultClashConfig.ipv6);
     expect(find.text('IPv6'), findsNothing);
+  });
+
+  testWidgets('cross-origin access shows with the controller, on by '
+      'default, and turns off', (tester) async {
+    await pumpGeneralView(tester);
+    final l = currentAppLocalizations;
+    expect(find.text(l.externalControllerCors), findsNothing);
+    expect(find.textContaining(l.externalControllerCorsDesc), findsNothing);
+
+    await tester.tap(find.text(l.externalController));
+    await tester.pumpAndSettle();
+    expect(find.text(l.externalControllerCors), findsOneWidget);
+    expect(find.textContaining(l.externalControllerCorsDesc), findsOneWidget);
+    expect(config().externalControllerCors, isTrue);
+
+    await tester.tap(find.text(l.externalControllerCors));
+    await tester.pumpAndSettle();
+    expect(config().externalControllerCors, isFalse);
   });
 
   testWidgets('the test URL takes only a URL', (tester) async {

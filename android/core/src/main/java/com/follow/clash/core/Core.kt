@@ -10,7 +10,6 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicBoolean
 
 data class TunOptions(
-    val stack: String,
     val mtu: Int,
     val address: List<String>,
     val dns: List<String>,
@@ -19,7 +18,6 @@ data class TunOptions(
     fun params(handle: Long): Map<String, Any?> =
         buildMap {
             put("source", mapOf("kind" to "inherited", "handle" to handle))
-            put("stack", stack)
             put("mtu", mtu)
             put("address", address)
             put("dns", dns)

@@ -89,7 +89,7 @@ final class CoreOptionsProvider
   }
 }
 
-String _$coreOptionsHash() => r'eda5c10501a808d6b6cc575e0841155d88dfc2ba';
+String _$coreOptionsHash() => r'ef7cb84b1c8ad89180f56c91cf863376c1ff9db5';
 
 @ProviderFor(setupPatch)
 final setupPatchProvider = SetupPatchProvider._();
@@ -475,7 +475,7 @@ final class VpnRouteAddressProvider
   }
 }
 
-String _$vpnRouteAddressHash() => r'bae2530b73b71ecff16aadfc395e60996d739d41';
+String _$vpnRouteAddressHash() => r'2994a2c0890fa22e06c30af4703e052b3c056c90';
 
 @ProviderFor(vpnOptions)
 final vpnOptionsProvider = VpnOptionsProvider._();
@@ -513,7 +513,7 @@ final class VpnOptionsProvider
   }
 }
 
-String _$vpnOptionsHash() => r'68264700abe838bd0ac34c5b034a674348640639';
+String _$vpnOptionsHash() => r'cb60357f2706d545ce4b78b38c2af2f8f1ad9f32';
 
 @ProviderFor(AccessControlState)
 final accessControlStateProvider = AccessControlStateProvider._();
@@ -1970,7 +1970,7 @@ final class ProxyStateProvider
   }
 }
 
-String _$proxyStateHash() => r'c34885ac363bf8ab033cb514210956e8f907f450';
+String _$proxyStateHash() => r'9d3d35d421564843613dbeece688731baae12b45';
 
 /// Watching the delay map instead would drop nodes one probe at a time, and
 /// reading it on any other rebuild would drop them whenever something
@@ -3628,6 +3628,172 @@ final class ScriptOutboundsFamily extends $Family
   String toString() => r'scriptOutboundsProvider';
 }
 
+@ProviderFor(profileMatchTarget)
+final profileMatchTargetProvider = ProfileMatchTargetFamily._();
+
+final class ProfileMatchTargetProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
+    with $FutureModifier<String?>, $FutureProvider<String?> {
+  ProfileMatchTargetProvider._({
+    required ProfileMatchTargetFamily super.from,
+    required int super.argument,
+  }) : super(
+         retry: _noRetry,
+         name: r'profileMatchTargetProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileMatchTargetHash();
+
+  @override
+  String toString() {
+    return r'profileMatchTargetProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<String?> create(Ref ref) {
+    final argument = this.argument as int;
+    return profileMatchTarget(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProfileMatchTargetProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$profileMatchTargetHash() =>
+    r'b42cc6c842bb53ac2928a0b2c4abf7943c5e3c54';
+
+final class ProfileMatchTargetFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<String?>, int> {
+  ProfileMatchTargetFamily._()
+    : super(
+        retry: _noRetry,
+        name: r'profileMatchTargetProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  ProfileMatchTargetProvider call(int profileId) =>
+      ProfileMatchTargetProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'profileMatchTargetProvider';
+}
+
+/// What the user set over the profile: a custom profile's own settings over
+/// the app's TUN overrides, or the app's overrides for any other profile.
+
+@ProviderFor(profileOverrides)
+final profileOverridesProvider = ProfileOverridesFamily._();
+
+/// What the user set over the profile: a custom profile's own settings over
+/// the app's TUN overrides, or the app's overrides for any other profile.
+
+final class ProfileOverridesProvider
+    extends
+        $FunctionalProvider<
+          ProfileOverrides,
+          ProfileOverrides,
+          ProfileOverrides
+        >
+    with $Provider<ProfileOverrides> {
+  /// What the user set over the profile: a custom profile's own settings over
+  /// the app's TUN overrides, or the app's overrides for any other profile.
+  ProfileOverridesProvider._({
+    required ProfileOverridesFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'profileOverridesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$profileOverridesHash();
+
+  @override
+  String toString() {
+    return r'profileOverridesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $ProviderElement<ProfileOverrides> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ProfileOverrides create(Ref ref) {
+    final argument = this.argument as int?;
+    return profileOverrides(ref, argument);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ProfileOverrides value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ProfileOverrides>(value),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProfileOverridesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$profileOverridesHash() => r'2df5e22d0d782b85bf22a0206b6066c26e77bd18';
+
+/// What the user set over the profile: a custom profile's own settings over
+/// the app's TUN overrides, or the app's overrides for any other profile.
+
+final class ProfileOverridesFamily extends $Family
+    with $FunctionalFamilyOverride<ProfileOverrides, int?> {
+  ProfileOverridesFamily._()
+    : super(
+        retry: null,
+        name: r'profileOverridesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// What the user set over the profile: a custom profile's own settings over
+  /// the app's TUN overrides, or the app's overrides for any other profile.
+
+  ProfileOverridesProvider call(int? profileId) =>
+      ProfileOverridesProvider._(argument: profileId, from: this);
+
+  @override
+  String toString() => r'profileOverridesProvider';
+}
+
 @ProviderFor(setupState)
 final setupStateProvider = SetupStateFamily._();
 
@@ -3682,7 +3848,7 @@ final class SetupStateProvider
   }
 }
 
-String _$setupStateHash() => r'aeb92b63ea7c448665c87ffac631a3fba966c020';
+String _$setupStateHash() => r'ea2026faab4f89458df501968b673cfbebf6878b';
 
 final class SetupStateFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<SetupState>, int?> {

@@ -5,6 +5,7 @@ import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/core/core.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -47,9 +48,11 @@ final class UpdateStatus extends LiveStatus {
   final UpdateDownload download;
 }
 
-final _warningsProvider = configWarningsStateProvider.select(
-  (items) => items.warnings,
-);
+final class MitmConsentStatus extends LiveStatus {
+  const MitmConsentStatus(this.names, {super.preview});
+
+  final List<String> names;
+}
 
 bool _isRunningCore(LiveStatus status) =>
     status is CoreLiveStatus && status.phase == CoreStatus.connected;
@@ -61,14 +64,17 @@ List<LiveStatus> watchLiveStatuses(
   required bool separateCore,
 }) {
   final core = ref.watch(heldCoreStatusProvider);
-  final warnings = ref.watch(_warningsProvider);
+  final warnings = ref.watch(liveConfigWarningsProvider);
   final download = ref.watch(updateDownloadStateProvider);
+  final awaitingConsent = ref.watch(mitmModulesToAgreeProvider);
   return [
     if (core == CoreStatus.disconnected ||
         separateCore && core == CoreStatus.connecting)
       CoreLiveStatus(core),
     if (download is UpdateReady) UpdateStatus(download),
     if (download is UpdateDownloading) UpdateStatus(download),
+    if (awaitingConsent.isNotEmpty)
+      MitmConsentStatus([for (final module in awaitingConsent) module.name]),
     if (warnings.isNotEmpty) WarningsStatus(warnings),
     if (separateCore && core == CoreStatus.connected)
       const CoreLiveStatus(CoreStatus.connected),
@@ -125,6 +131,7 @@ void showLiveStatusPreview(BuildContext context) {
             UpdateDownloading(tag, received: 18 * mb, total: 43 * mb),
             preview: 'downloading',
           ),
+          MitmConsentStatus(['Ads', 'Scripts'], preview: 'consent'),
           WarningsStatus(warnings, preview: 'warnings'),
           CoreLiveStatus(CoreStatus.connected, preview: 'running'),
         ],
@@ -243,6 +250,10 @@ class _LiveStatusPill extends StatelessWidget {
         colorScheme.successContainer,
         colorScheme.onSuccessContainer,
       ),
+      MitmConsentStatus() => (
+        colorScheme.warningContainer,
+        colorScheme.onWarningContainer,
+      ),
       _ => (null, null),
     };
     final label = switch (status) {
@@ -252,6 +263,7 @@ class _LiveStatusPill extends StatelessWidget {
       WarningsStatus() => appLocalizations.configWarnings,
       UpdateStatus(download: UpdateReady()) => appLocalizations.updateReady,
       UpdateStatus() => appLocalizations.downloadingUpdate,
+      MitmConsentStatus() => appLocalizations.mitmModulesTurnedOff,
     };
     final iconSize = globalState.measure.textHeight(AppTextStyle.subheadline);
     final icon = SizedBox.square(
@@ -274,6 +286,7 @@ class _LiveStatusPill extends StatelessWidget {
           download: UpdateDownloading(:final received, :final total),
         ) =>
           _PillProgressRing(value: total > 0 ? received / total : null),
+        MitmConsentStatus() => const GlyphIcon(AppGlyphs.puzzle, fill: 1),
       },
     );
     final shown = switch (status) {

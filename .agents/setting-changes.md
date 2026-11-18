@@ -61,7 +61,7 @@ rebuilds the profile YAML and hands it to the Core's `config.apply` through `set
   `route-exclude-address`.
 
 A change to anything else in `PatchClashConfig` therefore reaches it. Today that is the DNS, TUN and general overrides
-(`dns`, `dnsOverrideKeys`, `tunOverride`, `tunOverrideKeys`, `generalOverrideKeys`, `geodata-loader`), `hosts`, the
+(`dns`, `dnsOverrideKeys`, `tunOverride`, `tunOverrideKeys`, `generalOverrideKeys`), `hosts`, the
 extra inbound ports (`port`, `socks-port`, `redir-port`, `tproxy-port`), the dialer options (`keep-alive-*`,
 `disable-keep-alive`, `interface-name`, its mode, `routing-mark`), `global-ua` and `mitm` but its `capture`, which the
 task writes over the profile's own section. A new `PatchClashConfig` field written by `_makeRealProfileTask` lands here without further
@@ -101,7 +101,8 @@ database once instead of watching them. Content is applied explicitly by whateve
 ## Restart
 
 `VpnService.handleStart` builds the tunnel once from `VpnOptions` and never reads them again.
-`ServiceController.start` uses `enable` to choose between `VpnService` and `ProxyService`.
+`ServiceController.start` uses `enable` and `rootTun` to choose between `VpnService`, `RootTunService` and
+`ProxyService`; a root run that cannot get root falls back to `VpnService` for that run only.
 
 `vpnOptionsProvider` derives the options the service would start with now. `runningVpnOptionsProvider` records what
 the last listener start handed it. The route list is subtracted in an isolate by `vpnRouteAddressProvider`, which
@@ -117,7 +118,6 @@ asks for nothing. The tap runs `SetupAction.restartVpn`: a stop, then a start, a
 | `VpnOptions` field     | Taken from                                                    | The service reads it                   |
 |------------------------|---------------------------------------------------------------|----------------------------------------|
 | `enable`               | `VpnProps.enable`, off in safe mode                           | always                                 |
-| `stack`                | `Tun.stack`, empty while `rsFeature` is on                    | with the VPN                           |
 | `ipv6`, `dnsHijacking` | `VpnProps`                                                    | with the VPN                           |
 | `allowBypass`          | `VpnProps`                                                    | with the VPN                           |
 | `accessControlProps`   | `VpnProps.accessControlProps`                                 | `enable`, `mode` and that mode's list  |
@@ -127,6 +127,7 @@ asks for nothing. The tap runs `SetupAction.restartVpn`: a stop, then a start, a
 | `routeAddress`         | `Tun.routeAddress` and `bypassPrivateRoute`                   | with the VPN                           |
 | `mtu`                  | `Tun`                                                         | with the VPN                           |
 | `congestionController` | `Tun`                                                         | with the VPN                           |
+| `rootTun`              | `VpnProps.rootTun`                                            | with the VPN                           |
 
 The service never reads the access list's sort and filter fields. `effective` resets them, along with every field
 the table does not mark as read, so changing them does not ask for a restart.

@@ -1,6 +1,10 @@
+import 'package:drift/native.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_module.dart';
+import 'package:fl_clash/database/database.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -20,13 +24,17 @@ final _profile = Profile.normal(label: 'My subscription');
 
 void main() {
   late ProviderContainer container;
+  var toAgree = <MitmModule>[];
 
   setUp(() {
+    toAgree = [];
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(() => TestProfiles([_profile])),
+        mitmModulesToAgreeProvider.overrideWith((ref) => toAgree),
       ],
     );
+    container.listen(appSettingProvider, (_, _) {});
     globalState.container = container;
     globalState.packageInfo = PackageInfo(
       appName: 'FlClash',
@@ -256,6 +264,109 @@ void main() {
     expect(front('Stop'), findsNothing);
   });
 
+  testWidgets('names the modules an update turned off', (tester) async {
+    MitmModule module(int id, String name) => MitmModule(
+      id: id,
+      name: name,
+      enabled: false,
+      lastUpdateTime: DateTime(2026, 11, 17),
+    );
+    toAgree = [module(1, 'Ads')];
+    await pumpButton(tester);
+
+    expect(badge('Modules turned off'), findsOneWidget);
+    await open(tester);
+
+    expect(front('Ads'), findsOneWidget);
+    expect(
+      find.text(
+        'An update to Ads brought scripts or network changes you have not '
+        'agreed to',
+      ),
+      findsOneWidget,
+    );
+    expect(front('View'), findsOneWidget);
+
+    toAgree = [module(1, 'Ads'), module(2, 'Tracker'), module(3, 'Video')];
+    container.invalidate(mitmModulesToAgreeProvider);
+    await settle(tester);
+
+    expect(front('+1'), findsOneWidget);
+    expect(
+      find.text(
+        '3 modules got updates with scripts or network changes you have not '
+        'agreed to',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  group('with modules stored', () {
+    late Database testDatabase;
+
+    setUp(() {
+      testDatabase = Database(NativeDatabase.memory());
+      database = testDatabase;
+    });
+
+    // The modules provider holds a query open until its container goes.
+    tearDown(() {
+      container.dispose();
+      return testDatabase.close();
+    });
+
+    testWidgets('the module card asks about each module in turn', (
+      tester,
+    ) async {
+      MitmModule module(int id, String name) => MitmModule(
+        id: id,
+        name: name,
+        enabled: false,
+        scripts: 1,
+        order: id,
+        lastUpdateTime: DateTime(2026, 11, 17),
+      );
+      await testDatabase.mitmModulesDao.putAll([
+        module(1, 'Ads').toCompanion(),
+        module(2, 'Tracker').toCompanion(),
+      ]);
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(() => TestProfiles([_profile])),
+          for (final id in [1, 2])
+            mitmModuleContentProvider(
+              id,
+            ).overrideWith((ref) async => MitmModuleContent()),
+        ],
+      );
+      globalState.container = container;
+      container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
+      await pumpButton(tester);
+      await open(tester);
+
+      await tester.tap(front('View'));
+      for (final _ in [1, 2]) {
+        await settle(tester);
+        expect(
+          find.text(currentAppLocalizations.mitmScriptRiskTitle),
+          findsOneWidget,
+        );
+        await tester.tap(find.text(currentAppLocalizations.cancel));
+      }
+      await settle(tester);
+
+      final stored = await testDatabase.mitmModulesDao.query().get();
+      expect([for (final item in stored) item.accepted], [false, false]);
+      expect(container.read(mitmModulesToAgreeProvider), isEmpty);
+      expect(
+        find.text(currentAppLocalizations.mitmScriptRiskTitle),
+        findsNothing,
+      );
+      expect(badge('Modules turned off'), findsNothing);
+    });
+  });
+
   testWidgets('leaves updating resources out', (tester) async {
     container.read(updatingKeysProvider.notifier)
       ..start(_profile.updatingKey)
@@ -367,6 +478,11 @@ void main() {
   });
 
   group('config warnings', () {
+    setUp(() {
+      container.read(appSettingProvider.notifier).value = const AppSettingProps(
+        openLogs: true,
+      );
+    });
     const removed = ConfigWarning(
       level: ConfigWarningLevel.warning,
       path: 'proxies[12]',
@@ -381,6 +497,45 @@ void main() {
     void report(List<ConfigWarning> warnings) {
       container.read(configWarningsStateProvider.notifier).value = warnings;
     }
+
+    testWidgets('follow the logs setting in both the deck and hotspot count', (
+      tester,
+    ) async {
+      final settings = container.read(appSettingProvider.notifier);
+      settings.value = const AppSettingProps(openLogs: false);
+      container.read(coreStatusProvider.notifier).value = CoreStatus.connecting;
+      report(const [removed]);
+      await pumpButton(tester, separateCore: true);
+
+      expect(badge('Connecting…'), findsOneWidget);
+      expect(find.text('2'), findsNothing);
+      await open(tester);
+      expect(find.byKey(const ValueKey<Object>(WarningsStatus)), findsNothing);
+
+      settings.value = settings.value.copyWith(openLogs: true);
+      await settle(tester);
+      expect(badge('Connecting…, 2'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await settle(tester);
+      expect(front('View all'), findsOneWidget);
+      expect(find.text(removed.message), findsOneWidget);
+
+      settings.value = settings.value.copyWith(openLogs: false);
+      await settle(tester);
+      expect(badge('Connecting…'), findsOneWidget);
+      expect(find.byKey(const ValueKey<Object>(WarningsStatus)), findsNothing);
+      expect(front('View all'), findsNothing);
+      expect(container.read(configWarningsStateProvider), const [removed]);
+    });
+
+    testWidgets('alone stay hidden while logs are off', (tester) async {
+      container.read(appSettingProvider.notifier).value = const AppSettingProps(
+        openLogs: false,
+      );
+      report(const [removed]);
+      await pumpButton(tester);
+      expect(find.byTooltip('Live status'), findsNothing);
+    });
 
     testWidgets('alone count the warnings on the button', (tester) async {
       report(const [
@@ -433,13 +588,13 @@ void main() {
       expect(badge('Core stopped'), findsOneWidget);
     });
 
-    testWidgets('list the first on their card and all in an alert', (
+    testWidgets('list the first on their card and open it in place to all', (
       tester,
     ) async {
       report([
         removed,
         ignored,
-        for (var i = 1; i <= 3; i++)
+        for (var i = 1; i <= 6; i++)
           ConfigWarning(
             level: ConfigWarningLevel.warning,
             path: 'rules[$i]',
@@ -452,27 +607,44 @@ void main() {
       await open(tester);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await settle(tester);
+      final card = find.byKey(const ValueKey<Object>(WarningsStatus)).last;
+      final route = ModalRoute.of(tester.element(card));
 
       expect(find.text(removed.message), findsOneWidget);
       expect(find.text('proxies[12]'), findsOneWidget);
       expect(find.text('rule 2 was dropped'), findsOneWidget);
       expect(find.text('rule 3 was dropped'), findsNothing);
-      expect(find.text('4 warnings from loading the config'), findsOneWidget);
+      expect(find.text('7 warnings from loading the config'), findsOneWidget);
       expect(find.text(ignored.message), findsNothing);
+      expect(tester.getSize(card).height, 300);
 
       await tester.tap(front('View all'));
       await settle(tester);
 
-      expect(front('View all'), findsNothing);
-      expect(find.text('Config warnings'), findsOneWidget);
+      expect(ModalRoute.of(tester.element(card)), same(route));
+      expect(route!.isCurrent, isTrue);
+      expect(tester.getSize(card).height, greaterThan(300));
+      expect(tester.getSize(card).height, lessThanOrEqualTo(460));
+      expect(front('Collapse'), findsOneWidget);
       expect(
-        find.textContaining('rule 3 was dropped\nrules[3]', findRichText: true),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining(ignored.message, findRichText: true),
+        find.text('7 warnings from loading the config').hitTestable(),
         findsNothing,
       );
+      expect(find.text('rule 3 was dropped').hitTestable(), findsOneWidget);
+      expect(find.text('rules[3]').hitTestable(), findsOneWidget);
+      expect(find.text(ignored.message), findsNothing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await settle(tester);
+
+      expect(front('Collapse'), findsOneWidget);
+
+      await tester.tap(front('Collapse'));
+      await settle(tester);
+
+      expect(tester.getSize(card).height, 300);
+      expect(front('View all'), findsOneWidget);
+      expect(find.text('rule 3 was dropped'), findsNothing);
     });
   });
 
@@ -578,6 +750,22 @@ void main() {
       await tester.pump();
 
       expect(badge('Core stopped'), findsOneWidget);
+    });
+
+    testWidgets('the stopped card says why the core stopped', (tester) async {
+      container.read(coreStatusProvider.notifier).value =
+          CoreStatus.disconnected;
+      container.read(coreStopReasonProvider.notifier).value =
+          'The core could not be launched';
+      await pumpButton(tester, separateCore: true);
+
+      await open(tester);
+
+      expect(front('The core could not be launched'), findsOneWidget);
+      expect(
+        find.text('The app lost its connection to the core'),
+        findsNothing,
+      );
     });
   });
 }

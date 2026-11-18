@@ -25,6 +25,7 @@ android {
     sourceSets {
         // Unit tests live under android/tests/ instead of each module's src/test.
         getByName("test").java.setSrcDirs(listOf("../tests/core"))
+        getByName("test").kotlin.setSrcDirs(listOf("../tests/core"))
     }
 }
 
@@ -192,6 +193,9 @@ abstract class CargoBuild : DefaultTask() {
             listOf("libconcord.so", "libcore_jni.so").forEach { library ->
                 release.resolve(library).copyTo(output.resolve("$abi/$library"), overwrite = true)
             }
+            // Packaged as a library so the installer extracts it to the native library directory,
+            // the one place an app can execute a file from.
+            release.resolve("tun").copyTo(output.resolve("$abi/libtun.so"), overwrite = true)
         }
     }
 

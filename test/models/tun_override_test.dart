@@ -65,7 +65,7 @@ void main() {
 
   test('a custom profile picks its own TUN keys over the app-wide ones', () {
     const custom = ProfileOverrides(
-      tun: ProfileTun(mtu: 1400, gso: true),
+      tun: ProfileTun(mtu: 1400, strictRoute: true),
       tunOverrideKeys: {TunOverrideKey.mtu},
     );
     final merged = custom.overAppTun(

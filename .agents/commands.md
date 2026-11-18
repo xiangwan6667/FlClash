@@ -1,22 +1,32 @@
 # Commands
 
+`make` is the entry point on macOS and Linux: `make help` lists every target with its variables, generated from the
+`##` comments in the `Makefile`, and `test/tool/makefile_test.dart` keeps the two in step. Each target only calls the
+command this file documents, so the logic stays in `tool/` and `xtask`; `make doctor` names a missing toolchain,
+`make check` is CI's `dart` job, `make core-gate` the Concord gate, and `make run` starts the safe mode build, the only
+kind a shared host may run.
+
 ## Building
 
-Update submodules first. The Core is Concord in the `concord/` submodule, a private repository, which needs `cargo` and
+Update submodules first. The Core is Concord in the `concord/` submodule, which needs `cargo` and
 the toolchain pinned in `concord/rust-toolchain.toml`.
 
 ```bash
 git submodule update --init --recursive
 ```
 
-Full package build, including the Concord core, Flutter, and packaging, runs through `setup.dart`:
+Full package build, including the Concord core, Flutter, and packaging, runs through `tool/package.dart` (`make package`,
+`make package-android`, with `ARCH=`, `FORM=` and `DRY=1`). Run it with `dart`, not `dart run`, which first runs
+every build hook for the host:
 
 ```bash
-dart setup.dart macos
-dart setup.dart linux
-dart setup.dart windows
-dart setup.dart android
+dart tool/package.dart                     # this host: dmg, exe + zip, or deb + AppImage + rpm
+dart tool/package.dart android             # every ABI; --arch arm64 for one
+dart tool/package.dart linux --dry-run --arch arm64   # names and steps only, any platform
 ```
+
+Artifacts land in `dist/` as `FlClash-<line>-<version>-<os>-<arch>[-<form>].<ext>`, with `manifest.json` and
+`FlClash-<line>-<version>-SHA256SUMS`; see Packaging in `architecture.md`.
 
 The desktop Concord core and the Rust helper build automatically: Flutter runs
 `plugins/setup/hook/build.dart` on every `flutter build` and `flutter test`,
@@ -64,7 +74,7 @@ stays on there because the editor tests in `test/plugins/code_forge/` and the so
 test in `test/core/desktop/ipc_native_test.dart` load the Rust library the hook
 builds; the release-notes job, which runs no tests, flips both.
 Never commit `false`: a build with it set stages whatever `libclash/` already
-holds and bundles no Rust library, which is why `setup.dart` refuses to package
+holds and bundles no Rust library, which is why `tool/package.dart` refuses to package
 while it is set. Locally, `false` is worth setting for a Dart-only test loop,
 but the hook cache keys on the user-define, so the first build afterwards runs
 the hooks again. The editor and IPC socket tests still need the Rust library: keep `rust_api`
@@ -190,7 +200,6 @@ flutter test test/providers/
 flutter test test/common/
 flutter test test/database/
 flutter test test/widgets/
-flutter test test/setup_test.dart
 ```
 
 For the whole suite, or a directory of more than a few files, use `tool/test.dart`, which is also what CI runs:
@@ -202,9 +211,9 @@ dart run tool/test.dart -- --reporter expanded --coverage
 ```
 
 Plain `flutter test` compiles each file into its own program and starts an engine for it, one file after another, and
-that dominates a full run: 329 files took 128 s on a 12-core Mac with at most four running at once. `tool/test.dart`
-imports the files into 32 generated entrypoints under `.dart_tool/test_bundles/` and runs those with one worker per
-core: about 60 s for the same run, and 67 s instead of 180–213 s with `--coverage`. Files in one entrypoint share an
+that dominates a full run. `tool/test.dart` imports the files into 32 generated entrypoints under
+`.dart_tool/test_bundles/` and runs those with one worker per core, about half the time of a plain run, and less than
+a third with `--coverage`. Files in one entrypoint share an
 isolate, so a test can see state a file before it left behind; the script runs every file that failed there again on
 its own, lets that run decide, and names the files that only failed together. See the Shared Test Isolate section of
 `rules.md` before fixing one.
@@ -274,7 +283,7 @@ emulator validation; Kotlin compilation cannot prove those system callbacks.
 ## Concord Core
 
 Concord is the Rust core in `concord/` (see Concord Core in `architecture.md`). A normal `flutter test`, `flutter run` or
-`dart setup.dart` build compiles it through the setup hook, and Android through the `:core` Gradle module, so `cargo` and
+`tool/package.dart` build compiles it through the setup hook, and Android through the `:core` Gradle module, so `cargo` and
 the toolchain pinned in `concord/rust-toolchain.toml` must be installed.
 
 Work inside it from `concord/`:
@@ -290,6 +299,10 @@ cargo run -p xtask -- schema --check
 cargo deny check
 cargo run -p xtask -- check-size target/release/concord 15000000
 ```
+
+`make core-sent-config` (`dart tool/check_sent_config.dart` from the repository root, part of `make core-gate` and CI's
+Core job) loads each `test/fixtures/sent_config/` golden with `concord -t`; see Config Keys Sent To The Core in the
+`core-platform` skill.
 
 `CONCORD_REQUIRE_APP_TREE=1` turns the contract tests that read `lib/` from a skip into a failure when the FlClash tree
 is missing. Tests marked `#[ignore]` need an external peer; `concord/.agents/commands.md` lists the environment variables.
@@ -338,7 +351,7 @@ the `version` job rejects any other `v*` tag. It writes `X.Y.Z` from the tag int
 `pubspec.yaml` for the build and upload jobs, with a build number of the tag run's UTC `YYYYMMDDHH`, raised above the
 committed one when that is not already larger, because Android refuses an update with a lower versionCode. The app's
 version name stays `X.Y.Z` for a prerelease too: `compareVersions` reads only numbers. The build number in
-`pubspec.yaml` therefore no longer moves with releases; a local build that must install over a CI one passes its own
+`pubspec.yaml` stays fixed; a local build that must install over a CI one passes its own
 `--build-number`.
 
 Push the tag by name. Every release tag here is lightweight, and `--follow-tags` carries annotated tags only: it skips a
@@ -369,8 +382,7 @@ in `CHANGELOG.md`, and are never regenerated.
 
 `verify` compares a version only when its tag is reachable from `HEAD`, because that is the same scope the builder walks
 (`git tag --merged`). A branch cut before the newest release cannot derive that version at all, so `verify` names it as
-skipped and moves on instead of reporting drift that does not exist. Checking mere tag existence is what made every such
-branch fail on an unrelated release.
+skipped and moves on instead of reporting drift that does not exist.
 
 Prerelease tags (`v0.8.96-pre.N[+M]`) skip the release commit, and CI renders their notes with `build --unreleased` for
 the Telegram post. They publish no GitHub release, so the update dialog never sees them. `build --unreleased` reads the
@@ -416,7 +428,7 @@ The `dart` job performs these root-package checks in order:
 ```bash
 bash tool/hooks/test.sh
 flutter pub get
-dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
+dart format --output=none --set-exit-if-changed lib test tool plugins
 flutter analyze --no-fatal-infos
 dart run tool/changelog.dart verify   # main and tags only
 dart run tool/test.dart -- --reporter expanded --coverage
@@ -444,15 +456,14 @@ only once every build and every check job passes.
 `bash tool/check_plugins.sh` is that plugin gate, and CI runs the same script.
 It discovers every `plugins/*/pubspec.yaml`, analyzes each package, and runs
 `flutter test` wherever `test/*_test.dart` exists. Adding a plugin package needs
-no workflow edit; enumerating packages by hand in the workflow is what
-previously left `plugins/tray` unanalyzed and untested.
+no workflow edit.
 
 ### CI Caches
 
 A run restores only cache entries saved on its own branch or tag, or on the default branch (`main`), and the
 repository holds 10 GB before evicting the least recently used entries. Every release is a new tag that no later run
-reads from, so `BRANCH_CACHE` turns caching off in tag runs: one release used to write about 9 GB of such entries and
-evict everything `dev` had saved. Release builds therefore start cold; branch runs, chiefly `dev`, keep the caches.
+reads from, so `BRANCH_CACHE` turns caching off in tag runs, whose entries would evict what `dev` saved. Release
+builds therefore start cold; branch runs, chiefly `dev`, keep the caches.
 
 - `Swatinem/rust-cache` keys each entry on its `workspaces` and `key`, and the branch jobs save only when
   `BRANCH_CACHE` is on; `desktop` adds a per-platform `key` to get an entry of its own.

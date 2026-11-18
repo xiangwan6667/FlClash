@@ -3,12 +3,15 @@ import 'dart:math' as math;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,8 +27,12 @@ const _heroHeight = 156.0;
 const _heroCorner = AppCorner.alert - _cardInset;
 const _actionHeight = 44.0;
 const _textTop = 12.0;
+const _listTop = 8.0;
 const _actionBottom = 4.0;
 const _bottomHeight = _cardHeight - _cardInset * 2 - _heroHeight;
+const _openBottomHeight = _listTop + _actionHeight + _actionBottom;
+const _maxCardHeight = 460.0;
+const _growMargin = 24.0;
 const _anchorGap = 8.0;
 const _windowEdge = 16.0;
 // Room above the front card for the cards behind it to show.
@@ -41,6 +48,8 @@ const _wheelInterval = Duration(milliseconds: 350);
 const _labelFade = Duration(milliseconds: 160);
 const _askDuration = Duration(milliseconds: 200);
 const _askGap = 8.0;
+const _expandDuration = Duration(milliseconds: 320);
+const _listStep = 48.0;
 
 typedef _Pose = ({
   double x,
@@ -116,7 +125,16 @@ Matrix4 _transformOf(_Pose pose) => _isFlat(pose)
         ..rotateX(pose.tilt * math.pi / 180)
         ..rotateY(pose.turn * math.pi / 180));
 
-Rect _frontOf(BuildContext context, Size size, {required Rect anchor}) {
+/// Where the front card rests and how far an opened list may grow it: about
+/// its center where a phone's alert sits, down from under the bar on a
+/// desktop.
+typedef DeckPlacement = ({Rect front, bool growDown, double maxHeight});
+
+DeckPlacement _placementOf(
+  BuildContext context,
+  Size size, {
+  required Rect anchor,
+}) {
   final padding = MediaQuery.paddingOf(context);
   final width = _cardSize.width;
   final height = _cardSize.height;
@@ -126,11 +144,15 @@ Rect _frontOf(BuildContext context, Size size, {required Rect anchor}) {
       safe.center.dx - width / 2,
       safe.right - width - _rightGutter,
     );
-    return Rect.fromLTWH(
-      math.max(0, left),
-      safe.center.dy - height / 2,
-      width,
-      height,
+    return (
+      front: Rect.fromLTWH(
+        math.max(0, left),
+        safe.center.dy - height / 2,
+        width,
+        height,
+      ),
+      growDown: false,
+      maxHeight: (safe.height - _growMargin * 2).clamp(height, _maxCardHeight),
     );
   }
   final bottom = size.height - padding.bottom - _windowEdge;
@@ -138,11 +160,15 @@ Rect _frontOf(BuildContext context, Size size, {required Rect anchor}) {
     anchor.bottom + _anchorGap + _stackRise,
     bottom - height,
   );
-  return Rect.fromLTWH(
-    math.max(0, size.width - _windowEdge - _rightGutter - width),
-    math.max(0, top),
-    width,
-    height,
+  return (
+    front: Rect.fromLTWH(
+      math.max(0, size.width - _windowEdge - _rightGutter - width),
+      math.max(0, top),
+      width,
+      height,
+    ),
+    growDown: true,
+    maxHeight: (bottom - math.max(0, top)).clamp(height, _maxCardHeight),
   );
 }
 
@@ -176,7 +202,7 @@ class LiveStatusRoute extends PopupRoute<void>
 
   @override
   AlertScaleOrigin get scaleOrigin => (context, size) {
-    final center = _frontOf(context, size, anchor: anchor).center;
+    final center = _placementOf(context, size, anchor: anchor).front.center;
     return Alignment(
       center.dx / size.width * 2 - 1,
       center.dy / size.height * 2 - 1,
@@ -193,7 +219,7 @@ class LiveStatusRoute extends PopupRoute<void>
       builder: (context, constraints) => LiveStatusDeck(
         separateCore: separateCore,
         statuses: statuses,
-        front: _frontOf(context, constraints.biggest, anchor: anchor),
+        placement: _placementOf(context, constraints.biggest, anchor: anchor),
       ),
     );
   }
@@ -208,13 +234,13 @@ class LiveStatusDeck extends ConsumerStatefulWidget {
   const LiveStatusDeck({
     super.key,
     required this.separateCore,
-    required this.front,
+    required this.placement,
     this.statuses,
   });
 
   final bool separateCore;
 
-  final Rect front;
+  final DeckPlacement placement;
 
   final List<LiveStatus>? statuses;
 
@@ -243,10 +269,20 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
     parent: _asking,
     curve: Curves.easeOut,
   );
+  late final AnimationController _opening = AnimationController(
+    vsync: this,
+    duration: _expandDuration,
+  )..addStatusListener(_onOpeningStatus);
+  late final Animation<double> _expansion = CurvedAnimation(
+    parent: _opening,
+    curve: _settleCurve,
+  );
+  late final ScrollController _listScroll;
   List<LiveStatus> _statuses = const [];
   int _count = 0;
   Object? _shownKey;
   Object? _askKey;
+  Object? _openKey;
   int _target = 0;
   double _dragOrigin = 0;
   double _dragDistance = 0;
@@ -259,15 +295,23 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
 
   bool get _cycles => _statuses.length > 1;
 
-  bool get _held => _askKey != null;
+  bool get _held => _askKey != null || _openKey != null;
 
   int _indexOf(int target) => target % _statuses.length;
+
+  @override
+  void initState() {
+    super.initState();
+    _listScroll = sheetScrollController(context);
+  }
 
   @override
   void dispose() {
     _position.dispose();
     _reflow.dispose();
     _asking.dispose();
+    _opening.dispose();
+    _listScroll.dispose();
     super.dispose();
   }
 
@@ -287,6 +331,11 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
         !statuses.any((it) => it.key == _askKey && _confirmOf(it) != null)) {
       _askKey = null;
       _asking.value = 0;
+    }
+    if (_openKey != null &&
+        !statuses.any((it) => it.key == _openKey && it is WarningsStatus)) {
+      _openKey = null;
+      _opening.value = 0;
     }
     final kept = statuses.indexWhere((status) => status.key == _shownKey);
     final shown = kept >= 0 ? kept : _indexOf(_target);
@@ -382,6 +431,42 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
     }
   }
 
+  void _onOpeningStatus(AnimationStatus status) {
+    if (status == AnimationStatus.dismissed && _openKey != null) {
+      setState(() => _openKey = null);
+    }
+  }
+
+  void _toggleList(Object key) {
+    final opening = !_opening.status.isForwardOrCompleted;
+    setState(() {
+      if (opening) _openKey = key;
+    });
+    if (context.disableAnimations) {
+      _opening.value = opening ? 1 : 0;
+    } else if (opening) {
+      unawaited(_opening.forward().orCancel.catchError((_) {}));
+    } else {
+      unawaited(_opening.reverse().orCancel.catchError((_) {}));
+    }
+  }
+
+  void _scrollList(int direction) {
+    if (!_listScroll.hasClients) return;
+    final position = _listScroll.position;
+    final target = (position.pixels + direction * _listStep).clamp(
+      position.minScrollExtent,
+      position.maxScrollExtent,
+    );
+    if (context.disableAnimations) {
+      position.jumpTo(target);
+      return;
+    }
+    unawaited(
+      position.animateTo(target, duration: _labelFade, curve: Curves.easeOut),
+    );
+  }
+
   void _ask(Object key) {
     setState(() => _askKey = key);
     _runAsking(forward: true);
@@ -455,18 +540,21 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
   }
 
   KeyEventResult _onKey(FocusNode node, KeyEvent event) {
-    if (_held || event is! KeyDownEvent && event is! KeyRepeatEvent) {
+    if (_askKey != null || event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-      _step(1);
-      return KeyEventResult.handled;
+    final direction = switch (event.logicalKey) {
+      LogicalKeyboardKey.arrowDown => 1,
+      LogicalKeyboardKey.arrowUp => -1,
+      _ => 0,
+    };
+    if (direction == 0) return KeyEventResult.ignored;
+    if (_openKey != null) {
+      _scrollList(direction);
+    } else {
+      _step(direction);
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-      _step(-1);
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
+    return KeyEventResult.handled;
   }
 
   /// Where a card [offset] places from the front sits in the stack. Once the
@@ -501,6 +589,7 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
     final fill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
     final held = _held;
     final asking = _asking.status.isForwardOrCompleted;
+    final listOpen = _opening.status.isForwardOrCompleted;
     final cards = <Object, Widget>{
       for (final status in statuses)
         status.key: RepaintBoundary(
@@ -513,6 +602,12 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
             confirming: status.key == _askKey && asking,
             onAsk: () => _ask(status.key),
             onUnask: _unask,
+            expansion: status.key == _openKey
+                ? _expansion
+                : kAlwaysDismissedAnimation,
+            listScroll: status.key == _openKey ? _listScroll : null,
+            listOpen: status.key == _openKey && listOpen,
+            onToggleList: () => _toggleList(status.key),
           ),
         ),
       for (final (:status, from: _) in _leaving)
@@ -524,6 +619,9 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
             confirming: false,
             onAsk: _inert,
             onUnask: _inert,
+            expansion: kAlwaysDismissedAnimation,
+            listOpen: false,
+            onToggleList: _inert,
           ),
         ),
     };
@@ -548,10 +646,11 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
                 ? null
                 : () => _onDragEnd(DragEndDetails()),
             child: AnimatedBuilder(
-              animation: Listenable.merge([_position, _reflow]),
+              animation: Listenable.merge([_position, _reflow, _opening]),
               builder: (context, _) {
                 final placed = _layout()
                   ..sort((a, b) => b.slot.depth.compareTo(a.slot.depth));
+                final away = _openKey == null ? 0.0 : _expansion.value;
                 return Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -560,7 +659,13 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
                         _placeCard(
                           card: cards[status.key]!,
                           status: status,
-                          pose: slot.pose,
+                          pose: away == 0 || status.key == _openKey
+                              ? slot.pose
+                              : _lerpPose(
+                                  slot.pose,
+                                  _faded(_poseAt(slot.depth + 1)),
+                                  away,
+                                ),
                           front: !leaving && slot.depth.abs() < 0.5,
                           fill: fill,
                           shadows: slot.depth < 0.5
@@ -585,32 +690,111 @@ class _LiveStatusDeckState extends ConsumerState<LiveStatusDeck>
     required Color fill,
     required List<BoxShadow> shadows,
   }) {
-    return Positioned.fromRect(
+    return Positioned.fill(
       key: card.key,
-      rect: widget.front,
-      child: IgnorePointer(
-        ignoring: !front,
-        child: Opacity(
-          opacity: pose.opacity.clamp(0, 1),
-          child: Transform(
-            alignment: Alignment.center,
-            transform: _transformOf(pose),
-            child: DecoratedBox(
-              decoration: ShapeDecoration(
-                color: fill,
-                shape: AppShape.all(AppCorner.alert),
-                shadows: shadows,
-              ),
-              child: _LeaningRaster(
-                leaning: !_isFlat(pose),
-                content: status,
-                child: card,
+      child: CustomSingleChildLayout(
+        delegate: _CardSlot(widget.placement),
+        child: IgnorePointer(
+          ignoring: !front,
+          child: Opacity(
+            opacity: pose.opacity.clamp(0, 1),
+            child: Transform(
+              alignment: Alignment.center,
+              transform: _transformOf(pose),
+              child: DecoratedBox(
+                decoration: ShapeDecoration(
+                  color: fill,
+                  shape: AppShape.all(AppCorner.alert),
+                  shadows: shadows,
+                ),
+                child: _LeaningRaster(
+                  leaning: !_isFlat(pose),
+                  content: status,
+                  child: card,
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+/// Lays a card out at its resting place; an opened one grows as tall as the
+/// placement allows, about its center or down from its top.
+class _CardSlot extends SingleChildLayoutDelegate {
+  const _CardSlot(this.placement);
+
+  final DeckPlacement placement;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.tightFor(
+        width: placement.front.width,
+      ).copyWith(maxHeight: placement.maxHeight);
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final front = placement.front;
+    return Offset(
+      front.left,
+      placement.growDown ? front.top : front.center.dy - childSize.height / 2,
+    );
+  }
+
+  @override
+  bool shouldRelayout(_CardSlot oldDelegate) =>
+      oldDelegate.placement != placement;
+}
+
+/// A card [progress] of the way from its resting height to the height its
+/// content asks for, which only an opened card measures.
+class _ExpandingBox extends SingleChildRenderObjectWidget {
+  const _ExpandingBox({required this.progress, super.child});
+
+  final double progress;
+
+  @override
+  _RenderExpandingBox createRenderObject(BuildContext context) =>
+      _RenderExpandingBox(progress);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderExpandingBox renderObject,
+  ) {
+    renderObject.progress = progress;
+  }
+}
+
+class _RenderExpandingBox extends RenderProxyBox {
+  _RenderExpandingBox(this._progress);
+
+  double _progress;
+  set progress(double value) {
+    if (value == _progress) return;
+    _progress = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child!;
+    final width = constraints.maxWidth;
+    var height = _cardHeight;
+    if (_progress > 0) {
+      final ceiling = math.max(_cardHeight, constraints.maxHeight);
+      final full = child
+          .getMaxIntrinsicHeight(width)
+          .clamp(_cardHeight, ceiling);
+      height = _cardHeight + (full - _cardHeight) * _progress;
+    }
+    child.layout(
+      BoxConstraints.tight(constraints.constrain(Size(width, height))),
+      parentUsesSize: true,
+    );
+    size = child.size;
   }
 }
 
@@ -714,6 +898,10 @@ class _StatusCard extends ConsumerWidget {
     required this.confirming,
     required this.onAsk,
     required this.onUnask,
+    required this.expansion,
+    required this.listOpen,
+    required this.onToggleList,
+    this.listScroll,
   });
 
   final LiveStatus status;
@@ -727,6 +915,17 @@ class _StatusCard extends ConsumerWidget {
   final VoidCallback onAsk;
 
   final VoidCallback onUnask;
+
+  /// How far the card has grown to show its whole list.
+  final Animation<double> expansion;
+
+  /// Whether the list is open or opening, which its button closes.
+  final bool listOpen;
+
+  final VoidCallback onToggleList;
+
+  /// Scrolls the whole list while it is shown.
+  final ScrollController? listScroll;
 
   Future<void> _restartCore(CoreAction core) async {
     try {
@@ -742,22 +941,24 @@ class _StatusCard extends ConsumerWidget {
     unawaited(action.installUpdate());
   }
 
-  void _showWarnings(BuildContext context, List<ConfigWarning> warnings) {
-    Navigator.of(context).pop();
-    unawaited(
-      dialogs.showAlert(
-        title: currentAppLocalizations.configWarnings,
-        message: TextSpan(
-          text: warnings
-              .map(
-                (warning) => warning.path.isEmpty
-                    ? warning.message
-                    : '${warning.message}\n${warning.path}',
-              )
-              .join('\n\n'),
-        ),
-      ),
-    );
+  /// Asks module by module, each as it stands when its turn comes, until the
+  /// card goes or a prompt is dismissed.
+  Future<void> _reviewModules(BuildContext context, WidgetRef ref) async {
+    final ids = [
+      for (final module in ref.read(mitmModulesToAgreeProvider)) module.id,
+    ];
+    for (final id in ids) {
+      if (!context.mounted) {
+        return;
+      }
+      final module = ref
+          .read(mitmModulesToAgreeProvider)
+          .where((item) => item.id == id)
+          .firstOrNull;
+      if (module != null && !await answerMitmModule(ref, module)) {
+        return;
+      }
+    }
   }
 
   @override
@@ -774,20 +975,16 @@ class _StatusCard extends ConsumerWidget {
             stopDownload: action.cancelUpdateDownload,
             install: () => _install(context, ref),
             discard: () => unawaited(action.discardUpdate()),
-            showWarnings: switch (status) {
-              WarningsStatus(:final items) => () => _showWarnings(
-                context,
-                items,
-              ),
-              _ => _inert,
-            },
+            reviewModules: () => unawaited(_reviewModules(context, ref)),
+            toggleList: onToggleList,
           )
         : (
             restartCore: _inert,
             stopDownload: _inert,
             install: _inert,
             discard: _inert,
-            showWarnings: _inert,
+            reviewModules: _inert,
+            toggleList: _inert,
           );
     final (
       tint,
@@ -802,7 +999,8 @@ class _StatusCard extends ConsumerWidget {
         colorScheme.errorContainer,
         const _CoreHero(CoreStatus.disconnected),
         appLocalizations.coreStopped,
-        appLocalizations.coreStoppedDesc,
+        (status.preview == null ? ref.watch(coreStopReasonProvider) : null) ??
+            appLocalizations.coreStoppedDesc,
         appLocalizations.restartCore,
         effects.restartCore,
         (colorScheme.error, colorScheme.onError),
@@ -843,13 +1041,24 @@ class _StatusCard extends ConsumerWidget {
         effects.install,
         (colorScheme.success, colorScheme.onSuccess),
       ),
+      MitmConsentStatus(:final names) => (
+        colorScheme.warningContainer,
+        _ConsentHero(names: names),
+        appLocalizations.mitmModulesTurnedOff,
+        names.length == 1
+            ? appLocalizations.mitmModuleTurnedOffDesc(names.single)
+            : appLocalizations.mitmModulesTurnedOffDesc(names.length),
+        appLocalizations.view,
+        effects.reviewModules,
+        (colorScheme.warning, colorScheme.onWarning),
+      ),
       WarningsStatus(:final items) => (
         colorScheme.warningContainer,
-        _WarningsHero(items: items),
+        _WarningsHero(items: items, expansion: expansion, scroll: listScroll),
         appLocalizations.configWarnings,
         appLocalizations.configWarningsCount(items.length),
-        appLocalizations.viewAll,
-        effects.showWarnings,
+        listOpen ? appLocalizations.showLess : appLocalizations.viewAll,
+        effects.toggleList,
         (neutral, colorScheme.onSurface),
       ),
     };
@@ -873,7 +1082,12 @@ class _StatusCard extends ConsumerWidget {
         color: tint,
         shape: AppShape.all(_heroCorner),
       ),
-      child: hero,
+      child: listScroll == null
+          ? hero
+          : ClipRSuperellipse(
+              borderRadius: AppRadius.all(_heroCorner),
+              child: hero,
+            ),
     );
     Widget lines(String title, String body) => Column(
       mainAxisSize: MainAxisSize.min,
@@ -963,46 +1177,54 @@ class _StatusCard extends ConsumerWidget {
 
     return SurfaceScope(
       level: level,
-      child: Padding(
-        padding: const EdgeInsets.all(_cardInset),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(child: heroBox),
-            SizedBox(
-              height: _bottomHeight,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  8,
-                  _textTop,
-                  8,
-                  _actionBottom,
-                ),
-                child: AnimatedBuilder(
-                  animation: asking,
-                  builder: (context, _) {
-                    final a = asking.value;
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: ClipRect(
-                            child: OverflowBox(
-                              alignment: AlignmentDirectional.topStart,
-                              maxHeight: double.infinity,
-                              child: fade(a, restText, askText),
+      child: AnimatedBuilder(
+        animation: Listenable.merge([asking, expansion]),
+        builder: (context, _) {
+          final a = asking.value;
+          final t = expansion.value;
+          double toward(double from, double to) => from + (to - from) * t;
+          return _ExpandingBox(
+            progress: t,
+            child: Padding(
+              padding: const EdgeInsets.all(_cardInset),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: heroBox),
+                  SizedBox(
+                    height: toward(_bottomHeight, _openBottomHeight),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        8,
+                        toward(_textTop, _listTop),
+                        8,
+                        _actionBottom,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Expanded(
+                            child: ClipRect(
+                              child: Opacity(
+                                opacity: 1 - t,
+                                child: OverflowBox(
+                                  alignment: AlignmentDirectional.topStart,
+                                  maxHeight: double.infinity,
+                                  child: fade(a, restText, askText),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        if (button != null) fade(a, button, askButtons),
-                      ],
-                    );
-                  },
-                ),
+                          if (button != null) fade(a, button, askButtons),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -1253,6 +1475,88 @@ class _TicksPainter extends CustomPainter {
       oldDelegate.off != off;
 }
 
+class _BadgeHero extends StatelessWidget {
+  const _BadgeHero({
+    required this.color,
+    required this.glyph,
+    required this.glyphColor,
+    required this.chips,
+    this.fill,
+  });
+
+  final Color color;
+  final Glyph glyph;
+  final Color glyphColor;
+  final double? fill;
+  final List<Widget> chips;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 14,
+          children: [
+            SizedBox.square(
+              dimension: 60,
+              child: DecoratedBox(
+                decoration: ShapeDecoration(
+                  color: color,
+                  shape: AppShape.circle,
+                ),
+                child: Center(
+                  child: GlyphIcon(
+                    glyph,
+                    size: 28,
+                    fill: fill,
+                    color: glyphColor,
+                  ),
+                ),
+              ),
+            ),
+            Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: chips),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroChip extends StatelessWidget {
+  const _HeroChip(this.text, {required this.color, this.emphasized = false});
+
+  final String text;
+  final Color color;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
+        shape: AppShape.full,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.footnote
+              .of(context, emphasized: emphasized)
+              .copyWith(
+                color: color,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ReadyHero extends StatelessWidget {
   const _ReadyHero({required this.tag, required this.onDiscard});
 
@@ -1262,68 +1566,28 @@ class _ReadyHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final chipFill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
-    Widget chip(String text, {Color? color, bool emphasized = false}) =>
-        DecoratedBox(
-          decoration: ShapeDecoration(color: chipFill, shape: AppShape.full),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            child: Text(
-              text,
-              style: AppTextStyle.footnote
-                  .of(context, emphasized: emphasized)
-                  .copyWith(
-                    color: color,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-            ),
-          ),
-        );
     return Stack(
       children: [
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 14,
-            children: [
-              SizedBox.square(
-                dimension: 60,
-                child: DecoratedBox(
-                  decoration: ShapeDecoration(
-                    color: colorScheme.success,
-                    shape: AppShape.circle,
-                  ),
-                  child: Center(
-                    child: GlyphIcon(
-                      AppGlyphs.check,
-                      size: 28,
-                      color: colorScheme.onSuccess,
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  chip(
-                    globalState.packageInfo.version,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  GlyphIcon(
-                    AppGlyphs.chevronForward,
-                    size: 16,
-                    color: colorScheme.onSuccessContainer,
-                  ),
-                  chip(
-                    tag.replaceFirst(RegExp('^v'), ''),
-                    color: colorScheme.success,
-                    emphasized: true,
-                  ),
-                ],
-              ),
-            ],
-          ),
+        _BadgeHero(
+          color: colorScheme.success,
+          glyph: AppGlyphs.check,
+          glyphColor: colorScheme.onSuccess,
+          chips: [
+            _HeroChip(
+              globalState.packageInfo.version,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            GlyphIcon(
+              AppGlyphs.chevronForward,
+              size: 16,
+              color: colorScheme.onSuccessContainer,
+            ),
+            _HeroChip(
+              tag.replaceFirst(RegExp('^v'), ''),
+              color: colorScheme.success,
+              emphasized: true,
+            ),
+          ],
         ),
         PositionedDirectional(
           top: 8,
@@ -1339,10 +1603,38 @@ class _ReadyHero extends StatelessWidget {
   }
 }
 
-/// The first warnings a line each, message and path; the card's button lists
-/// them all.
+class _ConsentHero extends StatelessWidget {
+  const _ConsentHero({required this.names});
+
+  static const _shownNames = 2;
+
+  final List<String> names;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final rest = names.length - _shownNames;
+    return _BadgeHero(
+      color: colorScheme.warning,
+      glyph: AppGlyphs.puzzle,
+      glyphColor: colorScheme.onWarning,
+      fill: 1,
+      chips: [
+        for (final text in [...names.take(_shownNames), if (rest > 0) '+$rest'])
+          Flexible(child: _HeroChip(text, color: colorScheme.onSurfaceVariant)),
+      ],
+    );
+  }
+}
+
+/// The first warnings a line each, message and path; once the card opens, all
+/// of them in full, scrolling past what the card can grow to.
 class _WarningsHero extends StatelessWidget {
-  const _WarningsHero({required this.items});
+  const _WarningsHero({
+    required this.items,
+    required this.expansion,
+    required this.scroll,
+  });
 
   static const _shown = 3;
   static const _rowHeight = 36.0;
@@ -1354,13 +1646,17 @@ class _WarningsHero extends StatelessWidget {
 
   final List<ConfigWarning> items;
 
-  @override
-  Widget build(BuildContext context) {
+  final Animation<double> expansion;
+
+  final ScrollController? scroll;
+
+  static ShapeBorder _rowShape(int index, int last) => AppShape.vertical(
+    top: index == 0 ? _outerCorner : _innerCorner,
+    bottom: index == last ? _outerCorner : _innerCorner,
+  );
+
+  Widget _summary(BuildContext context, Color fill, TextStyle pathStyle) {
     final colorScheme = context.colorScheme;
-    final fill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
-    final pathStyle = AppTextStyle.caption1
-        .of(context)
-        .copyWith(color: colorScheme.onSurfaceVariant);
     final shown = items.take(_shown).toList();
     final last = shown.length - 1;
     return Padding(
@@ -1373,10 +1669,7 @@ class _WarningsHero extends StatelessWidget {
             DecoratedBox(
               decoration: ShapeDecoration(
                 color: fill,
-                shape: AppShape.vertical(
-                  top: i == 0 ? _outerCorner : _innerCorner,
-                  bottom: i == last ? _outerCorner : _innerCorner,
-                ),
+                shape: _rowShape(i, last),
               ),
               child: SizedBox(
                 height: _rowHeight,
@@ -1418,6 +1711,95 @@ class _WarningsHero extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+
+  Widget _list(
+    BuildContext context,
+    ScrollController scroll,
+    Color fill,
+    TextStyle pathStyle,
+  ) {
+    final colorScheme = context.colorScheme;
+    final last = items.length - 1;
+    return SingleChildScrollView(
+      controller: scroll,
+      padding: const EdgeInsets.all(_inset),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: _gap,
+        children: [
+          for (final (i, item) in items.indexed)
+            DecoratedBox(
+              decoration: ShapeDecoration(
+                color: fill,
+                shape: _rowShape(i, last),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: _rowHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 9,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 10,
+                    children: [
+                      GlyphIcon(
+                        AppGlyphs.warning,
+                        size: 18,
+                        fill: 1,
+                        color: colorScheme.warning,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 2,
+                          children: [
+                            Text(
+                              item.message,
+                              style: AppTextStyle.subheadline.of(context),
+                            ),
+                            if (item.path.isNotEmpty)
+                              Text(item.path, style: pathStyle),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final fill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
+    final pathStyle = AppTextStyle.caption1
+        .of(context)
+        .copyWith(color: colorScheme.onSurfaceVariant);
+    final summary = _summary(context, fill, pathStyle);
+    final scroll = this.scroll;
+    if (scroll == null) return summary;
+    final list = _list(context, scroll, fill, pathStyle);
+    return AnimatedBuilder(
+      animation: expansion,
+      builder: (context, _) {
+        final t = expansion.value;
+        return Stack(
+          children: [
+            IgnorePointer(
+              child: Opacity(opacity: 1 - t, child: summary),
+            ),
+            Opacity(opacity: t, child: list),
+          ],
+        );
+      },
     );
   }
 }

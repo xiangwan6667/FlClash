@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/system.dart';
+import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/enum/enum.dart';
 import 'package:flutter/foundation.dart';
 
 import 'api/channels/socket_channel.dart';
@@ -72,9 +72,10 @@ class CoreService extends CoreBackend {
        _client = client;
 
   @override
-  Stream<String> get crashes => _lifecycle.crashEvents.map(
-    (failure) => failure.cause?.toString() ?? 'core done',
-  );
+  Stream<String> get crashes => _lifecycle.crashEvents.map((failure) {
+    commonPrint.log('Core session lost: $failure', logLevel: LogLevel.warning);
+    return coreSessionLostMessage(failure.cause, currentAppLocalizations);
+  });
 
   @override
   Future<CoreLifecycleResult> start() => _lifecycle.start();

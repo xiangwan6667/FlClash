@@ -1,4 +1,4 @@
-display_name: FlClash
+display_name: FlClash RS
 package_name: flclash-rs
 
 packager: FlClash Fork
@@ -39,13 +39,11 @@ supported_mime_type:
 keywords:
   - FlClash
   - Clash
-  - ClashMeta
+  - Concord
   - Proxy
 
-generic_name: FlClash
+generic_name: FlClash RS
 
 group: Applications/Internet
 
 startup_notify: true
-
-startup_wm_class: app.flclash.fork.rs

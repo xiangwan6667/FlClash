@@ -63,10 +63,13 @@ jobs:
         run: flutter pub get
 
       - name: Check format
-        run: dart format --output=none --set-exit-if-changed lib test tool plugins setup.dart
+        run: dart format --output=none --set-exit-if-changed lib test tool plugins
 
       - name: Analyze
         run: flutter analyze --no-fatal-infos
+
+      - name: Analyze with the rsFeature checks stripped
+        run: bash tool/strip_check.sh
 
       - name: Skip the Core build hook
         run: |
@@ -283,7 +286,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CARGO_TERM_COLOR: always
-      # The upstream rs baseline is 27.25 MB before protocol additions.
+      # The release budget in bytes for the desktop Core.
       CORE_MAX_BYTES: 30000000
       CONCORD_REQUIRE_APP_TREE: '1'
     steps:
@@ -320,6 +323,12 @@ jobs:
       - name: Check crate layers
         working-directory: concord
         run: cargo run -p xtask -- check-layers
+
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Check the config the app sends
+        run: dart tool/check_sent_config.dart
 
       - name: Check generated schema
         working-directory: concord
@@ -511,18 +520,8 @@ jobs:
           ANDROID_NDK_HOME: ${{ steps.build-ndk.outputs.ndk-path }}
           # The setup hook builds the Core for the host slice only, so an x86_64 slice in the arm64 app cannot run.
           FLUTTER_MACOS_ARM64_ONLY: ${{ matrix.platform == 'macos' && matrix.arch == 'arm64' }}
-        run: dart setup.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
-
-      - name: Match asset names to the tag
-        shell: bash
-        run: |
-          version="$(sed -n 's/^version: \([^+]*\).*/\1/p' pubspec.yaml)"
-          tag_version="${GITHUB_REF_NAME#v}"
-          if [[ "$version" != "$tag_version" ]]; then
-            for file in dist/FlClash-"$version"-*; do
-              mv "$file" "${file/FlClash-$version-/FlClash-$tag_version-}"
-            done
-          fi
+        # `dart run` first runs every build hook for this runner, Linux GTK and the Go core included; the packager builds them for the target itself.
+        run: dart tool/package.dart ${{ matrix.platform }} ${{ env.IS_STABLE == 'true' && '--env stable' || '' }} -v
 
       - name: Verify Windows installer publisher
         if: matrix.platform == 'windows'
@@ -539,11 +538,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          dmg="$(jq -er '.artifacts[] | select(.os == "macos") | .name' dist/manifest.json)"
           mountpoint="$(mktemp -d)"
           trap 'hdiutil detach "$mountpoint" >/dev/null 2>&1 || true; rmdir "$mountpoint"' EXIT
-          hdiutil attach -nobrowse -readonly -mountpoint "$mountpoint" "dist/FlClash-${version}-macos-${{ matrix.arch }}.dmg"
-          app="$mountpoint/FlClash-rs/FlClash.app"
+          hdiutil attach -nobrowse -readonly -mountpoint "$mountpoint" "dist/$dmg"
+          app="$mountpoint/FlClash RS.app"
           test -d "$app"
           test ! -e "$mountpoint/FlClash.app"
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app/Contents/Info.plist")" = 'app.flclash.fork.rs'
@@ -553,9 +552,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
-          deb="dist/FlClash-${version}-linux-${{ matrix.arch }}.deb"
-          rpm="dist/FlClash-${version}-linux-${{ matrix.arch }}.rpm"
+          deb="dist/$(jq -er '.artifacts[] | select(.os == "linux" and (.name | endswith(".deb"))) | .name' dist/manifest.json)"
+          rpm="dist/$(jq -er '.artifacts[] | select(.os == "linux" and (.name | endswith(".rpm"))) | .name' dist/manifest.json)"
           test "$(dpkg-deb -f "$deb" Package)" = 'flclash-rs'
           expected='FlClash Fork <noreply@localhost>'
           test "$(dpkg-deb -f "$deb" Maintainer)" = "$expected"
@@ -570,15 +568,14 @@ jobs:
         run: |
           set -euo pipefail
           build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)"
-          shopt -s nullglob
-          apks=(dist/*android*.apk)
+          mapfile -t apks < <(jq -r '.artifacts[] | select(.os == "android") | .name' dist/manifest.json)
           test "${#apks[@]}" -eq 3
-          for apk in "${apks[@]}"; do
+          for name in "${apks[@]}"; do
+            apk="dist/$name"
             "$build_tools/aapt" dump badging "$apk" | grep -F "package: name='app.flclash.fork.rs'" >/dev/null
             certificates="$("$build_tools/apksigner" verify --print-certs "$apk")"
             if ! printf '%s\n' "$certificates" | grep -Fi 'certificate SHA-256 digest: 923e4c3eda8c6b516719b5b30f6e52e9faba273101368c6ce5a3bfdd74f40a33' >/dev/null; then
               echo "Unexpected signing certificate in $apk" >&2
-              printf '%s\n' "$certificates" >&2
               exit 1
             fi
           done
@@ -611,9 +608,8 @@ jobs:
       - name: Download
         uses: actions/download-artifact@v4
         with:
-          path: ./dist/
+          path: ./artifacts/
           pattern: artifact-*
-          merge-multiple: true
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -628,6 +624,9 @@ jobs:
       - name: Skip native build hooks
         run: |
           yq -i '.hooks.user_defines.setup.build_assets = false | .hooks.user_defines.rust_api.build_assets = false' pubspec.yaml
+
+      - name: Merge the build manifests
+        run: dart run tool/package.dart merge artifacts/* --out dist
 
       - name: Generate release notes
         shell: bash
@@ -647,14 +646,29 @@ jobs:
         env:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
-          version=$(echo "${{ github.ref_name }}" | sed 's/^v//')
-          printf "\n<!-- flclash:build-number:%s -->\n" "${VERSION##*+}" >> release.md
-          sed "s|VERSION|$version|g" ./.github/release_template.md >> release.md
+          line=$(jq -r '.artifacts[0].line' dist/manifest.json)
+          version=$(jq -r '.artifacts[0].version' dist/manifest.json)
+          printf '\n<!-- flclash:build-number:%s -->\n' "${VERSION##*+}" >> release.md
+          sed -e "s|TAG|${{ github.ref_name }}|g" -e "s|LINE|$line|g" -e "s|VERSION|$version|g" \
+            ./.github/release_template.md >> release.md
 
-      - name: Generate sha256
+      # Dev-line apps released before these names update from the old names; keep until the user says stop.
+      - name: Copy the Windows installers and APKs under their old names
+        if: ${{ env.IS_STABLE == 'true' }}
         run: |
           cd ./dist
-          sha256sum ./* > SHA256SUMS
+          jq -r '.artifacts[]
+            | select(.line == "dev")
+            | select((.os == "windows" and .form == "setup") or .os == "android")
+            | [.name, "FlClash-\(.version)-" + (
+                if .os == "windows" then "windows-\(.arch)-setup.exe"
+                else "android-" + {arm64: "arm64-v8a", armv7: "armeabi-v7a", amd64: "x86_64"}[.arch] + ".apk"
+                end)]
+            | @tsv' manifest.json |
+            while IFS=$'\t' read -r name legacy; do
+              cp "$name" "$legacy"
+              sha256sum "./$legacy" >> SHA256SUMS
+            done
 
       - name: Release
         uses: softprops/action-gh-release@v2

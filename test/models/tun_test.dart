@@ -1,4 +1,3 @@
-import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:test/test.dart';
 
@@ -25,12 +24,7 @@ void main() {
   });
 
   test('the desktop TUN takes only its switch and device, routed', () {
-    const tun = Tun(
-      enable: true,
-      stack: TunStack.gvisor,
-      mtu: 1400,
-      routeAddress: ['1.0.0.0/8'],
-    );
+    const tun = Tun(enable: true, mtu: 1400, routeAddress: ['1.0.0.0/8']);
 
     expect(tun.coreJson, {
       'enable': true,

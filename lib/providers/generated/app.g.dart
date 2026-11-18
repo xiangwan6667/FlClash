@@ -49,6 +49,47 @@ final class SafeModeProvider extends $FunctionalProvider<bool, bool, bool>
 
 String _$safeModeHash() => r'3ef07344f5a8dbf775ccf0a4861c0317ec8b2266';
 
+@ProviderFor(packageIconSource)
+final packageIconSourceProvider = PackageIconSourceProvider._();
+
+final class PackageIconSourceProvider
+    extends $FunctionalProvider<App?, App?, App?>
+    with $Provider<App?> {
+  PackageIconSourceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'packageIconSourceProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$packageIconSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<App?> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  App? create(Ref ref) {
+    return packageIconSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(App? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<App?>(value),
+    );
+  }
+}
+
+String _$packageIconSourceHash() => r'b9b233f207f9dce3809537c3458e7a70192dd52d';
+
 /// Android: su is there and granted FlClash's last request.
 
 @ProviderFor(rootAccess)
@@ -86,6 +127,44 @@ final class RootAccessProvider
 }
 
 String _$rootAccessHash() => r'59f43852dbede9ebe3301b885d63cd0a3961126d';
+
+/// Android: an su binary is installed, whether or not it grants FlClash.
+
+@ProviderFor(suInstalled)
+final suInstalledProvider = SuInstalledProvider._();
+
+/// Android: an su binary is installed, whether or not it grants FlClash.
+
+final class SuInstalledProvider
+    extends $FunctionalProvider<AsyncValue<bool>, bool, FutureOr<bool>>
+    with $FutureModifier<bool>, $FutureProvider<bool> {
+  /// Android: an su binary is installed, whether or not it grants FlClash.
+  SuInstalledProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'suInstalledProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$suInstalledHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<bool> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<bool> create(Ref ref) {
+    return suInstalled(ref);
+  }
+}
+
+String _$suInstalledHash() => r'fc80f277bdf74e629f164e8a9e23ab0ceb1bcd49';
 
 @ProviderFor(AuthorizedTunEnable)
 final authorizedTunEnableProvider = AuthorizedTunEnableProvider._();
@@ -342,7 +421,7 @@ final class ConfigWarningsStateProvider
 }
 
 String _$configWarningsStateHash() =>
-    r'c4f8b209ad1f4c7a4fde22f64d59004dca258e0f';
+    r'c954a8794505785fafe8fc172442513f612fef30';
 
 /// The warnings of the config the Core last set up; they end with the Core.
 
@@ -357,6 +436,106 @@ abstract class _$ConfigWarningsState extends $Notifier<List<ConfigWarning>> {
             as $ClassProviderElement<
               AnyNotifier<List<ConfigWarning>, List<ConfigWarning>>,
               List<ConfigWarning>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+@ProviderFor(liveConfigWarnings)
+final liveConfigWarningsProvider = LiveConfigWarningsProvider._();
+
+final class LiveConfigWarningsProvider
+    extends
+        $FunctionalProvider<
+          List<ConfigWarning>,
+          List<ConfigWarning>,
+          List<ConfigWarning>
+        >
+    with $Provider<List<ConfigWarning>> {
+  LiveConfigWarningsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'liveConfigWarningsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$liveConfigWarningsHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<ConfigWarning>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  List<ConfigWarning> create(Ref ref) {
+    return liveConfigWarnings(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<ConfigWarning> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<ConfigWarning>>(value),
+    );
+  }
+}
+
+String _$liveConfigWarningsHash() =>
+    r'8e3b1b36554096e55241117e05da8460e30ead08';
+
+@ProviderFor(CoreStopReason)
+final coreStopReasonProvider = CoreStopReasonProvider._();
+
+final class CoreStopReasonProvider
+    extends $NotifierProvider<CoreStopReason, String?> {
+  CoreStopReasonProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'coreStopReasonProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$coreStopReasonHash();
+
+  @$internal
+  @override
+  CoreStopReason create() => CoreStopReason();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String?>(value),
+    );
+  }
+}
+
+String _$coreStopReasonHash() => r'ba8ddb362ef3e025c5f052a68e896a0e728f9458';
+
+abstract class _$CoreStopReason extends $Notifier<String?> {
+  String? build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<String?, String?>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String?, String?>,
+              String?,
               Object?,
               Object?
             >;

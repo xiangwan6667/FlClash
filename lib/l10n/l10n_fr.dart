@@ -417,7 +417,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get desc =>
-      'Un client proxy multiplateforme basé sur ClashMeta, simple d’utilisation, open source et sans publicité.';
+      'Un client proxy multiplateforme basé sur le cœur Concord, simple d’utilisation, open source et sans publicité.';
 
   @override
   String get startVpn => 'Démarrage du VPN…';
@@ -518,6 +518,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get externalControllerSecret => 'Secret du contrôleur externe';
 
   @override
+  String get externalControllerCors => 'Autoriser l’accès cross-origin';
+
+  @override
+  String get externalControllerCorsDesc =>
+      'Les tableaux de bord web peuvent se connecter depuis d’autres sites.';
+
+  @override
   String get ipv6Desc => 'Le trafic IPv6 n’est reçu que si IPv6 est activé.';
 
   @override
@@ -545,16 +552,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tcpConcurrent => 'TCP simultané';
 
   @override
-  String get geodataLoader => 'Mode Geo à faible mémoire';
-
-  @override
   String get requests => 'Requêtes';
 
   @override
   String get recentRequests => 'Requêtes récentes';
 
   @override
-  String get findProcessMode => 'Recherche de processus';
+  String get alwaysFindProcess => 'Toujours rechercher le processus';
 
   @override
   String get init => 'Initialisation';
@@ -960,7 +964,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get disclaimerSoftwareContent =>
-      'Le Logiciel est un client proxy réseau open source construit sur le cœur Clash.Meta (mihomo). Il se limite à fournir des outils locaux tels que la gestion de la configuration, le routage par règles et le transfert du trafic.';
+      'Le Logiciel est un client proxy réseau open source construit sur le cœur Concord. Il se limite à fournir des outils locaux tels que la gestion de la configuration, le routage par règles et le transfert du trafic.';
 
   @override
   String get disclaimerNoServiceStatement =>
@@ -1013,7 +1017,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get disclaimerLicenseContent =>
-      'Le Logiciel est open source sous licence GPL-3.0. Selon cette licence, vous pouvez l\'exécuter, l\'étudier, le modifier et le distribuer ; lorsque vous distribuez le Logiciel ou une version modifiée, vous devez également en fournir le code source sous GPL-3.0 et conserver les mentions de droits d\'auteur d\'origine.\n\nLes composants tiers du Logiciel, y compris le noyau Clash.Meta, suivent leurs propres licences. Les auteurs d\'origine ne sont pas responsables des problèmes liés aux versions modifiées ou distribuées par d\'autres.';
+      'Le Logiciel est open source sous licence GPL-3.0. Selon cette licence, vous pouvez l\'exécuter, l\'étudier, le modifier et le distribuer ; lorsque vous distribuez le Logiciel ou une version modifiée, vous devez également en fournir le code source sous GPL-3.0 et conserver les mentions de droits d\'auteur d\'origine.\n\nLes composants tiers du Logiciel, y compris le noyau Concord, suivent leurs propres licences. Les auteurs d\'origine ne sont pas responsables des problèmes liés aux versions modifiées ou distribuées par d\'autres.';
 
   @override
   String get disclaimerChangesTitle => 'Modifications de cette déclaration';
@@ -1115,9 +1119,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get hideTimeoutProxies => 'Masquer les proxys expirés';
-
-  @override
-  String get stackMode => 'Mode de pile';
 
   @override
   String get network => 'Réseau';
@@ -1291,10 +1292,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get ruleTarget => 'Cible de la règle';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get exitDefault => 'Par défaut';
 
   @override
-  String get followProfile => 'Suivre le profil';
+  String get customExit => 'Sortie personnalisée';
+
+  @override
+  String get inputExitName => 'Saisissez le nom de la sortie';
 
   @override
   String get scriptFailed => 'Le script a échoué';
@@ -2774,10 +2778,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get congestionController => 'Contrôle de congestion TCP';
 
   @override
-  String get congestionControllerDesc =>
-      'Le contrôle de congestion TCP ne fonctionne qu’avec la pile mips.';
-
-  @override
   String get routeExcludeAddress => 'Adresses de route exclues';
 
   @override
@@ -2851,8 +2851,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get udpTimeout => 'Délai UDP';
 
   @override
-  String get udpTimeoutDesc =>
-      'Le délai UDP est en secondes et ne fonctionne qu’avec les piles gvisor, system et mixed.';
+  String get udpTimeoutDesc => 'Le délai UDP est en secondes.';
 
   @override
   String get dnsHijackDesc =>
@@ -3452,6 +3451,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Seules les applications qui font confiance aux certificats utilisateur, surtout les navigateurs, sont déchiffrées.';
 
   @override
+  String get mitmAndroidRootDesc =>
+      'Sans root, seules les applications qui font confiance aux certificats utilisateur, surtout les navigateurs, peuvent être déchiffrées. Avec root, toutes les applications le peuvent.';
+
+  @override
   String get mitmCertificateLinuxTip =>
       'Les navigateurs Flatpak nécessitent d’importer le certificat exporté à la main.';
 
@@ -3463,6 +3466,27 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String mitmMissingStores(Object stores) {
     return 'Pas encore dans : $stores';
+  }
+
+  @override
+  String get httpRequestsReadFailed => 'Impossible de lire les requêtes';
+
+  @override
+  String get requestBodyReadFailed =>
+      'Impossible de lire le corps de la requête';
+
+  @override
+  String get responseBodyReadFailed =>
+      'Impossible de lire le corps de la réponse';
+
+  @override
+  String mitmGrpcOverLimit(Object size) {
+    return 'Dépasse $size Mo une fois décompressé ; affiché compressé';
+  }
+
+  @override
+  String mitmUntrustedStores(Object stores) {
+    return 'Installé mais non approuvé dans : $stores';
   }
 
   @override
@@ -3566,6 +3590,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mapLocal => 'Mappage local';
 
   @override
+  String get requestBodyMock => 'Remplacement du corps de la requête';
+
+  @override
+  String get clientSourceAddress => 'Adresses des clients';
+
+  @override
+  String get skipVerifyHostname => 'Hôtes sans vérification de certificat';
+
+  @override
   String get mitmModules => 'Modules';
 
   @override
@@ -3589,8 +3622,69 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les règles de routage passent avant celles du profil.';
 
   @override
+  String get mitmRequestRulesDesc =>
+      'Les règles URL-REGEX et USER-AGENT du module deviennent des réécritures d’URL évaluées à chaque requête : sur toute requête HTTP en clair et, en HTTPS, seulement pour les hôtes de la liste MITM.';
+
+  @override
   String mitmModuleSystemTip(Object system) {
     return 'Écrit pour $system ; certaines lignes peuvent ne pas correspondre aux applications de cet appareil.';
+  }
+
+  @override
+  String mitmModuleRequirementTip(Object requirement) {
+    return 'Le module exige $requirement, que cet appareil ne remplit pas ; il risque de ne pas fonctionner comme prévu.';
+  }
+
+  @override
+  String mitmExitModules(Object modules) {
+    return 'Des modules : $modules';
+  }
+
+  @override
+  String get mitmModuleRiskTitle => 'Activer ce module ?';
+
+  @override
+  String get mitmNetworkRisk =>
+      'À la génération de la configuration, il modifie les réglages réseau ci-dessous, en passant avant ce que vous avez défini pour les mêmes dans FlClash. Désactiver ou supprimer le module annule ces changements.';
+
+  @override
+  String mitmSkipVerifyRisk(Object hosts) {
+    return 'Une fois activé, les certificats des serveurs de ces hôtes ne sont plus vérifiés : un serveur qui se fait passer pour eux passera inaperçu : $hosts';
+  }
+
+  @override
+  String mitmClientSourceRisk(Object addresses) {
+    return 'Il ne déchiffre que le trafic de ces clients : $addresses. Avec TUN activé, les apps de cet appareil arrivent depuis l’adresse de TUN et peuvent donc être exclues.';
+  }
+
+  @override
+  String get mitmClientSourceTunTip =>
+      'Avec TUN activé, les apps de cet appareil arrivent depuis l’adresse de TUN ; si la liste ne la contient pas, leur trafic n’est pas déchiffré.';
+
+  @override
+  String get mitmNetworkChanges => 'Réglages réseau';
+
+  @override
+  String mitmChangeReplace(Object values) {
+    return 'Remplacé par $values';
+  }
+
+  @override
+  String mitmChangeInsert(Object values) {
+    return 'Ajoute $values en tête';
+  }
+
+  @override
+  String mitmChangeAppend(Object values) {
+    return 'Ajoute $values';
+  }
+
+  @override
+  String get mitmChangeOverridesYours => 'Passe avant votre réglage';
+
+  @override
+  String mitmChangeReplacedBy(Object module) {
+    return 'Remplacé par le module $module';
   }
 
   @override
@@ -3609,23 +3703,44 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mitmSkipRule => 'Ce type de règle n’est pas pris en charge';
 
   @override
-  String get mitmSkipPolicy =>
-      'Seules les politiques DIRECT et REJECT sont prises en charge';
+  String get mitmSkipHttpRulePolicy =>
+      'Les règles URL-REGEX et USER-AGENT n’acceptent qu’une stratégie REJECT';
 
   @override
-  String get mitmSkipJq => 'Les réécritures jq ne sont pas prises en charge';
+  String get mitmSkipFinalRule =>
+      'Les règles du module passent en premier ; une règle finale masquerait toutes les suivantes';
 
   @override
-  String get mitmSkipJsonBody =>
-      'Les réécritures de corps JSON ne sont pas prises en charge';
+  String get mitmSkipDeviceRule =>
+      'Cette règle a besoin d’informations sur l’appareil ou le réseau que FlClash ne peut pas lire';
 
   @override
-  String get mitmSkipRawHeader =>
-      'La réécriture de tous les en-têtes comme un seul texte n’est pas prise en charge';
+  String get mitmSkipRequirement =>
+      'Cet appareil ne remplit pas la condition de cette ligne';
+
+  @override
+  String get mitmSkipManagedCa =>
+      'FlClash gère le certificat de l’AC ; un module ne peut pas le modifier';
+
+  @override
+  String get mitmSkipProxies =>
+      'Un module ne peut pas modifier les proxys ni les groupes de proxys';
+
+  @override
+  String get mitmSkipAppOnly =>
+      'Fonction propre à l’app d’origine, sans équivalent dans FlClash';
+
+  @override
+  String get mitmSkipReflect =>
+      'FlClash ne peut pas renvoyer les paquets à leur expéditeur';
 
   @override
   String get mitmSkipConditional =>
       'Les réécritures conditionnelles ne sont pas prises en charge';
+
+  @override
+  String get mitmSkipSkipVerifyAll =>
+      'La vérification des certificats n’est pas désactivée pour tous les hôtes';
 
   @override
   String get mitmSkipRelativeData =>
@@ -3666,14 +3781,49 @@ class AppLocalizationsFr extends AppLocalizations {
   String get mitmRunScript => 'Exécuter maintenant';
 
   @override
+  String get mitmScriptCron => 'Planifié';
+
+  @override
+  String get mitmScriptEvent => 'Événement';
+
+  @override
+  String get mitmScriptGeneric => 'Générique';
+
+  @override
+  String get mitmExcluded => 'Exclu';
+
+  @override
   String get mitmScriptNoOutput => 'Le script s\'est terminé sans sortie';
 
   @override
   String get mitmScriptRiskTitle => 'Exécuter les scripts de ce module ?';
 
   @override
+  String get mitmModulesTurnedOff => 'Modules désactivés';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return 'Une mise à jour de $name a apporté des scripts ou des changements réseau que vous n\'avez pas acceptés';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Les mises à jour de $count modules ont apporté des scripts ou des changements réseau que vous n\'avez pas acceptés',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       'Ses scripts lisent et modifient le trafic des hôtes qu\'ils ciblent, cookies et jetons compris, et peuvent envoyer leurs propres requêtes. Ne l\'activez que si vous faites confiance à sa source. Une fois activé, ses mises à jour s\'appliquent sans nouvelle demande.';
+
+  @override
+  String get mitmModuleUnreadableRisk =>
+      'Le fichier du module est illisible, on ne sait donc pas ce qu\'il modifie. Ne l\'activez que si vous faites confiance à sa source.';
 
   @override
   String get skipServerCertVerify =>
@@ -3807,6 +3957,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get coreStoppedDesc => 'L’application a perdu la connexion au cœur';
 
   @override
+  String coreStoppedWithReason(Object reason) {
+    return 'L’application a perdu la connexion au cœur : $reason';
+  }
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'Le port mixte ne peut pas être $value, il a été remis à $port';
+  }
+
+  @override
   String get restartCore => 'Redémarrer le cœur';
 
   @override
@@ -3868,4 +4028,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get tunStartFailed =>
       'Le TUN n\'a pas pu démarrer et ne sera plus essayé pendant cette exécution.';
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'L\'autorisation VPN n\'a pas été accordée, le VPN n\'a donc pas démarré. Un VPN permanent défini pour une autre application l\'empêche aussi.';
+
+  @override
+  String get vpnServiceStartFailed => 'Le service VPN n\'a pas pu démarrer.';
+
+  @override
+  String get rootTun => 'Mode root';
+
+  @override
+  String get rootTunDesc => 'Utilise root au lieu du VPN système.';
+
+  @override
+  String get rootTunUnavailable => 'Aucun root détecté sur cet appareil';
+
+  @override
+  String rootTunFallback(Object reason) {
+    return 'Root n\'est pas disponible ($reason) : cette session utilise le VPN système.';
+  }
 }

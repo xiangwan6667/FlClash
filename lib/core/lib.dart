@@ -53,7 +53,7 @@ class CoreLib extends CoreBackend {
           _connectedCompleter.isCompleted &&
           !_closed) {
         _crashController.add(
-          event.error?.toString() ?? 'The Core session ended',
+          coreSessionLostMessage(event.error, currentAppLocalizations),
         );
       }
     });

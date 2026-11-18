@@ -189,6 +189,13 @@ CoreOptionsArg coreOptionsArgOf(models.CoreOptions options) => CoreOptionsArg(
   mitmCapture: options.mitmCapture,
 );
 
+/// Off is sent as an empty list, since a patch that left the field out would
+/// keep a cross-origin grant in force.
+ControllerCorsArg controllerCorsOf(bool allowed) => ControllerCorsArg(
+  allowOrigins: allowed ? const ['*'] : const [],
+  allowPrivateNetwork: allowed,
+);
+
 /// What the general overrides leave of [config], as the live patch. A field
 /// the user did not pick for override is left null so the profile keeps its own.
 ConfigPatch configPatchOf(
@@ -202,7 +209,6 @@ ConfigPatch configPatchOf(
     tun: TunPatchArg(
       enable: config.tun.enable,
       device: config.tun.device,
-      stack: rsFeature ? null : config.tun.stack.name,
       autoRoute: true,
     ),
     allowLan: config.allowLan,
@@ -217,6 +223,7 @@ ConfigPatch configPatchOf(
     ),
     externalController: config.externalController.value,
     secret: config.secret,
+    externalControllerCors: controllerCorsOf(config.externalControllerCors),
     unifiedDelay: picked(GeneralOverrideKey.unifiedDelay, config.unifiedDelay),
     authentication: authentication,
     geoAutoUpdate: config.geoAutoUpdate,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fl_clash/core/desktop/lifecycle.dart';
 import 'package:fl_clash/core/desktop/model.dart';
 import 'package:fl_clash/core/service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -67,8 +68,12 @@ void main() {
     verify(() => api.stopEngine()).called(1);
   });
 
-  test('reports lifecycle crashes by their cause', () async {
+  test('reports a lost session in words, with the cause it has', () async {
     final messages = <String>[];
+    final logs = <String>[];
+    final print = debugPrint;
+    debugPrint = (message, {wrapWidth}) => logs.add(message ?? '');
+    addTearDown(() => debugPrint = print);
     final subscription = service.crashes.listen(messages.add);
 
     crashes.add(
@@ -84,12 +89,28 @@ void main() {
         code: 'unexpected_disconnect',
         phase: DesktopCorePhase.running,
         revision: 3,
+        sessionId: 'session-token',
+        owner: CoreProcessOwner.helper,
+        pid: 4242,
+        connectionGeneration: 7,
       ),
     );
     await pumpEventQueue();
     await subscription.cancel();
 
-    expect(messages, ['pipe closed', 'core done']);
+    expect(messages, [
+      'The app lost its connection to the core: pipe closed',
+      'The app lost its connection to the core',
+    ]);
+    expect(
+      logs.last,
+      allOf(
+        contains('unexpected_disconnect'),
+        contains('pid: 4242'),
+        contains('generation: 7'),
+        isNot(contains('session-token')),
+      ),
+    );
   });
 
   test('close coalesces lifecycle cleanup', () async {

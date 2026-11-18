@@ -46,7 +46,8 @@ const minTunMtu = 1280;
 const maxTunMtu = 65535;
 const defaultCongestionController = 'cubic';
 
-// The congestion controls mipstack registers, cubic first as its default.
+// The TUN congestion controls the app knows, cubic first as the default; the
+// Core's reported list decides which of them are offered.
 const congestionControllers = [
   defaultCongestionController,
   'reno',
@@ -1147,7 +1148,6 @@ abstract class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
     @Default(defaultTunDevice) String device,
-    @Default(TunStack.mips) TunStack stack,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
     @JsonKey(fromJson: _mtuFromJson) @Default(defaultTunMtu) int mtu,
     @JsonKey(
@@ -1170,6 +1170,21 @@ abstract class Tun with _$Tun {
     return decodeSalvaging('tun config', json, Tun.fromJson);
   }
 }
+
+bool isUsableMixedPort(int port) => port > 0 && port <= 65535;
+
+Object? unusableMixedPort(Object? patchJson) {
+  if (patchJson is! Map) return null;
+  final raw = patchJson['mixed-port'];
+  return raw != null && _mixedPortFromJson(raw) != raw ? raw : null;
+}
+
+int _mixedPortFromJson(Object? value) => switch (value) {
+  final num port
+      when port == port.truncate() && isUsableMixedPort(port.toInt()) =>
+    port.toInt(),
+  _ => defaultMixedPort,
+};
 
 int _mtuFromJson(int value) =>
     value > 0 ? value.clamp(minTunMtu, maxTunMtu) : defaultTunMtu;
@@ -1196,7 +1211,6 @@ extension TunExt on Tun {
   Map<String, Object?> get coreJson => {
     'enable': enable,
     'device': device,
-    if (!rsFeature) 'stack': stack.name,
     'auto-route': true,
   };
 }
@@ -1565,7 +1579,6 @@ abstract class ProfileTun with _$ProfileTun {
     @Default(false)
     @JsonKey(name: 'disable-icmp-forwarding')
     bool disableIcmpForwarding,
-    @Default(false) bool gso,
     @Default([])
     @JsonKey(name: 'include-interface')
     List<String> includeInterface,
@@ -1796,6 +1809,7 @@ abstract class Rule with _$Rule {
     @Default(false) bool noResolve,
     @Default(false) bool src,
     String? order,
+    @Default(false) bool customExit,
   }) = _Rule;
 
   factory Rule.init() {
@@ -1933,6 +1947,11 @@ extension RuleExt on Rule {
 
   List<String> get searchFields => [ruleAction.name, rawValue];
 }
+
+Set<String> customExitsOf(Iterable<Rule> rules) => {
+  for (final rule in rules)
+    if (rule.customExit && rule.ruleTarget != null) rule.ruleTarget!,
+};
 
 final class RuleLineException implements Exception {
   final int line;
@@ -2096,7 +2115,6 @@ const _legacyForcedGeneralKeys = [
   GeneralOverrideKey.unifiedDelay,
   GeneralOverrideKey.tcpConcurrent,
   GeneralOverrideKey.ipv6,
-  GeneralOverrideKey.geodataLoader,
 ];
 
 Map<String, Object?> _withLegacyGeneralOverrideKeys(Map<String, Object?> json) {
@@ -2117,7 +2135,9 @@ Map<String, Object?> _withLegacyGeneralOverrideKeys(Map<String, Object?> json) {
 @freezed
 abstract class PatchClashConfig with _$PatchClashConfig {
   const factory PatchClashConfig({
-    @Default(defaultMixedPort) @JsonKey(name: 'mixed-port') int mixedPort,
+    @Default(defaultMixedPort)
+    @JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson)
+    int mixedPort,
     @Default(0) @JsonKey(name: 'socks-port') int socksPort,
     @Default(0) @JsonKey(name: 'port') int port,
     @Default(0) @JsonKey(name: 'redir-port') int redirPort,
@@ -2126,8 +2146,11 @@ abstract class PatchClashConfig with _$PatchClashConfig {
     @Default(false) @JsonKey(name: 'allow-lan') bool allowLan,
     @Default(LogLevel.error) @JsonKey(name: 'log-level') LogLevel logLevel,
     @Default(false) bool ipv6,
-    @Default(FindProcessMode.off)
-    @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)
+    @Default(FindProcessMode.strict)
+    @JsonKey(
+      name: 'find-process-mode',
+      unknownEnumValue: FindProcessMode.strict,
+    )
     FindProcessMode findProcessMode,
     @Default(InterfaceNameMode.clear)
     @JsonKey(
@@ -2162,16 +2185,16 @@ abstract class PatchClashConfig with _$PatchClashConfig {
       toJson: _geoXUrlToJson,
     )
     Map<GeoResource, String> geoXUrl,
-    @Default(GeodataLoader.memconservative)
-    @JsonKey(name: 'geodata-loader')
-    GeodataLoader geodataLoader,
     @JsonKey(name: 'global-ua') String? globalUa,
     @Default(ExternalControllerStatus.close)
     @JsonKey(name: 'external-controller')
     ExternalControllerStatus externalController,
     @Default('') String secret,
+    @Default(true)
+    @JsonKey(name: 'external-controller-cors')
+    bool externalControllerCors,
     @Default({}) Map<String, String> hosts,
-    @Default(false) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
+    @Default(true) @JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,
     @Default(24) @JsonKey(name: 'geo-update-interval') int geoUpdateInterval,
     @Default(defaultTestUrl) @JsonKey(name: 'test-url') String testUrl,
     @Default({})
@@ -2280,7 +2303,7 @@ extension MitmExt on Mitm {
   );
 
   /// The hostnames come from [rules] alone, which the user's own lead.
-  Map<String, Object?> coreJson(MitmRules rules) {
+  Map<String, Object?> coreJson(MitmRules rules, {bool? isAndroid}) {
     final json = toJson()
       ..remove('hostname')
       ..remove('decrypt-untrusted')
@@ -2290,10 +2313,11 @@ extension MitmExt on Mitm {
     return {
       ...json,
       ...rules.toJson(),
+      'h2': h2 || rules.h2,
       'decrypt-tls': decryptUntrusted || trustedFingerprint != null,
       'ca-fingerprint': decryptUntrusted ? '' : trustedFingerprint ?? '',
       'limits': {
-        ..._mitmLimits(isAndroid: system.isAndroid),
+        ..._mitmLimits(isAndroid: isAndroid ?? system.isAndroid),
         'capture-entries': ?captureEntries,
       },
     };
@@ -2307,7 +2331,11 @@ class MitmRules {
     this.headerRewrite = const [],
     this.bodyRewrite = const [],
     this.mapLocal = const [],
+    this.requestBodyMock = const [],
+    this.clientSourceAddress = const [],
+    this.skipVerifyHostname = const [],
     this.script = const [],
+    this.h2 = false,
   });
 
   final List<String> hostname;
@@ -2315,7 +2343,13 @@ class MitmRules {
   final List<String> headerRewrite;
   final List<String> bodyRewrite;
   final List<String> mapLocal;
+  final List<String> requestBodyMock;
+  final List<String> clientSourceAddress;
+  final List<String> skipVerifyHostname;
   final List<String> script;
+
+  /// A module that turns HTTP/2 on, which only adds to the user's choice.
+  final bool h2;
 
   List<String> linesOf(MitmList list) => switch (list) {
     MitmList.hostname => hostname,
@@ -2323,6 +2357,9 @@ class MitmRules {
     MitmList.headerRewrite => headerRewrite,
     MitmList.bodyRewrite => bodyRewrite,
     MitmList.mapLocal => mapLocal,
+    MitmList.requestBodyMock => requestBodyMock,
+    MitmList.clientSourceAddress => clientSourceAddress,
+    MitmList.skipVerifyHostname => skipVerifyHostname,
     MitmList.script => script,
   };
 
@@ -2351,6 +2388,7 @@ extension PatchClashConfigExt on PatchClashConfig {
     tcpConcurrent: defaultClashConfig.tcpConcurrent,
     externalController: defaultClashConfig.externalController,
     secret: defaultClashConfig.secret,
+    externalControllerCors: defaultClashConfig.externalControllerCors,
     unifiedDelay: defaultClashConfig.unifiedDelay,
     geoAutoUpdate: defaultClashConfig.geoAutoUpdate,
     geoUpdateInterval: defaultClashConfig.geoUpdateInterval,

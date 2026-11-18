@@ -171,8 +171,6 @@ enum NavigationItemMode { mobile, desktop, more, moreFull }
 
 enum ProxiesSortType { none, delay, name }
 
-enum TunStack { gvisor, system, mixed, mips }
-
 enum AccessControlMode { acceptSelected, rejectSelected }
 
 enum AccessSortType { none, name, time }
@@ -186,7 +184,7 @@ enum ResultType {
   error,
 }
 
-enum FindProcessMode { always, off }
+enum FindProcessMode { always, strict }
 
 enum InterfaceNameMode { clear, follow, custom }
 
@@ -333,7 +331,6 @@ enum TunOverrideKey with OverrideKey {
   dnsHijack('dns-hijack'),
   udpTimeout('udp-timeout'),
   disableIcmpForwarding('disable-icmp-forwarding'),
-  gso('gso'),
   includeInterface('include-interface'),
   excludeInterface('exclude-interface'),
   includeUid('include-uid'),
@@ -354,8 +351,7 @@ enum GeneralOverrideKey with OverrideKey {
   testUrl('test-url'),
   unifiedDelay('unified-delay'),
   tcpConcurrent('tcp-concurrent'),
-  ipv6('ipv6'),
-  geodataLoader('geodata-loader');
+  ipv6('ipv6');
 
   const GeneralOverrideKey(this.path);
 
@@ -476,8 +472,6 @@ enum IpQualitySource {
 }
 
 enum IpQualitySourceStatus { noType, timeout, rateLimited, failed, ipMismatch }
-
-enum GeodataLoader { standard, memconservative }
 
 enum GeoResource {
   @JsonValue('mmdb')
@@ -833,6 +827,9 @@ enum MitmList {
   headerRewrite('header-rewrite'),
   bodyRewrite('body-rewrite'),
   mapLocal('map-local'),
+  requestBodyMock('request-body-mock'),
+  clientSourceAddress('client-source-address'),
+  skipVerifyHostname('skip-server-cert-verify-hostname'),
   script('script');
 
   final String key;
@@ -853,3 +850,17 @@ enum CoreStatus { connecting, connected, disconnected }
 enum RequestFeed { recent, live }
 
 enum UpdatingScope { core, local }
+
+/// Why the Android service gave up a start, by the code `ServiceStateMachine`
+/// sends with its stopped report.
+enum ServiceStartFailure {
+  vpnPermission('vpn_permission'),
+  service('service');
+
+  final String code;
+
+  const ServiceStartFailure(this.code);
+
+  static ServiceStartFailure? fromCode(Object? code) =>
+      values.where((it) => it.code == code).firstOrNull;
+}

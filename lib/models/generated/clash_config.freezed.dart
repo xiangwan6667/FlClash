@@ -3757,7 +3757,7 @@ as bool?,
 /// @nodoc
 mixin _$Tun {
 
- bool get enable; String get device; TunStack get stack;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(fromJson: _mtuFromJson) int get mtu;@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String get congestionController;@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress;
+ bool get enable; String get device;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(fromJson: _mtuFromJson) int get mtu;@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String get congestionController;@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress;
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3771,20 +3771,20 @@ $TunCopyWith<Tun> get copyWith => _$TunCopyWithImpl<Tun>(this as Tun, _$identity
 @override
 bool operator ==(Object other) {
   final _this = this as Tun;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tun&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Tun&&(identical(other.enable, _this.enable) || other.enable == _this.enable)&&(identical(other.device, _this.device) || other.device == _this.device)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Tun;
-  return Object.hash(runtimeType,_this.enable,_this.device,_this.stack,const DeepCollectionEquality().hash(_this.routeAddress),_this.mtu,_this.congestionController,const DeepCollectionEquality().hash(_this.routeExcludeAddress));
+  return Object.hash(runtimeType,_this.enable,_this.device,const DeepCollectionEquality().hash(_this.routeAddress),_this.mtu,_this.congestionController,const DeepCollectionEquality().hash(_this.routeExcludeAddress));
 }
 
 @override
 String toString() {
   final _this = this as Tun;
-  return 'Tun(enable: ${_this.enable}, device: ${_this.device}, stack: ${_this.stack}, routeAddress: ${_this.routeAddress}, mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, routeExcludeAddress: ${_this.routeExcludeAddress})';
+  return 'Tun(enable: ${_this.enable}, device: ${_this.device}, routeAddress: ${_this.routeAddress}, mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, routeExcludeAddress: ${_this.routeExcludeAddress})';
 }
 
 
@@ -3795,7 +3795,7 @@ abstract mixin class $TunCopyWith<$Res>  {
   factory $TunCopyWith(Tun value, $Res Function(Tun) _then) = _$TunCopyWithImpl;
 @useResult
 $Res call({
- bool enable, String device, TunStack stack,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(fromJson: _mtuFromJson) int mtu,@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String congestionController,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress
+ bool enable, String device,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(fromJson: _mtuFromJson) int mtu,@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String congestionController,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress
 });
 
 
@@ -3812,12 +3812,11 @@ class _$TunCopyWithImpl<$Res>
 
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? routeExcludeAddress = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? enable = null,Object? device = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? routeExcludeAddress = null,}) {
   return _then(Tun(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as String,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as TunStack,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as String,routeAddress: null == routeAddress ? _self.routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
 as String,routeExcludeAddress: null == routeExcludeAddress ? _self.routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
@@ -3906,10 +3905,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool enable,  String device, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Tun() when $default != null:
-return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
+return $default(_that.enable,_that.device,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
   return orElse();
 
 }
@@ -3927,10 +3926,10 @@ return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.m
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  String device,  TunStack stack, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool enable,  String device, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)  $default,) {final _that = this;
 switch (_that) {
 case _Tun():
-return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
+return $default(_that.enable,_that.device,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3947,10 +3946,10 @@ return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.m
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  String device,  TunStack stack, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool enable,  String device, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(fromJson: _mtuFromJson)  int mtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson)  String congestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress)?  $default,) {final _that = this;
 switch (_that) {
 case _Tun() when $default != null:
-return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
+return $default(_that.enable,_that.device,_that.routeAddress,_that.mtu,_that.congestionController,_that.routeExcludeAddress);case _:
   return null;
 
 }
@@ -3962,12 +3961,11 @@ return $default(_that.enable,_that.device,_that.stack,_that.routeAddress,_that.m
 @JsonSerializable()
 
 class _Tun implements Tun {
-  const _Tun({this.enable = false, this.device = defaultTunDevice, this.stack = TunStack.mips, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(fromJson: _mtuFromJson) this.mtu = defaultTunMtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) this.congestionController = defaultCongestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress = const []}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress;
+  const _Tun({this.enable = false, this.device = defaultTunDevice, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(fromJson: _mtuFromJson) this.mtu = defaultTunMtu, @JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) this.congestionController = defaultCongestionController, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress = const []}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress;
   factory _Tun.fromJson(Map<String, dynamic> json) => _$TunFromJson(json);
 
 @override@JsonKey() final  bool enable;
 @override@JsonKey() final  String device;
-@override@JsonKey() final  TunStack stack;
  final  List<String> _routeAddress;
 @override@JsonKey(name: 'route-address') List<String> get routeAddress {
   if (_routeAddress is EqualUnmodifiableListView) return _routeAddress;
@@ -3998,18 +3996,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tun&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.device, device) || other.device == device)&&(identical(other.stack, stack) || other.stack == stack)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Tun&&(identical(other.enable, enable) || other.enable == enable)&&(identical(other.device, device) || other.device == device)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,enable,device,stack,const DeepCollectionEquality().hash(_routeAddress),mtu,congestionController,const DeepCollectionEquality().hash(_routeExcludeAddress));
+    return Object.hash(runtimeType,enable,device,const DeepCollectionEquality().hash(_routeAddress),mtu,congestionController,const DeepCollectionEquality().hash(_routeExcludeAddress));
 }
 
 @override
 String toString() {
-    return 'Tun(enable: $enable, device: $device, stack: $stack, routeAddress: $routeAddress, mtu: $mtu, congestionController: $congestionController, routeExcludeAddress: $routeExcludeAddress)';
+    return 'Tun(enable: $enable, device: $device, routeAddress: $routeAddress, mtu: $mtu, congestionController: $congestionController, routeExcludeAddress: $routeExcludeAddress)';
 }
 
 
@@ -4020,7 +4018,7 @@ abstract mixin class _$TunCopyWith<$Res> implements $TunCopyWith<$Res> {
   factory _$TunCopyWith(_Tun value, $Res Function(_Tun) _then) = __$TunCopyWithImpl;
 @override @useResult
 $Res call({
- bool enable, String device, TunStack stack,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(fromJson: _mtuFromJson) int mtu,@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String congestionController,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress
+ bool enable, String device,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(fromJson: _mtuFromJson) int mtu,@JsonKey(name: 'congestion-controller', fromJson: _congestionControllerFromJson) String congestionController,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress
 });
 
 
@@ -4037,12 +4035,11 @@ class __$TunCopyWithImpl<$Res>
 
 /// Create a copy of Tun
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? device = null,Object? stack = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? routeExcludeAddress = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? enable = null,Object? device = null,Object? routeAddress = null,Object? mtu = null,Object? congestionController = null,Object? routeExcludeAddress = null,}) {
   return _then(_Tun(
 enable: null == enable ? _self.enable : enable // ignore: cast_nullable_to_non_nullable
 as bool,device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as String,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
-as TunStack,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
+as String,routeAddress: null == routeAddress ? _self._routeAddress : routeAddress // ignore: cast_nullable_to_non_nullable
 as List<String>,mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
 as String,routeExcludeAddress: null == routeExcludeAddress ? _self._routeExcludeAddress : routeExcludeAddress // ignore: cast_nullable_to_non_nullable
@@ -5056,7 +5053,7 @@ as bool,
 /// @nodoc
 mixin _$ProfileTun {
 
- int get mtu;@JsonKey(name: 'congestion-controller') String get congestionController;@JsonKey(name: 'strict-route') bool get strictRoute;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress;@JsonKey(name: 'dns-hijack') List<String> get dnsHijack;@JsonKey(name: 'udp-timeout') int get udpTimeout;@JsonKey(name: 'disable-icmp-forwarding') bool get disableIcmpForwarding; bool get gso;@JsonKey(name: 'include-interface') List<String> get includeInterface;@JsonKey(name: 'exclude-interface') List<String> get excludeInterface;@JsonKey(name: 'include-uid') List<int> get includeUid;@JsonKey(name: 'exclude-uid') List<int> get excludeUid;@JsonKey(name: 'exclude-src-port') List<int> get excludeSrcPort;@JsonKey(name: 'exclude-dst-port') List<int> get excludeDstPort;
+ int get mtu;@JsonKey(name: 'congestion-controller') String get congestionController;@JsonKey(name: 'strict-route') bool get strictRoute;@JsonKey(name: 'route-address') List<String> get routeAddress;@JsonKey(name: 'route-exclude-address') List<String> get routeExcludeAddress;@JsonKey(name: 'dns-hijack') List<String> get dnsHijack;@JsonKey(name: 'udp-timeout') int get udpTimeout;@JsonKey(name: 'disable-icmp-forwarding') bool get disableIcmpForwarding;@JsonKey(name: 'include-interface') List<String> get includeInterface;@JsonKey(name: 'exclude-interface') List<String> get excludeInterface;@JsonKey(name: 'include-uid') List<int> get includeUid;@JsonKey(name: 'exclude-uid') List<int> get excludeUid;@JsonKey(name: 'exclude-src-port') List<int> get excludeSrcPort;@JsonKey(name: 'exclude-dst-port') List<int> get excludeDstPort;
 /// Create a copy of ProfileTun
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -5070,20 +5067,20 @@ $ProfileTunCopyWith<ProfileTun> get copyWith => _$ProfileTunCopyWithImpl<Profile
 @override
 bool operator ==(Object other) {
   final _this = this as ProfileTun;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileTun&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&(identical(other.strictRoute, _this.strictRoute) || other.strictRoute == _this.strictRoute)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress)&&const DeepCollectionEquality().equals(other.dnsHijack, _this.dnsHijack)&&(identical(other.udpTimeout, _this.udpTimeout) || other.udpTimeout == _this.udpTimeout)&&(identical(other.disableIcmpForwarding, _this.disableIcmpForwarding) || other.disableIcmpForwarding == _this.disableIcmpForwarding)&&(identical(other.gso, _this.gso) || other.gso == _this.gso)&&const DeepCollectionEquality().equals(other.includeInterface, _this.includeInterface)&&const DeepCollectionEquality().equals(other.excludeInterface, _this.excludeInterface)&&const DeepCollectionEquality().equals(other.includeUid, _this.includeUid)&&const DeepCollectionEquality().equals(other.excludeUid, _this.excludeUid)&&const DeepCollectionEquality().equals(other.excludeSrcPort, _this.excludeSrcPort)&&const DeepCollectionEquality().equals(other.excludeDstPort, _this.excludeDstPort));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProfileTun&&(identical(other.mtu, _this.mtu) || other.mtu == _this.mtu)&&(identical(other.congestionController, _this.congestionController) || other.congestionController == _this.congestionController)&&(identical(other.strictRoute, _this.strictRoute) || other.strictRoute == _this.strictRoute)&&const DeepCollectionEquality().equals(other.routeAddress, _this.routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _this.routeExcludeAddress)&&const DeepCollectionEquality().equals(other.dnsHijack, _this.dnsHijack)&&(identical(other.udpTimeout, _this.udpTimeout) || other.udpTimeout == _this.udpTimeout)&&(identical(other.disableIcmpForwarding, _this.disableIcmpForwarding) || other.disableIcmpForwarding == _this.disableIcmpForwarding)&&const DeepCollectionEquality().equals(other.includeInterface, _this.includeInterface)&&const DeepCollectionEquality().equals(other.excludeInterface, _this.excludeInterface)&&const DeepCollectionEquality().equals(other.includeUid, _this.includeUid)&&const DeepCollectionEquality().equals(other.excludeUid, _this.excludeUid)&&const DeepCollectionEquality().equals(other.excludeSrcPort, _this.excludeSrcPort)&&const DeepCollectionEquality().equals(other.excludeDstPort, _this.excludeDstPort));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ProfileTun;
-  return Object.hash(runtimeType,_this.mtu,_this.congestionController,_this.strictRoute,const DeepCollectionEquality().hash(_this.routeAddress),const DeepCollectionEquality().hash(_this.routeExcludeAddress),const DeepCollectionEquality().hash(_this.dnsHijack),_this.udpTimeout,_this.disableIcmpForwarding,_this.gso,const DeepCollectionEquality().hash(_this.includeInterface),const DeepCollectionEquality().hash(_this.excludeInterface),const DeepCollectionEquality().hash(_this.includeUid),const DeepCollectionEquality().hash(_this.excludeUid),const DeepCollectionEquality().hash(_this.excludeSrcPort),const DeepCollectionEquality().hash(_this.excludeDstPort));
+  return Object.hash(runtimeType,_this.mtu,_this.congestionController,_this.strictRoute,const DeepCollectionEquality().hash(_this.routeAddress),const DeepCollectionEquality().hash(_this.routeExcludeAddress),const DeepCollectionEquality().hash(_this.dnsHijack),_this.udpTimeout,_this.disableIcmpForwarding,const DeepCollectionEquality().hash(_this.includeInterface),const DeepCollectionEquality().hash(_this.excludeInterface),const DeepCollectionEquality().hash(_this.includeUid),const DeepCollectionEquality().hash(_this.excludeUid),const DeepCollectionEquality().hash(_this.excludeSrcPort),const DeepCollectionEquality().hash(_this.excludeDstPort));
 }
 
 @override
 String toString() {
   final _this = this as ProfileTun;
-  return 'ProfileTun(mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, strictRoute: ${_this.strictRoute}, routeAddress: ${_this.routeAddress}, routeExcludeAddress: ${_this.routeExcludeAddress}, dnsHijack: ${_this.dnsHijack}, udpTimeout: ${_this.udpTimeout}, disableIcmpForwarding: ${_this.disableIcmpForwarding}, gso: ${_this.gso}, includeInterface: ${_this.includeInterface}, excludeInterface: ${_this.excludeInterface}, includeUid: ${_this.includeUid}, excludeUid: ${_this.excludeUid}, excludeSrcPort: ${_this.excludeSrcPort}, excludeDstPort: ${_this.excludeDstPort})';
+  return 'ProfileTun(mtu: ${_this.mtu}, congestionController: ${_this.congestionController}, strictRoute: ${_this.strictRoute}, routeAddress: ${_this.routeAddress}, routeExcludeAddress: ${_this.routeExcludeAddress}, dnsHijack: ${_this.dnsHijack}, udpTimeout: ${_this.udpTimeout}, disableIcmpForwarding: ${_this.disableIcmpForwarding}, includeInterface: ${_this.includeInterface}, excludeInterface: ${_this.excludeInterface}, includeUid: ${_this.includeUid}, excludeUid: ${_this.excludeUid}, excludeSrcPort: ${_this.excludeSrcPort}, excludeDstPort: ${_this.excludeDstPort})';
 }
 
 
@@ -5094,7 +5091,7 @@ abstract mixin class $ProfileTunCopyWith<$Res>  {
   factory $ProfileTunCopyWith(ProfileTun value, $Res Function(ProfileTun) _then) = _$ProfileTunCopyWithImpl;
 @useResult
 $Res call({
- int mtu,@JsonKey(name: 'congestion-controller') String congestionController,@JsonKey(name: 'strict-route') bool strictRoute,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'dns-hijack') List<String> dnsHijack,@JsonKey(name: 'udp-timeout') int udpTimeout,@JsonKey(name: 'disable-icmp-forwarding') bool disableIcmpForwarding, bool gso,@JsonKey(name: 'include-interface') List<String> includeInterface,@JsonKey(name: 'exclude-interface') List<String> excludeInterface,@JsonKey(name: 'include-uid') List<int> includeUid,@JsonKey(name: 'exclude-uid') List<int> excludeUid,@JsonKey(name: 'exclude-src-port') List<int> excludeSrcPort,@JsonKey(name: 'exclude-dst-port') List<int> excludeDstPort
+ int mtu,@JsonKey(name: 'congestion-controller') String congestionController,@JsonKey(name: 'strict-route') bool strictRoute,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'dns-hijack') List<String> dnsHijack,@JsonKey(name: 'udp-timeout') int udpTimeout,@JsonKey(name: 'disable-icmp-forwarding') bool disableIcmpForwarding,@JsonKey(name: 'include-interface') List<String> includeInterface,@JsonKey(name: 'exclude-interface') List<String> excludeInterface,@JsonKey(name: 'include-uid') List<int> includeUid,@JsonKey(name: 'exclude-uid') List<int> excludeUid,@JsonKey(name: 'exclude-src-port') List<int> excludeSrcPort,@JsonKey(name: 'exclude-dst-port') List<int> excludeDstPort
 });
 
 
@@ -5111,7 +5108,7 @@ class _$ProfileTunCopyWithImpl<$Res>
 
 /// Create a copy of ProfileTun
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mtu = null,Object? congestionController = null,Object? strictRoute = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? dnsHijack = null,Object? udpTimeout = null,Object? disableIcmpForwarding = null,Object? gso = null,Object? includeInterface = null,Object? excludeInterface = null,Object? includeUid = null,Object? excludeUid = null,Object? excludeSrcPort = null,Object? excludeDstPort = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mtu = null,Object? congestionController = null,Object? strictRoute = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? dnsHijack = null,Object? udpTimeout = null,Object? disableIcmpForwarding = null,Object? includeInterface = null,Object? excludeInterface = null,Object? includeUid = null,Object? excludeUid = null,Object? excludeSrcPort = null,Object? excludeDstPort = null,}) {
   return _then(ProfileTun(
 mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
@@ -5121,7 +5118,6 @@ as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self.routeEx
 as List<String>,dnsHijack: null == dnsHijack ? _self.dnsHijack : dnsHijack // ignore: cast_nullable_to_non_nullable
 as List<String>,udpTimeout: null == udpTimeout ? _self.udpTimeout : udpTimeout // ignore: cast_nullable_to_non_nullable
 as int,disableIcmpForwarding: null == disableIcmpForwarding ? _self.disableIcmpForwarding : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
-as bool,gso: null == gso ? _self.gso : gso // ignore: cast_nullable_to_non_nullable
 as bool,includeInterface: null == includeInterface ? _self.includeInterface : includeInterface // ignore: cast_nullable_to_non_nullable
 as List<String>,excludeInterface: null == excludeInterface ? _self.excludeInterface : excludeInterface // ignore: cast_nullable_to_non_nullable
 as List<String>,includeUid: null == includeUid ? _self.includeUid : includeUid // ignore: cast_nullable_to_non_nullable
@@ -5213,10 +5209,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding,  bool gso, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProfileTun() when $default != null:
-return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.gso,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
+return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
   return orElse();
 
 }
@@ -5234,10 +5230,10 @@ return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.rou
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding,  bool gso, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)  $default,) {final _that = this;
 switch (_that) {
 case _ProfileTun():
-return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.gso,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
+return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -5254,10 +5250,10 @@ return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.rou
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding,  bool gso, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int mtu, @JsonKey(name: 'congestion-controller')  String congestionController, @JsonKey(name: 'strict-route')  bool strictRoute, @JsonKey(name: 'route-address')  List<String> routeAddress, @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress, @JsonKey(name: 'dns-hijack')  List<String> dnsHijack, @JsonKey(name: 'udp-timeout')  int udpTimeout, @JsonKey(name: 'disable-icmp-forwarding')  bool disableIcmpForwarding, @JsonKey(name: 'include-interface')  List<String> includeInterface, @JsonKey(name: 'exclude-interface')  List<String> excludeInterface, @JsonKey(name: 'include-uid')  List<int> includeUid, @JsonKey(name: 'exclude-uid')  List<int> excludeUid, @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort, @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort)?  $default,) {final _that = this;
 switch (_that) {
 case _ProfileTun() when $default != null:
-return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.gso,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
+return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.routeAddress,_that.routeExcludeAddress,_that.dnsHijack,_that.udpTimeout,_that.disableIcmpForwarding,_that.includeInterface,_that.excludeInterface,_that.includeUid,_that.excludeUid,_that.excludeSrcPort,_that.excludeDstPort);case _:
   return null;
 
 }
@@ -5269,7 +5265,7 @@ return $default(_that.mtu,_that.congestionController,_that.strictRoute,_that.rou
 @JsonSerializable()
 
 class _ProfileTun implements ProfileTun {
-  const _ProfileTun({this.mtu = defaultTunMtu, @JsonKey(name: 'congestion-controller') this.congestionController = defaultCongestionController, @JsonKey(name: 'strict-route') this.strictRoute = false, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress = const [], @JsonKey(name: 'dns-hijack')  List<String> dnsHijack = defaultDnsHijack, @JsonKey(name: 'udp-timeout') this.udpTimeout = defaultTunUdpTimeout, @JsonKey(name: 'disable-icmp-forwarding') this.disableIcmpForwarding = false, this.gso = false, @JsonKey(name: 'include-interface')  List<String> includeInterface = const [], @JsonKey(name: 'exclude-interface')  List<String> excludeInterface = const [], @JsonKey(name: 'include-uid')  List<int> includeUid = const [], @JsonKey(name: 'exclude-uid')  List<int> excludeUid = const [], @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort = const [], @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort = const []}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress,_dnsHijack = dnsHijack,_includeInterface = includeInterface,_excludeInterface = excludeInterface,_includeUid = includeUid,_excludeUid = excludeUid,_excludeSrcPort = excludeSrcPort,_excludeDstPort = excludeDstPort;
+  const _ProfileTun({this.mtu = defaultTunMtu, @JsonKey(name: 'congestion-controller') this.congestionController = defaultCongestionController, @JsonKey(name: 'strict-route') this.strictRoute = false, @JsonKey(name: 'route-address')  List<String> routeAddress = const [], @JsonKey(name: 'route-exclude-address')  List<String> routeExcludeAddress = const [], @JsonKey(name: 'dns-hijack')  List<String> dnsHijack = defaultDnsHijack, @JsonKey(name: 'udp-timeout') this.udpTimeout = defaultTunUdpTimeout, @JsonKey(name: 'disable-icmp-forwarding') this.disableIcmpForwarding = false, @JsonKey(name: 'include-interface')  List<String> includeInterface = const [], @JsonKey(name: 'exclude-interface')  List<String> excludeInterface = const [], @JsonKey(name: 'include-uid')  List<int> includeUid = const [], @JsonKey(name: 'exclude-uid')  List<int> excludeUid = const [], @JsonKey(name: 'exclude-src-port')  List<int> excludeSrcPort = const [], @JsonKey(name: 'exclude-dst-port')  List<int> excludeDstPort = const []}): _routeAddress = routeAddress,_routeExcludeAddress = routeExcludeAddress,_dnsHijack = dnsHijack,_includeInterface = includeInterface,_excludeInterface = excludeInterface,_includeUid = includeUid,_excludeUid = excludeUid,_excludeSrcPort = excludeSrcPort,_excludeDstPort = excludeDstPort;
   factory _ProfileTun.fromJson(Map<String, dynamic> json) => _$ProfileTunFromJson(json);
 
 @override@JsonKey() final  int mtu;
@@ -5298,7 +5294,6 @@ class _ProfileTun implements ProfileTun {
 
 @override@JsonKey(name: 'udp-timeout') final  int udpTimeout;
 @override@JsonKey(name: 'disable-icmp-forwarding') final  bool disableIcmpForwarding;
-@override@JsonKey() final  bool gso;
  final  List<String> _includeInterface;
 @override@JsonKey(name: 'include-interface') List<String> get includeInterface {
   if (_includeInterface is EqualUnmodifiableListView) return _includeInterface;
@@ -5355,18 +5350,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileTun&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&(identical(other.strictRoute, strictRoute) || other.strictRoute == strictRoute)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress)&&const DeepCollectionEquality().equals(other.dnsHijack, _dnsHijack)&&(identical(other.udpTimeout, udpTimeout) || other.udpTimeout == udpTimeout)&&(identical(other.disableIcmpForwarding, disableIcmpForwarding) || other.disableIcmpForwarding == disableIcmpForwarding)&&(identical(other.gso, gso) || other.gso == gso)&&const DeepCollectionEquality().equals(other.includeInterface, _includeInterface)&&const DeepCollectionEquality().equals(other.excludeInterface, _excludeInterface)&&const DeepCollectionEquality().equals(other.includeUid, _includeUid)&&const DeepCollectionEquality().equals(other.excludeUid, _excludeUid)&&const DeepCollectionEquality().equals(other.excludeSrcPort, _excludeSrcPort)&&const DeepCollectionEquality().equals(other.excludeDstPort, _excludeDstPort));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProfileTun&&(identical(other.mtu, mtu) || other.mtu == mtu)&&(identical(other.congestionController, congestionController) || other.congestionController == congestionController)&&(identical(other.strictRoute, strictRoute) || other.strictRoute == strictRoute)&&const DeepCollectionEquality().equals(other.routeAddress, _routeAddress)&&const DeepCollectionEquality().equals(other.routeExcludeAddress, _routeExcludeAddress)&&const DeepCollectionEquality().equals(other.dnsHijack, _dnsHijack)&&(identical(other.udpTimeout, udpTimeout) || other.udpTimeout == udpTimeout)&&(identical(other.disableIcmpForwarding, disableIcmpForwarding) || other.disableIcmpForwarding == disableIcmpForwarding)&&const DeepCollectionEquality().equals(other.includeInterface, _includeInterface)&&const DeepCollectionEquality().equals(other.excludeInterface, _excludeInterface)&&const DeepCollectionEquality().equals(other.includeUid, _includeUid)&&const DeepCollectionEquality().equals(other.excludeUid, _excludeUid)&&const DeepCollectionEquality().equals(other.excludeSrcPort, _excludeSrcPort)&&const DeepCollectionEquality().equals(other.excludeDstPort, _excludeDstPort));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,mtu,congestionController,strictRoute,const DeepCollectionEquality().hash(_routeAddress),const DeepCollectionEquality().hash(_routeExcludeAddress),const DeepCollectionEquality().hash(_dnsHijack),udpTimeout,disableIcmpForwarding,gso,const DeepCollectionEquality().hash(_includeInterface),const DeepCollectionEquality().hash(_excludeInterface),const DeepCollectionEquality().hash(_includeUid),const DeepCollectionEquality().hash(_excludeUid),const DeepCollectionEquality().hash(_excludeSrcPort),const DeepCollectionEquality().hash(_excludeDstPort));
+    return Object.hash(runtimeType,mtu,congestionController,strictRoute,const DeepCollectionEquality().hash(_routeAddress),const DeepCollectionEquality().hash(_routeExcludeAddress),const DeepCollectionEquality().hash(_dnsHijack),udpTimeout,disableIcmpForwarding,const DeepCollectionEquality().hash(_includeInterface),const DeepCollectionEquality().hash(_excludeInterface),const DeepCollectionEquality().hash(_includeUid),const DeepCollectionEquality().hash(_excludeUid),const DeepCollectionEquality().hash(_excludeSrcPort),const DeepCollectionEquality().hash(_excludeDstPort));
 }
 
 @override
 String toString() {
-    return 'ProfileTun(mtu: $mtu, congestionController: $congestionController, strictRoute: $strictRoute, routeAddress: $routeAddress, routeExcludeAddress: $routeExcludeAddress, dnsHijack: $dnsHijack, udpTimeout: $udpTimeout, disableIcmpForwarding: $disableIcmpForwarding, gso: $gso, includeInterface: $includeInterface, excludeInterface: $excludeInterface, includeUid: $includeUid, excludeUid: $excludeUid, excludeSrcPort: $excludeSrcPort, excludeDstPort: $excludeDstPort)';
+    return 'ProfileTun(mtu: $mtu, congestionController: $congestionController, strictRoute: $strictRoute, routeAddress: $routeAddress, routeExcludeAddress: $routeExcludeAddress, dnsHijack: $dnsHijack, udpTimeout: $udpTimeout, disableIcmpForwarding: $disableIcmpForwarding, includeInterface: $includeInterface, excludeInterface: $excludeInterface, includeUid: $includeUid, excludeUid: $excludeUid, excludeSrcPort: $excludeSrcPort, excludeDstPort: $excludeDstPort)';
 }
 
 
@@ -5377,7 +5372,7 @@ abstract mixin class _$ProfileTunCopyWith<$Res> implements $ProfileTunCopyWith<$
   factory _$ProfileTunCopyWith(_ProfileTun value, $Res Function(_ProfileTun) _then) = __$ProfileTunCopyWithImpl;
 @override @useResult
 $Res call({
- int mtu,@JsonKey(name: 'congestion-controller') String congestionController,@JsonKey(name: 'strict-route') bool strictRoute,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'dns-hijack') List<String> dnsHijack,@JsonKey(name: 'udp-timeout') int udpTimeout,@JsonKey(name: 'disable-icmp-forwarding') bool disableIcmpForwarding, bool gso,@JsonKey(name: 'include-interface') List<String> includeInterface,@JsonKey(name: 'exclude-interface') List<String> excludeInterface,@JsonKey(name: 'include-uid') List<int> includeUid,@JsonKey(name: 'exclude-uid') List<int> excludeUid,@JsonKey(name: 'exclude-src-port') List<int> excludeSrcPort,@JsonKey(name: 'exclude-dst-port') List<int> excludeDstPort
+ int mtu,@JsonKey(name: 'congestion-controller') String congestionController,@JsonKey(name: 'strict-route') bool strictRoute,@JsonKey(name: 'route-address') List<String> routeAddress,@JsonKey(name: 'route-exclude-address') List<String> routeExcludeAddress,@JsonKey(name: 'dns-hijack') List<String> dnsHijack,@JsonKey(name: 'udp-timeout') int udpTimeout,@JsonKey(name: 'disable-icmp-forwarding') bool disableIcmpForwarding,@JsonKey(name: 'include-interface') List<String> includeInterface,@JsonKey(name: 'exclude-interface') List<String> excludeInterface,@JsonKey(name: 'include-uid') List<int> includeUid,@JsonKey(name: 'exclude-uid') List<int> excludeUid,@JsonKey(name: 'exclude-src-port') List<int> excludeSrcPort,@JsonKey(name: 'exclude-dst-port') List<int> excludeDstPort
 });
 
 
@@ -5394,7 +5389,7 @@ class __$ProfileTunCopyWithImpl<$Res>
 
 /// Create a copy of ProfileTun
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mtu = null,Object? congestionController = null,Object? strictRoute = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? dnsHijack = null,Object? udpTimeout = null,Object? disableIcmpForwarding = null,Object? gso = null,Object? includeInterface = null,Object? excludeInterface = null,Object? includeUid = null,Object? excludeUid = null,Object? excludeSrcPort = null,Object? excludeDstPort = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mtu = null,Object? congestionController = null,Object? strictRoute = null,Object? routeAddress = null,Object? routeExcludeAddress = null,Object? dnsHijack = null,Object? udpTimeout = null,Object? disableIcmpForwarding = null,Object? includeInterface = null,Object? excludeInterface = null,Object? includeUid = null,Object? excludeUid = null,Object? excludeSrcPort = null,Object? excludeDstPort = null,}) {
   return _then(_ProfileTun(
 mtu: null == mtu ? _self.mtu : mtu // ignore: cast_nullable_to_non_nullable
 as int,congestionController: null == congestionController ? _self.congestionController : congestionController // ignore: cast_nullable_to_non_nullable
@@ -5404,7 +5399,6 @@ as List<String>,routeExcludeAddress: null == routeExcludeAddress ? _self._routeE
 as List<String>,dnsHijack: null == dnsHijack ? _self._dnsHijack : dnsHijack // ignore: cast_nullable_to_non_nullable
 as List<String>,udpTimeout: null == udpTimeout ? _self.udpTimeout : udpTimeout // ignore: cast_nullable_to_non_nullable
 as int,disableIcmpForwarding: null == disableIcmpForwarding ? _self.disableIcmpForwarding : disableIcmpForwarding // ignore: cast_nullable_to_non_nullable
-as bool,gso: null == gso ? _self.gso : gso // ignore: cast_nullable_to_non_nullable
 as bool,includeInterface: null == includeInterface ? _self._includeInterface : includeInterface // ignore: cast_nullable_to_non_nullable
 as List<String>,excludeInterface: null == excludeInterface ? _self._excludeInterface : excludeInterface // ignore: cast_nullable_to_non_nullable
 as List<String>,includeUid: null == includeUid ? _self._includeUid : includeUid // ignore: cast_nullable_to_non_nullable
@@ -6714,7 +6708,7 @@ $ProviderOverrideCopyWith<$Res> get proxyOverride {
 /// @nodoc
 mixin _$Rule {
 
- int get id;@JsonKey(includeFromJson: false, includeToJson: false) int? get profileId; RuleAction get ruleAction; String? get content; String? get ruleTarget; String? get ruleProvider; String? get subRule; bool get noResolve; bool get src; String? get order;
+ int get id;@JsonKey(includeFromJson: false, includeToJson: false) int? get profileId; RuleAction get ruleAction; String? get content; String? get ruleTarget; String? get ruleProvider; String? get subRule; bool get noResolve; bool get src; String? get order; bool get customExit;
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -6728,20 +6722,20 @@ $RuleCopyWith<Rule> get copyWith => _$RuleCopyWithImpl<Rule>(this as Rule, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Rule;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Rule&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.ruleAction, _this.ruleAction) || other.ruleAction == _this.ruleAction)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.ruleTarget, _this.ruleTarget) || other.ruleTarget == _this.ruleTarget)&&(identical(other.ruleProvider, _this.ruleProvider) || other.ruleProvider == _this.ruleProvider)&&(identical(other.subRule, _this.subRule) || other.subRule == _this.subRule)&&(identical(other.noResolve, _this.noResolve) || other.noResolve == _this.noResolve)&&(identical(other.src, _this.src) || other.src == _this.src)&&(identical(other.order, _this.order) || other.order == _this.order));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Rule&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.profileId, _this.profileId) || other.profileId == _this.profileId)&&(identical(other.ruleAction, _this.ruleAction) || other.ruleAction == _this.ruleAction)&&(identical(other.content, _this.content) || other.content == _this.content)&&(identical(other.ruleTarget, _this.ruleTarget) || other.ruleTarget == _this.ruleTarget)&&(identical(other.ruleProvider, _this.ruleProvider) || other.ruleProvider == _this.ruleProvider)&&(identical(other.subRule, _this.subRule) || other.subRule == _this.subRule)&&(identical(other.noResolve, _this.noResolve) || other.noResolve == _this.noResolve)&&(identical(other.src, _this.src) || other.src == _this.src)&&(identical(other.order, _this.order) || other.order == _this.order)&&(identical(other.customExit, _this.customExit) || other.customExit == _this.customExit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Rule;
-  return Object.hash(runtimeType,_this.id,_this.profileId,_this.ruleAction,_this.content,_this.ruleTarget,_this.ruleProvider,_this.subRule,_this.noResolve,_this.src,_this.order);
+  return Object.hash(runtimeType,_this.id,_this.profileId,_this.ruleAction,_this.content,_this.ruleTarget,_this.ruleProvider,_this.subRule,_this.noResolve,_this.src,_this.order,_this.customExit);
 }
 
 @override
 String toString() {
   final _this = this as Rule;
-  return 'Rule(id: ${_this.id}, profileId: ${_this.profileId}, ruleAction: ${_this.ruleAction}, content: ${_this.content}, ruleTarget: ${_this.ruleTarget}, ruleProvider: ${_this.ruleProvider}, subRule: ${_this.subRule}, noResolve: ${_this.noResolve}, src: ${_this.src}, order: ${_this.order})';
+  return 'Rule(id: ${_this.id}, profileId: ${_this.profileId}, ruleAction: ${_this.ruleAction}, content: ${_this.content}, ruleTarget: ${_this.ruleTarget}, ruleProvider: ${_this.ruleProvider}, subRule: ${_this.subRule}, noResolve: ${_this.noResolve}, src: ${_this.src}, order: ${_this.order}, customExit: ${_this.customExit})';
 }
 
 
@@ -6752,7 +6746,7 @@ abstract mixin class $RuleCopyWith<$Res>  {
   factory $RuleCopyWith(Rule value, $Res Function(Rule) _then) = _$RuleCopyWithImpl;
 @useResult
 $Res call({
- int id,@JsonKey(includeFromJson: false, includeToJson: false) int? profileId, RuleAction ruleAction, String? content, String? ruleTarget, String? ruleProvider, String? subRule, bool noResolve, bool src, String? order
+ int id,@JsonKey(includeFromJson: false, includeToJson: false) int? profileId, RuleAction ruleAction, String? content, String? ruleTarget, String? ruleProvider, String? subRule, bool noResolve, bool src, String? order, bool customExit
 });
 
 
@@ -6769,7 +6763,7 @@ class _$RuleCopyWithImpl<$Res>
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? profileId = freezed,Object? ruleAction = null,Object? content = freezed,Object? ruleTarget = freezed,Object? ruleProvider = freezed,Object? subRule = freezed,Object? noResolve = null,Object? src = null,Object? order = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? profileId = freezed,Object? ruleAction = null,Object? content = freezed,Object? ruleTarget = freezed,Object? ruleProvider = freezed,Object? subRule = freezed,Object? noResolve = null,Object? src = null,Object? order = freezed,Object? customExit = null,}) {
   return _then(Rule(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -6781,7 +6775,8 @@ as String?,subRule: freezed == subRule ? _self.subRule : subRule // ignore: cast
 as String?,noResolve: null == noResolve ? _self.noResolve : noResolve // ignore: cast_nullable_to_non_nullable
 as bool,src: null == src ? _self.src : src // ignore: cast_nullable_to_non_nullable
 as bool,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,customExit: null == customExit ? _self.customExit : customExit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -6866,10 +6861,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order,  bool customExit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Rule() when $default != null:
-return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order);case _:
+return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order,_that.customExit);case _:
   return orElse();
 
 }
@@ -6887,10 +6882,10 @@ return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ru
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order,  bool customExit)  $default,) {final _that = this;
 switch (_that) {
 case _Rule():
-return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order);case _:
+return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order,_that.customExit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6907,10 +6902,10 @@ return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ru
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id, @JsonKey(includeFromJson: false, includeToJson: false)  int? profileId,  RuleAction ruleAction,  String? content,  String? ruleTarget,  String? ruleProvider,  String? subRule,  bool noResolve,  bool src,  String? order,  bool customExit)?  $default,) {final _that = this;
 switch (_that) {
 case _Rule() when $default != null:
-return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order);case _:
+return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ruleTarget,_that.ruleProvider,_that.subRule,_that.noResolve,_that.src,_that.order,_that.customExit);case _:
   return null;
 
 }
@@ -6922,7 +6917,7 @@ return $default(_that.id,_that.profileId,_that.ruleAction,_that.content,_that.ru
 @JsonSerializable()
 
 class _Rule implements Rule {
-  const _Rule({this.id = -1, @JsonKey(includeFromJson: false, includeToJson: false) this.profileId, this.ruleAction = RuleAction.DOMAIN, this.content, this.ruleTarget, this.ruleProvider, this.subRule, this.noResolve = false, this.src = false, this.order});
+  const _Rule({this.id = -1, @JsonKey(includeFromJson: false, includeToJson: false) this.profileId, this.ruleAction = RuleAction.DOMAIN, this.content, this.ruleTarget, this.ruleProvider, this.subRule, this.noResolve = false, this.src = false, this.order, this.customExit = false});
   factory _Rule.fromJson(Map<String, dynamic> json) => _$RuleFromJson(json);
 
 @override@JsonKey() final  int id;
@@ -6935,6 +6930,7 @@ class _Rule implements Rule {
 @override@JsonKey() final  bool noResolve;
 @override@JsonKey() final  bool src;
 @override final  String? order;
+@override@JsonKey() final  bool customExit;
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
@@ -6949,18 +6945,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Rule&&(identical(other.id, id) || other.id == id)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.ruleAction, ruleAction) || other.ruleAction == ruleAction)&&(identical(other.content, content) || other.content == content)&&(identical(other.ruleTarget, ruleTarget) || other.ruleTarget == ruleTarget)&&(identical(other.ruleProvider, ruleProvider) || other.ruleProvider == ruleProvider)&&(identical(other.subRule, subRule) || other.subRule == subRule)&&(identical(other.noResolve, noResolve) || other.noResolve == noResolve)&&(identical(other.src, src) || other.src == src)&&(identical(other.order, order) || other.order == order));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Rule&&(identical(other.id, id) || other.id == id)&&(identical(other.profileId, profileId) || other.profileId == profileId)&&(identical(other.ruleAction, ruleAction) || other.ruleAction == ruleAction)&&(identical(other.content, content) || other.content == content)&&(identical(other.ruleTarget, ruleTarget) || other.ruleTarget == ruleTarget)&&(identical(other.ruleProvider, ruleProvider) || other.ruleProvider == ruleProvider)&&(identical(other.subRule, subRule) || other.subRule == subRule)&&(identical(other.noResolve, noResolve) || other.noResolve == noResolve)&&(identical(other.src, src) || other.src == src)&&(identical(other.order, order) || other.order == order)&&(identical(other.customExit, customExit) || other.customExit == customExit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,profileId,ruleAction,content,ruleTarget,ruleProvider,subRule,noResolve,src,order);
+    return Object.hash(runtimeType,id,profileId,ruleAction,content,ruleTarget,ruleProvider,subRule,noResolve,src,order,customExit);
 }
 
 @override
 String toString() {
-    return 'Rule(id: $id, profileId: $profileId, ruleAction: $ruleAction, content: $content, ruleTarget: $ruleTarget, ruleProvider: $ruleProvider, subRule: $subRule, noResolve: $noResolve, src: $src, order: $order)';
+    return 'Rule(id: $id, profileId: $profileId, ruleAction: $ruleAction, content: $content, ruleTarget: $ruleTarget, ruleProvider: $ruleProvider, subRule: $subRule, noResolve: $noResolve, src: $src, order: $order, customExit: $customExit)';
 }
 
 
@@ -6971,7 +6967,7 @@ abstract mixin class _$RuleCopyWith<$Res> implements $RuleCopyWith<$Res> {
   factory _$RuleCopyWith(_Rule value, $Res Function(_Rule) _then) = __$RuleCopyWithImpl;
 @override @useResult
 $Res call({
- int id,@JsonKey(includeFromJson: false, includeToJson: false) int? profileId, RuleAction ruleAction, String? content, String? ruleTarget, String? ruleProvider, String? subRule, bool noResolve, bool src, String? order
+ int id,@JsonKey(includeFromJson: false, includeToJson: false) int? profileId, RuleAction ruleAction, String? content, String? ruleTarget, String? ruleProvider, String? subRule, bool noResolve, bool src, String? order, bool customExit
 });
 
 
@@ -6988,7 +6984,7 @@ class __$RuleCopyWithImpl<$Res>
 
 /// Create a copy of Rule
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? profileId = freezed,Object? ruleAction = null,Object? content = freezed,Object? ruleTarget = freezed,Object? ruleProvider = freezed,Object? subRule = freezed,Object? noResolve = null,Object? src = null,Object? order = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? profileId = freezed,Object? ruleAction = null,Object? content = freezed,Object? ruleTarget = freezed,Object? ruleProvider = freezed,Object? subRule = freezed,Object? noResolve = null,Object? src = null,Object? order = freezed,Object? customExit = null,}) {
   return _then(_Rule(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,profileId: freezed == profileId ? _self.profileId : profileId // ignore: cast_nullable_to_non_nullable
@@ -7000,7 +6996,8 @@ as String?,subRule: freezed == subRule ? _self.subRule : subRule // ignore: cast
 as String?,noResolve: null == noResolve ? _self.noResolve : noResolve // ignore: cast_nullable_to_non_nullable
 as bool,src: null == src ? _self.src : src // ignore: cast_nullable_to_non_nullable
 as bool,order: freezed == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,customExit: null == customExit ? _self.customExit : customExit // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -7332,7 +7329,7 @@ as List<String>,
 /// @nodoc
 mixin _$PatchClashConfig {
 
-@JsonKey(name: 'mixed-port') int get mixedPort;@JsonKey(name: 'socks-port') int get socksPort;@JsonKey(name: 'port') int get port;@JsonKey(name: 'redir-port') int get redirPort;@JsonKey(name: 'tproxy-port') int get tproxyPort; Mode get mode;@JsonKey(name: 'allow-lan') bool get allowLan;@JsonKey(name: 'log-level') LogLevel get logLevel; bool get ipv6;@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off) FindProcessMode get findProcessMode;@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode get interfaceNameMode;@JsonKey(name: 'interface-name') String get interfaceName;@JsonKey(name: 'keep-alive-interval') int get keepAliveInterval;@JsonKey(name: 'keep-alive-idle') int get keepAliveIdle;@JsonKey(name: 'disable-keep-alive') bool get disableKeepAlive;@JsonKey(name: 'routing-mark') int get routingMark;@JsonKey(name: 'unified-delay') bool get unifiedDelay;@JsonKey(name: 'tcp-concurrent') bool get tcpConcurrent;@JsonKey(fromJson: Tun.safeFormJson) Tun get tun;@JsonKey(fromJson: Dns.safeDnsFromJson) Dns get dns;@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> get dnsOverrideKeys;@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun get tunOverride;@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> get tunOverrideKeys;@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> get geoXUrl;@JsonKey(name: 'geodata-loader') GeodataLoader get geodataLoader;@JsonKey(name: 'global-ua') String? get globalUa;@JsonKey(name: 'external-controller') ExternalControllerStatus get externalController; String get secret; Map<String, String> get hosts;@JsonKey(name: 'geo-auto-update') bool get geoAutoUpdate;@JsonKey(name: 'geo-update-interval') int get geoUpdateInterval;@JsonKey(name: 'test-url') String get testUrl;@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> get generalOverrideKeys; Mitm get mitm;
+@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson) int get mixedPort;@JsonKey(name: 'socks-port') int get socksPort;@JsonKey(name: 'port') int get port;@JsonKey(name: 'redir-port') int get redirPort;@JsonKey(name: 'tproxy-port') int get tproxyPort; Mode get mode;@JsonKey(name: 'allow-lan') bool get allowLan;@JsonKey(name: 'log-level') LogLevel get logLevel; bool get ipv6;@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict) FindProcessMode get findProcessMode;@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode get interfaceNameMode;@JsonKey(name: 'interface-name') String get interfaceName;@JsonKey(name: 'keep-alive-interval') int get keepAliveInterval;@JsonKey(name: 'keep-alive-idle') int get keepAliveIdle;@JsonKey(name: 'disable-keep-alive') bool get disableKeepAlive;@JsonKey(name: 'routing-mark') int get routingMark;@JsonKey(name: 'unified-delay') bool get unifiedDelay;@JsonKey(name: 'tcp-concurrent') bool get tcpConcurrent;@JsonKey(fromJson: Tun.safeFormJson) Tun get tun;@JsonKey(fromJson: Dns.safeDnsFromJson) Dns get dns;@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> get dnsOverrideKeys;@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun get tunOverride;@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> get tunOverrideKeys;@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> get geoXUrl;@JsonKey(name: 'global-ua') String? get globalUa;@JsonKey(name: 'external-controller') ExternalControllerStatus get externalController; String get secret;@JsonKey(name: 'external-controller-cors') bool get externalControllerCors; Map<String, String> get hosts;@JsonKey(name: 'geo-auto-update') bool get geoAutoUpdate;@JsonKey(name: 'geo-update-interval') int get geoUpdateInterval;@JsonKey(name: 'test-url') String get testUrl;@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> get generalOverrideKeys; Mitm get mitm;
 /// Create a copy of PatchClashConfig
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7346,20 +7343,20 @@ $PatchClashConfigCopyWith<PatchClashConfig> get copyWith => _$PatchClashConfigCo
 @override
 bool operator ==(Object other) {
   final _this = this as PatchClashConfig;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatchClashConfig&&(identical(other.mixedPort, _this.mixedPort) || other.mixedPort == _this.mixedPort)&&(identical(other.socksPort, _this.socksPort) || other.socksPort == _this.socksPort)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.redirPort, _this.redirPort) || other.redirPort == _this.redirPort)&&(identical(other.tproxyPort, _this.tproxyPort) || other.tproxyPort == _this.tproxyPort)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.allowLan, _this.allowLan) || other.allowLan == _this.allowLan)&&(identical(other.logLevel, _this.logLevel) || other.logLevel == _this.logLevel)&&(identical(other.ipv6, _this.ipv6) || other.ipv6 == _this.ipv6)&&(identical(other.findProcessMode, _this.findProcessMode) || other.findProcessMode == _this.findProcessMode)&&(identical(other.interfaceNameMode, _this.interfaceNameMode) || other.interfaceNameMode == _this.interfaceNameMode)&&(identical(other.interfaceName, _this.interfaceName) || other.interfaceName == _this.interfaceName)&&(identical(other.keepAliveInterval, _this.keepAliveInterval) || other.keepAliveInterval == _this.keepAliveInterval)&&(identical(other.keepAliveIdle, _this.keepAliveIdle) || other.keepAliveIdle == _this.keepAliveIdle)&&(identical(other.disableKeepAlive, _this.disableKeepAlive) || other.disableKeepAlive == _this.disableKeepAlive)&&(identical(other.routingMark, _this.routingMark) || other.routingMark == _this.routingMark)&&(identical(other.unifiedDelay, _this.unifiedDelay) || other.unifiedDelay == _this.unifiedDelay)&&(identical(other.tcpConcurrent, _this.tcpConcurrent) || other.tcpConcurrent == _this.tcpConcurrent)&&(identical(other.tun, _this.tun) || other.tun == _this.tun)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.tunOverride, _this.tunOverride) || other.tunOverride == _this.tunOverride)&&const DeepCollectionEquality().equals(other.tunOverrideKeys, _this.tunOverrideKeys)&&const DeepCollectionEquality().equals(other.geoXUrl, _this.geoXUrl)&&(identical(other.geodataLoader, _this.geodataLoader) || other.geodataLoader == _this.geodataLoader)&&(identical(other.globalUa, _this.globalUa) || other.globalUa == _this.globalUa)&&(identical(other.externalController, _this.externalController) || other.externalController == _this.externalController)&&(identical(other.secret, _this.secret) || other.secret == _this.secret)&&const DeepCollectionEquality().equals(other.hosts, _this.hosts)&&(identical(other.geoAutoUpdate, _this.geoAutoUpdate) || other.geoAutoUpdate == _this.geoAutoUpdate)&&(identical(other.geoUpdateInterval, _this.geoUpdateInterval) || other.geoUpdateInterval == _this.geoUpdateInterval)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&const DeepCollectionEquality().equals(other.generalOverrideKeys, _this.generalOverrideKeys)&&(identical(other.mitm, _this.mitm) || other.mitm == _this.mitm));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PatchClashConfig&&(identical(other.mixedPort, _this.mixedPort) || other.mixedPort == _this.mixedPort)&&(identical(other.socksPort, _this.socksPort) || other.socksPort == _this.socksPort)&&(identical(other.port, _this.port) || other.port == _this.port)&&(identical(other.redirPort, _this.redirPort) || other.redirPort == _this.redirPort)&&(identical(other.tproxyPort, _this.tproxyPort) || other.tproxyPort == _this.tproxyPort)&&(identical(other.mode, _this.mode) || other.mode == _this.mode)&&(identical(other.allowLan, _this.allowLan) || other.allowLan == _this.allowLan)&&(identical(other.logLevel, _this.logLevel) || other.logLevel == _this.logLevel)&&(identical(other.ipv6, _this.ipv6) || other.ipv6 == _this.ipv6)&&(identical(other.findProcessMode, _this.findProcessMode) || other.findProcessMode == _this.findProcessMode)&&(identical(other.interfaceNameMode, _this.interfaceNameMode) || other.interfaceNameMode == _this.interfaceNameMode)&&(identical(other.interfaceName, _this.interfaceName) || other.interfaceName == _this.interfaceName)&&(identical(other.keepAliveInterval, _this.keepAliveInterval) || other.keepAliveInterval == _this.keepAliveInterval)&&(identical(other.keepAliveIdle, _this.keepAliveIdle) || other.keepAliveIdle == _this.keepAliveIdle)&&(identical(other.disableKeepAlive, _this.disableKeepAlive) || other.disableKeepAlive == _this.disableKeepAlive)&&(identical(other.routingMark, _this.routingMark) || other.routingMark == _this.routingMark)&&(identical(other.unifiedDelay, _this.unifiedDelay) || other.unifiedDelay == _this.unifiedDelay)&&(identical(other.tcpConcurrent, _this.tcpConcurrent) || other.tcpConcurrent == _this.tcpConcurrent)&&(identical(other.tun, _this.tun) || other.tun == _this.tun)&&(identical(other.dns, _this.dns) || other.dns == _this.dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _this.dnsOverrideKeys)&&(identical(other.tunOverride, _this.tunOverride) || other.tunOverride == _this.tunOverride)&&const DeepCollectionEquality().equals(other.tunOverrideKeys, _this.tunOverrideKeys)&&const DeepCollectionEquality().equals(other.geoXUrl, _this.geoXUrl)&&(identical(other.globalUa, _this.globalUa) || other.globalUa == _this.globalUa)&&(identical(other.externalController, _this.externalController) || other.externalController == _this.externalController)&&(identical(other.secret, _this.secret) || other.secret == _this.secret)&&(identical(other.externalControllerCors, _this.externalControllerCors) || other.externalControllerCors == _this.externalControllerCors)&&const DeepCollectionEquality().equals(other.hosts, _this.hosts)&&(identical(other.geoAutoUpdate, _this.geoAutoUpdate) || other.geoAutoUpdate == _this.geoAutoUpdate)&&(identical(other.geoUpdateInterval, _this.geoUpdateInterval) || other.geoUpdateInterval == _this.geoUpdateInterval)&&(identical(other.testUrl, _this.testUrl) || other.testUrl == _this.testUrl)&&const DeepCollectionEquality().equals(other.generalOverrideKeys, _this.generalOverrideKeys)&&(identical(other.mitm, _this.mitm) || other.mitm == _this.mitm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PatchClashConfig;
-  return Object.hashAll([runtimeType,_this.mixedPort,_this.socksPort,_this.port,_this.redirPort,_this.tproxyPort,_this.mode,_this.allowLan,_this.logLevel,_this.ipv6,_this.findProcessMode,_this.interfaceNameMode,_this.interfaceName,_this.keepAliveInterval,_this.keepAliveIdle,_this.disableKeepAlive,_this.routingMark,_this.unifiedDelay,_this.tcpConcurrent,_this.tun,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.tunOverride,const DeepCollectionEquality().hash(_this.tunOverrideKeys),const DeepCollectionEquality().hash(_this.geoXUrl),_this.geodataLoader,_this.globalUa,_this.externalController,_this.secret,const DeepCollectionEquality().hash(_this.hosts),_this.geoAutoUpdate,_this.geoUpdateInterval,_this.testUrl,const DeepCollectionEquality().hash(_this.generalOverrideKeys),_this.mitm]);
+  return Object.hashAll([runtimeType,_this.mixedPort,_this.socksPort,_this.port,_this.redirPort,_this.tproxyPort,_this.mode,_this.allowLan,_this.logLevel,_this.ipv6,_this.findProcessMode,_this.interfaceNameMode,_this.interfaceName,_this.keepAliveInterval,_this.keepAliveIdle,_this.disableKeepAlive,_this.routingMark,_this.unifiedDelay,_this.tcpConcurrent,_this.tun,_this.dns,const DeepCollectionEquality().hash(_this.dnsOverrideKeys),_this.tunOverride,const DeepCollectionEquality().hash(_this.tunOverrideKeys),const DeepCollectionEquality().hash(_this.geoXUrl),_this.globalUa,_this.externalController,_this.secret,_this.externalControllerCors,const DeepCollectionEquality().hash(_this.hosts),_this.geoAutoUpdate,_this.geoUpdateInterval,_this.testUrl,const DeepCollectionEquality().hash(_this.generalOverrideKeys),_this.mitm]);
 }
 
 @override
 String toString() {
   final _this = this as PatchClashConfig;
-  return 'PatchClashConfig(mixedPort: ${_this.mixedPort}, socksPort: ${_this.socksPort}, port: ${_this.port}, redirPort: ${_this.redirPort}, tproxyPort: ${_this.tproxyPort}, mode: ${_this.mode}, allowLan: ${_this.allowLan}, logLevel: ${_this.logLevel}, ipv6: ${_this.ipv6}, findProcessMode: ${_this.findProcessMode}, interfaceNameMode: ${_this.interfaceNameMode}, interfaceName: ${_this.interfaceName}, keepAliveInterval: ${_this.keepAliveInterval}, keepAliveIdle: ${_this.keepAliveIdle}, disableKeepAlive: ${_this.disableKeepAlive}, routingMark: ${_this.routingMark}, unifiedDelay: ${_this.unifiedDelay}, tcpConcurrent: ${_this.tcpConcurrent}, tun: ${_this.tun}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, tunOverride: ${_this.tunOverride}, tunOverrideKeys: ${_this.tunOverrideKeys}, geoXUrl: ${_this.geoXUrl}, geodataLoader: ${_this.geodataLoader}, globalUa: ${_this.globalUa}, externalController: ${_this.externalController}, secret: ${_this.secret}, hosts: ${_this.hosts}, geoAutoUpdate: ${_this.geoAutoUpdate}, geoUpdateInterval: ${_this.geoUpdateInterval}, testUrl: ${_this.testUrl}, generalOverrideKeys: ${_this.generalOverrideKeys}, mitm: ${_this.mitm})';
+  return 'PatchClashConfig(mixedPort: ${_this.mixedPort}, socksPort: ${_this.socksPort}, port: ${_this.port}, redirPort: ${_this.redirPort}, tproxyPort: ${_this.tproxyPort}, mode: ${_this.mode}, allowLan: ${_this.allowLan}, logLevel: ${_this.logLevel}, ipv6: ${_this.ipv6}, findProcessMode: ${_this.findProcessMode}, interfaceNameMode: ${_this.interfaceNameMode}, interfaceName: ${_this.interfaceName}, keepAliveInterval: ${_this.keepAliveInterval}, keepAliveIdle: ${_this.keepAliveIdle}, disableKeepAlive: ${_this.disableKeepAlive}, routingMark: ${_this.routingMark}, unifiedDelay: ${_this.unifiedDelay}, tcpConcurrent: ${_this.tcpConcurrent}, tun: ${_this.tun}, dns: ${_this.dns}, dnsOverrideKeys: ${_this.dnsOverrideKeys}, tunOverride: ${_this.tunOverride}, tunOverrideKeys: ${_this.tunOverrideKeys}, geoXUrl: ${_this.geoXUrl}, globalUa: ${_this.globalUa}, externalController: ${_this.externalController}, secret: ${_this.secret}, externalControllerCors: ${_this.externalControllerCors}, hosts: ${_this.hosts}, geoAutoUpdate: ${_this.geoAutoUpdate}, geoUpdateInterval: ${_this.geoUpdateInterval}, testUrl: ${_this.testUrl}, generalOverrideKeys: ${_this.generalOverrideKeys}, mitm: ${_this.mitm})';
 }
 
 
@@ -7370,7 +7367,7 @@ abstract mixin class $PatchClashConfigCopyWith<$Res>  {
   factory $PatchClashConfigCopyWith(PatchClashConfig value, $Res Function(PatchClashConfig) _then) = _$PatchClashConfigCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'socks-port') int socksPort,@JsonKey(name: 'port') int port,@JsonKey(name: 'redir-port') int redirPort,@JsonKey(name: 'tproxy-port') int tproxyPort, Mode mode,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off) FindProcessMode findProcessMode,@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode interfaceNameMode,@JsonKey(name: 'interface-name') String interfaceName,@JsonKey(name: 'keep-alive-interval') int keepAliveInterval,@JsonKey(name: 'keep-alive-idle') int keepAliveIdle,@JsonKey(name: 'disable-keep-alive') bool disableKeepAlive,@JsonKey(name: 'routing-mark') int routingMark,@JsonKey(name: 'unified-delay') bool unifiedDelay,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(fromJson: Tun.safeFormJson) Tun tun,@JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> dnsOverrideKeys,@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun tunOverride,@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> tunOverrideKeys,@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> geoXUrl,@JsonKey(name: 'geodata-loader') GeodataLoader geodataLoader,@JsonKey(name: 'global-ua') String? globalUa,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController, String secret, Map<String, String> hosts,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval,@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> generalOverrideKeys, Mitm mitm
+@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson) int mixedPort,@JsonKey(name: 'socks-port') int socksPort,@JsonKey(name: 'port') int port,@JsonKey(name: 'redir-port') int redirPort,@JsonKey(name: 'tproxy-port') int tproxyPort, Mode mode,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict) FindProcessMode findProcessMode,@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode interfaceNameMode,@JsonKey(name: 'interface-name') String interfaceName,@JsonKey(name: 'keep-alive-interval') int keepAliveInterval,@JsonKey(name: 'keep-alive-idle') int keepAliveIdle,@JsonKey(name: 'disable-keep-alive') bool disableKeepAlive,@JsonKey(name: 'routing-mark') int routingMark,@JsonKey(name: 'unified-delay') bool unifiedDelay,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(fromJson: Tun.safeFormJson) Tun tun,@JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> dnsOverrideKeys,@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun tunOverride,@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> tunOverrideKeys,@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> geoXUrl,@JsonKey(name: 'global-ua') String? globalUa,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController, String secret,@JsonKey(name: 'external-controller-cors') bool externalControllerCors, Map<String, String> hosts,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval,@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> generalOverrideKeys, Mitm mitm
 });
 
 
@@ -7387,7 +7384,7 @@ class _$PatchClashConfigCopyWithImpl<$Res>
 
 /// Create a copy of PatchClashConfig
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? mixedPort = null,Object? socksPort = null,Object? port = null,Object? redirPort = null,Object? tproxyPort = null,Object? mode = null,Object? allowLan = null,Object? logLevel = null,Object? ipv6 = null,Object? findProcessMode = null,Object? interfaceNameMode = null,Object? interfaceName = null,Object? keepAliveInterval = null,Object? keepAliveIdle = null,Object? disableKeepAlive = null,Object? routingMark = null,Object? unifiedDelay = null,Object? tcpConcurrent = null,Object? tun = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? tunOverride = null,Object? tunOverrideKeys = null,Object? geoXUrl = null,Object? geodataLoader = null,Object? globalUa = freezed,Object? externalController = null,Object? secret = null,Object? hosts = null,Object? geoAutoUpdate = null,Object? geoUpdateInterval = null,Object? testUrl = null,Object? generalOverrideKeys = null,Object? mitm = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? mixedPort = null,Object? socksPort = null,Object? port = null,Object? redirPort = null,Object? tproxyPort = null,Object? mode = null,Object? allowLan = null,Object? logLevel = null,Object? ipv6 = null,Object? findProcessMode = null,Object? interfaceNameMode = null,Object? interfaceName = null,Object? keepAliveInterval = null,Object? keepAliveIdle = null,Object? disableKeepAlive = null,Object? routingMark = null,Object? unifiedDelay = null,Object? tcpConcurrent = null,Object? tun = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? tunOverride = null,Object? tunOverrideKeys = null,Object? geoXUrl = null,Object? globalUa = freezed,Object? externalController = null,Object? secret = null,Object? externalControllerCors = null,Object? hosts = null,Object? geoAutoUpdate = null,Object? geoUpdateInterval = null,Object? testUrl = null,Object? generalOverrideKeys = null,Object? mitm = null,}) {
   return _then(PatchClashConfig(
 mixedPort: null == mixedPort ? _self.mixedPort : mixedPort // ignore: cast_nullable_to_non_nullable
 as int,socksPort: null == socksPort ? _self.socksPort : socksPort // ignore: cast_nullable_to_non_nullable
@@ -7413,11 +7410,11 @@ as Dns,dnsOverrideKeys: null == dnsOverrideKeys ? _self.dnsOverrideKeys : dnsOve
 as Set<DnsOverrideKey>,tunOverride: null == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
 as ProfileTun,tunOverrideKeys: null == tunOverrideKeys ? _self.tunOverrideKeys : tunOverrideKeys // ignore: cast_nullable_to_non_nullable
 as Set<TunOverrideKey>,geoXUrl: null == geoXUrl ? _self.geoXUrl : geoXUrl // ignore: cast_nullable_to_non_nullable
-as Map<GeoResource, String>,geodataLoader: null == geodataLoader ? _self.geodataLoader : geodataLoader // ignore: cast_nullable_to_non_nullable
-as GeodataLoader,globalUa: freezed == globalUa ? _self.globalUa : globalUa // ignore: cast_nullable_to_non_nullable
+as Map<GeoResource, String>,globalUa: freezed == globalUa ? _self.globalUa : globalUa // ignore: cast_nullable_to_non_nullable
 as String?,externalController: null == externalController ? _self.externalController : externalController // ignore: cast_nullable_to_non_nullable
 as ExternalControllerStatus,secret: null == secret ? _self.secret : secret // ignore: cast_nullable_to_non_nullable
-as String,hosts: null == hosts ? _self.hosts : hosts // ignore: cast_nullable_to_non_nullable
+as String,externalControllerCors: null == externalControllerCors ? _self.externalControllerCors : externalControllerCors // ignore: cast_nullable_to_non_nullable
+as bool,hosts: null == hosts ? _self.hosts : hosts // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,geoAutoUpdate: null == geoAutoUpdate ? _self.geoAutoUpdate : geoAutoUpdate // ignore: cast_nullable_to_non_nullable
 as bool,geoUpdateInterval: null == geoUpdateInterval ? _self.geoUpdateInterval : geoUpdateInterval // ignore: cast_nullable_to_non_nullable
 as int,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable
@@ -7544,10 +7541,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'geodata-loader')  GeodataLoader geodataLoader, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson)  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret, @JsonKey(name: 'external-controller-cors')  bool externalControllerCors,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PatchClashConfig() when $default != null:
-return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.geodataLoader,_that.globalUa,_that.externalController,_that.secret,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
+return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.globalUa,_that.externalController,_that.secret,_that.externalControllerCors,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
   return orElse();
 
 }
@@ -7565,10 +7562,10 @@ return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'geodata-loader')  GeodataLoader geodataLoader, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson)  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret, @JsonKey(name: 'external-controller-cors')  bool externalControllerCors,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)  $default,) {final _that = this;
 switch (_that) {
 case _PatchClashConfig():
-return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.geodataLoader,_that.globalUa,_that.externalController,_that.secret,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
+return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.globalUa,_that.externalController,_that.secret,_that.externalControllerCors,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7585,10 +7582,10 @@ return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'mixed-port')  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'geodata-loader')  GeodataLoader geodataLoader, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson)  int mixedPort, @JsonKey(name: 'socks-port')  int socksPort, @JsonKey(name: 'port')  int port, @JsonKey(name: 'redir-port')  int redirPort, @JsonKey(name: 'tproxy-port')  int tproxyPort,  Mode mode, @JsonKey(name: 'allow-lan')  bool allowLan, @JsonKey(name: 'log-level')  LogLevel logLevel,  bool ipv6, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict)  FindProcessMode findProcessMode, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear)  InterfaceNameMode interfaceNameMode, @JsonKey(name: 'interface-name')  String interfaceName, @JsonKey(name: 'keep-alive-interval')  int keepAliveInterval, @JsonKey(name: 'keep-alive-idle')  int keepAliveIdle, @JsonKey(name: 'disable-keep-alive')  bool disableKeepAlive, @JsonKey(name: 'routing-mark')  int routingMark, @JsonKey(name: 'unified-delay')  bool unifiedDelay, @JsonKey(name: 'tcp-concurrent')  bool tcpConcurrent, @JsonKey(fromJson: Tun.safeFormJson)  Tun tun, @JsonKey(fromJson: Dns.safeDnsFromJson)  Dns dns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson)  ProfileTun tunOverride, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl, @JsonKey(name: 'global-ua')  String? globalUa, @JsonKey(name: 'external-controller')  ExternalControllerStatus externalController,  String secret, @JsonKey(name: 'external-controller-cors')  bool externalControllerCors,  Map<String, String> hosts, @JsonKey(name: 'geo-auto-update')  bool geoAutoUpdate, @JsonKey(name: 'geo-update-interval')  int geoUpdateInterval, @JsonKey(name: 'test-url')  String testUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys,  Mitm mitm)?  $default,) {final _that = this;
 switch (_that) {
 case _PatchClashConfig() when $default != null:
-return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.geodataLoader,_that.globalUa,_that.externalController,_that.secret,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
+return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that.tproxyPort,_that.mode,_that.allowLan,_that.logLevel,_that.ipv6,_that.findProcessMode,_that.interfaceNameMode,_that.interfaceName,_that.keepAliveInterval,_that.keepAliveIdle,_that.disableKeepAlive,_that.routingMark,_that.unifiedDelay,_that.tcpConcurrent,_that.tun,_that.dns,_that.dnsOverrideKeys,_that.tunOverride,_that.tunOverrideKeys,_that.geoXUrl,_that.globalUa,_that.externalController,_that.secret,_that.externalControllerCors,_that.hosts,_that.geoAutoUpdate,_that.geoUpdateInterval,_that.testUrl,_that.generalOverrideKeys,_that.mitm);case _:
   return null;
 
 }
@@ -7600,10 +7597,10 @@ return $default(_that.mixedPort,_that.socksPort,_that.port,_that.redirPort,_that
 @JsonSerializable()
 
 class _PatchClashConfig implements PatchClashConfig {
-  const _PatchClashConfig({@JsonKey(name: 'mixed-port') this.mixedPort = defaultMixedPort, @JsonKey(name: 'socks-port') this.socksPort = 0, @JsonKey(name: 'port') this.port = 0, @JsonKey(name: 'redir-port') this.redirPort = 0, @JsonKey(name: 'tproxy-port') this.tproxyPort = 0, this.mode = Mode.rule, @JsonKey(name: 'allow-lan') this.allowLan = false, @JsonKey(name: 'log-level') this.logLevel = LogLevel.error, this.ipv6 = false, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off) this.findProcessMode = FindProcessMode.off, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) this.interfaceNameMode = InterfaceNameMode.clear, @JsonKey(name: 'interface-name') this.interfaceName = '', @JsonKey(name: 'keep-alive-interval') this.keepAliveInterval = defaultKeepAliveInterval, @JsonKey(name: 'keep-alive-idle') this.keepAliveIdle = 15, @JsonKey(name: 'disable-keep-alive') this.disableKeepAlive = false, @JsonKey(name: 'routing-mark') this.routingMark = 0, @JsonKey(name: 'unified-delay') this.unifiedDelay = true, @JsonKey(name: 'tcp-concurrent') this.tcpConcurrent = true, @JsonKey(fromJson: Tun.safeFormJson) this.tun = defaultTun, @JsonKey(fromJson: Dns.safeDnsFromJson) this.dns = defaultDns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys = const {}, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) this.tunOverride = defaultProfileTun, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys = const {}, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl = defaultGeoXUrl, @JsonKey(name: 'geodata-loader') this.geodataLoader = GeodataLoader.memconservative, @JsonKey(name: 'global-ua') this.globalUa, @JsonKey(name: 'external-controller') this.externalController = ExternalControllerStatus.close, this.secret = '',  Map<String, String> hosts = const {}, @JsonKey(name: 'geo-auto-update') this.geoAutoUpdate = false, @JsonKey(name: 'geo-update-interval') this.geoUpdateInterval = 24, @JsonKey(name: 'test-url') this.testUrl = defaultTestUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys = const {}, this.mitm = defaultMitm}): _dnsOverrideKeys = dnsOverrideKeys,_tunOverrideKeys = tunOverrideKeys,_geoXUrl = geoXUrl,_hosts = hosts,_generalOverrideKeys = generalOverrideKeys;
+  const _PatchClashConfig({@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson) this.mixedPort = defaultMixedPort, @JsonKey(name: 'socks-port') this.socksPort = 0, @JsonKey(name: 'port') this.port = 0, @JsonKey(name: 'redir-port') this.redirPort = 0, @JsonKey(name: 'tproxy-port') this.tproxyPort = 0, this.mode = Mode.rule, @JsonKey(name: 'allow-lan') this.allowLan = false, @JsonKey(name: 'log-level') this.logLevel = LogLevel.error, this.ipv6 = false, @JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict) this.findProcessMode = FindProcessMode.strict, @JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) this.interfaceNameMode = InterfaceNameMode.clear, @JsonKey(name: 'interface-name') this.interfaceName = '', @JsonKey(name: 'keep-alive-interval') this.keepAliveInterval = defaultKeepAliveInterval, @JsonKey(name: 'keep-alive-idle') this.keepAliveIdle = 15, @JsonKey(name: 'disable-keep-alive') this.disableKeepAlive = false, @JsonKey(name: 'routing-mark') this.routingMark = 0, @JsonKey(name: 'unified-delay') this.unifiedDelay = true, @JsonKey(name: 'tcp-concurrent') this.tcpConcurrent = true, @JsonKey(fromJson: Tun.safeFormJson) this.tun = defaultTun, @JsonKey(fromJson: Dns.safeDnsFromJson) this.dns = defaultDns, @JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson)  Set<DnsOverrideKey> dnsOverrideKeys = const {}, @JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) this.tunOverride = defaultProfileTun, @JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson)  Set<TunOverrideKey> tunOverrideKeys = const {}, @JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson)  Map<GeoResource, String> geoXUrl = defaultGeoXUrl, @JsonKey(name: 'global-ua') this.globalUa, @JsonKey(name: 'external-controller') this.externalController = ExternalControllerStatus.close, this.secret = '', @JsonKey(name: 'external-controller-cors') this.externalControllerCors = true,  Map<String, String> hosts = const {}, @JsonKey(name: 'geo-auto-update') this.geoAutoUpdate = true, @JsonKey(name: 'geo-update-interval') this.geoUpdateInterval = 24, @JsonKey(name: 'test-url') this.testUrl = defaultTestUrl, @JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson)  Set<GeneralOverrideKey> generalOverrideKeys = const {}, this.mitm = defaultMitm}): _dnsOverrideKeys = dnsOverrideKeys,_tunOverrideKeys = tunOverrideKeys,_geoXUrl = geoXUrl,_hosts = hosts,_generalOverrideKeys = generalOverrideKeys;
   factory _PatchClashConfig.fromJson(Map<String, dynamic> json) => _$PatchClashConfigFromJson(json);
 
-@override@JsonKey(name: 'mixed-port') final  int mixedPort;
+@override@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson) final  int mixedPort;
 @override@JsonKey(name: 'socks-port') final  int socksPort;
 @override@JsonKey(name: 'port') final  int port;
 @override@JsonKey(name: 'redir-port') final  int redirPort;
@@ -7612,7 +7609,7 @@ class _PatchClashConfig implements PatchClashConfig {
 @override@JsonKey(name: 'allow-lan') final  bool allowLan;
 @override@JsonKey(name: 'log-level') final  LogLevel logLevel;
 @override@JsonKey() final  bool ipv6;
-@override@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off) final  FindProcessMode findProcessMode;
+@override@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict) final  FindProcessMode findProcessMode;
 @override@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) final  InterfaceNameMode interfaceNameMode;
 @override@JsonKey(name: 'interface-name') final  String interfaceName;
 @override@JsonKey(name: 'keep-alive-interval') final  int keepAliveInterval;
@@ -7645,10 +7642,10 @@ class _PatchClashConfig implements PatchClashConfig {
   return EqualUnmodifiableMapView(_geoXUrl);
 }
 
-@override@JsonKey(name: 'geodata-loader') final  GeodataLoader geodataLoader;
 @override@JsonKey(name: 'global-ua') final  String? globalUa;
 @override@JsonKey(name: 'external-controller') final  ExternalControllerStatus externalController;
 @override@JsonKey() final  String secret;
+@override@JsonKey(name: 'external-controller-cors') final  bool externalControllerCors;
  final  Map<String, String> _hosts;
 @override@JsonKey() Map<String, String> get hosts {
   if (_hosts is EqualUnmodifiableMapView) return _hosts;
@@ -7681,18 +7678,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatchClashConfig&&(identical(other.mixedPort, mixedPort) || other.mixedPort == mixedPort)&&(identical(other.socksPort, socksPort) || other.socksPort == socksPort)&&(identical(other.port, port) || other.port == port)&&(identical(other.redirPort, redirPort) || other.redirPort == redirPort)&&(identical(other.tproxyPort, tproxyPort) || other.tproxyPort == tproxyPort)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.allowLan, allowLan) || other.allowLan == allowLan)&&(identical(other.logLevel, logLevel) || other.logLevel == logLevel)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.findProcessMode, findProcessMode) || other.findProcessMode == findProcessMode)&&(identical(other.interfaceNameMode, interfaceNameMode) || other.interfaceNameMode == interfaceNameMode)&&(identical(other.interfaceName, interfaceName) || other.interfaceName == interfaceName)&&(identical(other.keepAliveInterval, keepAliveInterval) || other.keepAliveInterval == keepAliveInterval)&&(identical(other.keepAliveIdle, keepAliveIdle) || other.keepAliveIdle == keepAliveIdle)&&(identical(other.disableKeepAlive, disableKeepAlive) || other.disableKeepAlive == disableKeepAlive)&&(identical(other.routingMark, routingMark) || other.routingMark == routingMark)&&(identical(other.unifiedDelay, unifiedDelay) || other.unifiedDelay == unifiedDelay)&&(identical(other.tcpConcurrent, tcpConcurrent) || other.tcpConcurrent == tcpConcurrent)&&(identical(other.tun, tun) || other.tun == tun)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.tunOverride, tunOverride) || other.tunOverride == tunOverride)&&const DeepCollectionEquality().equals(other.tunOverrideKeys, _tunOverrideKeys)&&const DeepCollectionEquality().equals(other.geoXUrl, _geoXUrl)&&(identical(other.geodataLoader, geodataLoader) || other.geodataLoader == geodataLoader)&&(identical(other.globalUa, globalUa) || other.globalUa == globalUa)&&(identical(other.externalController, externalController) || other.externalController == externalController)&&(identical(other.secret, secret) || other.secret == secret)&&const DeepCollectionEquality().equals(other.hosts, _hosts)&&(identical(other.geoAutoUpdate, geoAutoUpdate) || other.geoAutoUpdate == geoAutoUpdate)&&(identical(other.geoUpdateInterval, geoUpdateInterval) || other.geoUpdateInterval == geoUpdateInterval)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&const DeepCollectionEquality().equals(other.generalOverrideKeys, _generalOverrideKeys)&&(identical(other.mitm, mitm) || other.mitm == mitm));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PatchClashConfig&&(identical(other.mixedPort, mixedPort) || other.mixedPort == mixedPort)&&(identical(other.socksPort, socksPort) || other.socksPort == socksPort)&&(identical(other.port, port) || other.port == port)&&(identical(other.redirPort, redirPort) || other.redirPort == redirPort)&&(identical(other.tproxyPort, tproxyPort) || other.tproxyPort == tproxyPort)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.allowLan, allowLan) || other.allowLan == allowLan)&&(identical(other.logLevel, logLevel) || other.logLevel == logLevel)&&(identical(other.ipv6, ipv6) || other.ipv6 == ipv6)&&(identical(other.findProcessMode, findProcessMode) || other.findProcessMode == findProcessMode)&&(identical(other.interfaceNameMode, interfaceNameMode) || other.interfaceNameMode == interfaceNameMode)&&(identical(other.interfaceName, interfaceName) || other.interfaceName == interfaceName)&&(identical(other.keepAliveInterval, keepAliveInterval) || other.keepAliveInterval == keepAliveInterval)&&(identical(other.keepAliveIdle, keepAliveIdle) || other.keepAliveIdle == keepAliveIdle)&&(identical(other.disableKeepAlive, disableKeepAlive) || other.disableKeepAlive == disableKeepAlive)&&(identical(other.routingMark, routingMark) || other.routingMark == routingMark)&&(identical(other.unifiedDelay, unifiedDelay) || other.unifiedDelay == unifiedDelay)&&(identical(other.tcpConcurrent, tcpConcurrent) || other.tcpConcurrent == tcpConcurrent)&&(identical(other.tun, tun) || other.tun == tun)&&(identical(other.dns, dns) || other.dns == dns)&&const DeepCollectionEquality().equals(other.dnsOverrideKeys, _dnsOverrideKeys)&&(identical(other.tunOverride, tunOverride) || other.tunOverride == tunOverride)&&const DeepCollectionEquality().equals(other.tunOverrideKeys, _tunOverrideKeys)&&const DeepCollectionEquality().equals(other.geoXUrl, _geoXUrl)&&(identical(other.globalUa, globalUa) || other.globalUa == globalUa)&&(identical(other.externalController, externalController) || other.externalController == externalController)&&(identical(other.secret, secret) || other.secret == secret)&&(identical(other.externalControllerCors, externalControllerCors) || other.externalControllerCors == externalControllerCors)&&const DeepCollectionEquality().equals(other.hosts, _hosts)&&(identical(other.geoAutoUpdate, geoAutoUpdate) || other.geoAutoUpdate == geoAutoUpdate)&&(identical(other.geoUpdateInterval, geoUpdateInterval) || other.geoUpdateInterval == geoUpdateInterval)&&(identical(other.testUrl, testUrl) || other.testUrl == testUrl)&&const DeepCollectionEquality().equals(other.generalOverrideKeys, _generalOverrideKeys)&&(identical(other.mitm, mitm) || other.mitm == mitm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,mixedPort,socksPort,port,redirPort,tproxyPort,mode,allowLan,logLevel,ipv6,findProcessMode,interfaceNameMode,interfaceName,keepAliveInterval,keepAliveIdle,disableKeepAlive,routingMark,unifiedDelay,tcpConcurrent,tun,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),tunOverride,const DeepCollectionEquality().hash(_tunOverrideKeys),const DeepCollectionEquality().hash(_geoXUrl),geodataLoader,globalUa,externalController,secret,const DeepCollectionEquality().hash(_hosts),geoAutoUpdate,geoUpdateInterval,testUrl,const DeepCollectionEquality().hash(_generalOverrideKeys),mitm]);
+    return Object.hashAll([runtimeType,mixedPort,socksPort,port,redirPort,tproxyPort,mode,allowLan,logLevel,ipv6,findProcessMode,interfaceNameMode,interfaceName,keepAliveInterval,keepAliveIdle,disableKeepAlive,routingMark,unifiedDelay,tcpConcurrent,tun,dns,const DeepCollectionEquality().hash(_dnsOverrideKeys),tunOverride,const DeepCollectionEquality().hash(_tunOverrideKeys),const DeepCollectionEquality().hash(_geoXUrl),globalUa,externalController,secret,externalControllerCors,const DeepCollectionEquality().hash(_hosts),geoAutoUpdate,geoUpdateInterval,testUrl,const DeepCollectionEquality().hash(_generalOverrideKeys),mitm]);
 }
 
 @override
 String toString() {
-    return 'PatchClashConfig(mixedPort: $mixedPort, socksPort: $socksPort, port: $port, redirPort: $redirPort, tproxyPort: $tproxyPort, mode: $mode, allowLan: $allowLan, logLevel: $logLevel, ipv6: $ipv6, findProcessMode: $findProcessMode, interfaceNameMode: $interfaceNameMode, interfaceName: $interfaceName, keepAliveInterval: $keepAliveInterval, keepAliveIdle: $keepAliveIdle, disableKeepAlive: $disableKeepAlive, routingMark: $routingMark, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, tun: $tun, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, tunOverride: $tunOverride, tunOverrideKeys: $tunOverrideKeys, geoXUrl: $geoXUrl, geodataLoader: $geodataLoader, globalUa: $globalUa, externalController: $externalController, secret: $secret, hosts: $hosts, geoAutoUpdate: $geoAutoUpdate, geoUpdateInterval: $geoUpdateInterval, testUrl: $testUrl, generalOverrideKeys: $generalOverrideKeys, mitm: $mitm)';
+    return 'PatchClashConfig(mixedPort: $mixedPort, socksPort: $socksPort, port: $port, redirPort: $redirPort, tproxyPort: $tproxyPort, mode: $mode, allowLan: $allowLan, logLevel: $logLevel, ipv6: $ipv6, findProcessMode: $findProcessMode, interfaceNameMode: $interfaceNameMode, interfaceName: $interfaceName, keepAliveInterval: $keepAliveInterval, keepAliveIdle: $keepAliveIdle, disableKeepAlive: $disableKeepAlive, routingMark: $routingMark, unifiedDelay: $unifiedDelay, tcpConcurrent: $tcpConcurrent, tun: $tun, dns: $dns, dnsOverrideKeys: $dnsOverrideKeys, tunOverride: $tunOverride, tunOverrideKeys: $tunOverrideKeys, geoXUrl: $geoXUrl, globalUa: $globalUa, externalController: $externalController, secret: $secret, externalControllerCors: $externalControllerCors, hosts: $hosts, geoAutoUpdate: $geoAutoUpdate, geoUpdateInterval: $geoUpdateInterval, testUrl: $testUrl, generalOverrideKeys: $generalOverrideKeys, mitm: $mitm)';
 }
 
 
@@ -7703,7 +7700,7 @@ abstract mixin class _$PatchClashConfigCopyWith<$Res> implements $PatchClashConf
   factory _$PatchClashConfigCopyWith(_PatchClashConfig value, $Res Function(_PatchClashConfig) _then) = __$PatchClashConfigCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'mixed-port') int mixedPort,@JsonKey(name: 'socks-port') int socksPort,@JsonKey(name: 'port') int port,@JsonKey(name: 'redir-port') int redirPort,@JsonKey(name: 'tproxy-port') int tproxyPort, Mode mode,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.off) FindProcessMode findProcessMode,@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode interfaceNameMode,@JsonKey(name: 'interface-name') String interfaceName,@JsonKey(name: 'keep-alive-interval') int keepAliveInterval,@JsonKey(name: 'keep-alive-idle') int keepAliveIdle,@JsonKey(name: 'disable-keep-alive') bool disableKeepAlive,@JsonKey(name: 'routing-mark') int routingMark,@JsonKey(name: 'unified-delay') bool unifiedDelay,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(fromJson: Tun.safeFormJson) Tun tun,@JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> dnsOverrideKeys,@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun tunOverride,@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> tunOverrideKeys,@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> geoXUrl,@JsonKey(name: 'geodata-loader') GeodataLoader geodataLoader,@JsonKey(name: 'global-ua') String? globalUa,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController, String secret, Map<String, String> hosts,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval,@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> generalOverrideKeys, Mitm mitm
+@JsonKey(name: 'mixed-port', fromJson: _mixedPortFromJson) int mixedPort,@JsonKey(name: 'socks-port') int socksPort,@JsonKey(name: 'port') int port,@JsonKey(name: 'redir-port') int redirPort,@JsonKey(name: 'tproxy-port') int tproxyPort, Mode mode,@JsonKey(name: 'allow-lan') bool allowLan,@JsonKey(name: 'log-level') LogLevel logLevel, bool ipv6,@JsonKey(name: 'find-process-mode', unknownEnumValue: FindProcessMode.strict) FindProcessMode findProcessMode,@JsonKey(name: 'interface-name-mode', unknownEnumValue: InterfaceNameMode.clear) InterfaceNameMode interfaceNameMode,@JsonKey(name: 'interface-name') String interfaceName,@JsonKey(name: 'keep-alive-interval') int keepAliveInterval,@JsonKey(name: 'keep-alive-idle') int keepAliveIdle,@JsonKey(name: 'disable-keep-alive') bool disableKeepAlive,@JsonKey(name: 'routing-mark') int routingMark,@JsonKey(name: 'unified-delay') bool unifiedDelay,@JsonKey(name: 'tcp-concurrent') bool tcpConcurrent,@JsonKey(fromJson: Tun.safeFormJson) Tun tun,@JsonKey(fromJson: Dns.safeDnsFromJson) Dns dns,@JsonKey(name: _dnsOverrideKeysJsonKey, fromJson: _dnsOverrideKeysFromJson) Set<DnsOverrideKey> dnsOverrideKeys,@JsonKey(name: 'tun-override', fromJson: ProfileTun.safeFromJson) ProfileTun tunOverride,@JsonKey(name: _tunOverrideKeysJsonKey, fromJson: _tunOverrideKeysFromJson) Set<TunOverrideKey> tunOverrideKeys,@JsonKey(name: 'geox-url', fromJson: _geoXUrlFromJson, toJson: _geoXUrlToJson) Map<GeoResource, String> geoXUrl,@JsonKey(name: 'global-ua') String? globalUa,@JsonKey(name: 'external-controller') ExternalControllerStatus externalController, String secret,@JsonKey(name: 'external-controller-cors') bool externalControllerCors, Map<String, String> hosts,@JsonKey(name: 'geo-auto-update') bool geoAutoUpdate,@JsonKey(name: 'geo-update-interval') int geoUpdateInterval,@JsonKey(name: 'test-url') String testUrl,@JsonKey(name: _generalOverrideKeysJsonKey, fromJson: _generalOverrideKeysFromJson) Set<GeneralOverrideKey> generalOverrideKeys, Mitm mitm
 });
 
 
@@ -7720,7 +7717,7 @@ class __$PatchClashConfigCopyWithImpl<$Res>
 
 /// Create a copy of PatchClashConfig
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? mixedPort = null,Object? socksPort = null,Object? port = null,Object? redirPort = null,Object? tproxyPort = null,Object? mode = null,Object? allowLan = null,Object? logLevel = null,Object? ipv6 = null,Object? findProcessMode = null,Object? interfaceNameMode = null,Object? interfaceName = null,Object? keepAliveInterval = null,Object? keepAliveIdle = null,Object? disableKeepAlive = null,Object? routingMark = null,Object? unifiedDelay = null,Object? tcpConcurrent = null,Object? tun = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? tunOverride = null,Object? tunOverrideKeys = null,Object? geoXUrl = null,Object? geodataLoader = null,Object? globalUa = freezed,Object? externalController = null,Object? secret = null,Object? hosts = null,Object? geoAutoUpdate = null,Object? geoUpdateInterval = null,Object? testUrl = null,Object? generalOverrideKeys = null,Object? mitm = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? mixedPort = null,Object? socksPort = null,Object? port = null,Object? redirPort = null,Object? tproxyPort = null,Object? mode = null,Object? allowLan = null,Object? logLevel = null,Object? ipv6 = null,Object? findProcessMode = null,Object? interfaceNameMode = null,Object? interfaceName = null,Object? keepAliveInterval = null,Object? keepAliveIdle = null,Object? disableKeepAlive = null,Object? routingMark = null,Object? unifiedDelay = null,Object? tcpConcurrent = null,Object? tun = null,Object? dns = null,Object? dnsOverrideKeys = null,Object? tunOverride = null,Object? tunOverrideKeys = null,Object? geoXUrl = null,Object? globalUa = freezed,Object? externalController = null,Object? secret = null,Object? externalControllerCors = null,Object? hosts = null,Object? geoAutoUpdate = null,Object? geoUpdateInterval = null,Object? testUrl = null,Object? generalOverrideKeys = null,Object? mitm = null,}) {
   return _then(_PatchClashConfig(
 mixedPort: null == mixedPort ? _self.mixedPort : mixedPort // ignore: cast_nullable_to_non_nullable
 as int,socksPort: null == socksPort ? _self.socksPort : socksPort // ignore: cast_nullable_to_non_nullable
@@ -7746,11 +7743,11 @@ as Dns,dnsOverrideKeys: null == dnsOverrideKeys ? _self._dnsOverrideKeys : dnsOv
 as Set<DnsOverrideKey>,tunOverride: null == tunOverride ? _self.tunOverride : tunOverride // ignore: cast_nullable_to_non_nullable
 as ProfileTun,tunOverrideKeys: null == tunOverrideKeys ? _self._tunOverrideKeys : tunOverrideKeys // ignore: cast_nullable_to_non_nullable
 as Set<TunOverrideKey>,geoXUrl: null == geoXUrl ? _self._geoXUrl : geoXUrl // ignore: cast_nullable_to_non_nullable
-as Map<GeoResource, String>,geodataLoader: null == geodataLoader ? _self.geodataLoader : geodataLoader // ignore: cast_nullable_to_non_nullable
-as GeodataLoader,globalUa: freezed == globalUa ? _self.globalUa : globalUa // ignore: cast_nullable_to_non_nullable
+as Map<GeoResource, String>,globalUa: freezed == globalUa ? _self.globalUa : globalUa // ignore: cast_nullable_to_non_nullable
 as String?,externalController: null == externalController ? _self.externalController : externalController // ignore: cast_nullable_to_non_nullable
 as ExternalControllerStatus,secret: null == secret ? _self.secret : secret // ignore: cast_nullable_to_non_nullable
-as String,hosts: null == hosts ? _self._hosts : hosts // ignore: cast_nullable_to_non_nullable
+as String,externalControllerCors: null == externalControllerCors ? _self.externalControllerCors : externalControllerCors // ignore: cast_nullable_to_non_nullable
+as bool,hosts: null == hosts ? _self._hosts : hosts // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,geoAutoUpdate: null == geoAutoUpdate ? _self.geoAutoUpdate : geoAutoUpdate // ignore: cast_nullable_to_non_nullable
 as bool,geoUpdateInterval: null == geoUpdateInterval ? _self.geoUpdateInterval : geoUpdateInterval // ignore: cast_nullable_to_non_nullable
 as int,testUrl: null == testUrl ? _self.testUrl : testUrl // ignore: cast_nullable_to_non_nullable

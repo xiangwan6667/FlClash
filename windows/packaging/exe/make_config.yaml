@@ -1,19 +1,9 @@
 script_template: inno_setup.iss
 app_id: A97DB4C4-D63D-441E-B40A-28A40AB90133
-app_name: FlClash
-publisher_name: ''
+app_name: FlClash RS
+publisher: ''
 publisher_url: https://github.com/xiangwan6667/FlClash
-display_name: FlClash
-executable_name: FlClash.exe
+display_name: FlClash RS
 install_dir_name: '{autopf64}\FlClash-rs'
-output_base_file_name: FlClash.exe
-# Resolved against the project root: flutter_distributor turns this into an
-# absolute path via Directory.current.
+executable_name: FlClash-RS.exe
 setup_icon_file: windows\runner\resources\app_icon.ico
-locales:
-  # Written into the .iss verbatim, so this one stays relative to the generated
-  # script in dist/.
-  - lang: zh
-    file: ..\windows\packaging\exe\ChineseSimplified.isl
-  - lang: en
-privileges_required: admin

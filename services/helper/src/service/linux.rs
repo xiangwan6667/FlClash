@@ -170,7 +170,7 @@ fn quoted_unit_argument(path: &Path) -> String {
 fn unit_contents(executable: &Path, owner: Owner) -> String {
     format!(
         "[Unit]\n\
-         Description=FlClash Helper starts the FlClash Core with the privileges TUN mode needs.\n\
+         Description=FlClash RS Helper starts the FlClash RS Core with the privileges TUN mode needs.\n\
          After=nftables.service iptables.service\n\
          StartLimitIntervalSec=60\n\
          StartLimitBurst=5\n\
@@ -420,7 +420,7 @@ mod tests {
         assert!(unit.contains("Group=1001\n"));
         assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_UID=1000\n"));
         assert!(unit.contains("Environment=FLCLASH_HELPER_OWNER_GID=1001\n"));
-        assert!(unit.contains("RuntimeDirectory=flclash-rs\n"));
+        assert!(unit.contains(&format!("RuntimeDirectory={RUNTIME_DIR_NAME}\n")));
         assert!(unit.contains("Restart=on-failure\n"));
         assert!(unit.contains("StartLimitBurst=5\n"));
         assert!(!unit.contains("network-online.target"));

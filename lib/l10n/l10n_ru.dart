@@ -409,7 +409,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get desc =>
-      'Многоплатформенный прокси-клиент на основе ClashMeta: простой и удобный, с открытым исходным кодом и без рекламы.';
+      'Многоплатформенный прокси-клиент на основе ядра Concord: простой и удобный, с открытым исходным кодом и без рекламы.';
 
   @override
   String get startVpn => 'Запуск VPN…';
@@ -509,6 +509,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get externalControllerSecret => 'Секрет внешнего контроллера';
 
   @override
+  String get externalControllerCors => 'Разрешить кросс-доменный доступ';
+
+  @override
+  String get externalControllerCorsDesc =>
+      'Веб-панели смогут подключаться с других сайтов.';
+
+  @override
   String get ipv6Desc => 'Трафик IPv6 принимается, только когда IPv6 включён.';
 
   @override
@@ -536,16 +543,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tcpConcurrent => 'Параллельный TCP';
 
   @override
-  String get geodataLoader => 'Geo: экономия памяти';
-
-  @override
   String get requests => 'Запросы';
 
   @override
   String get recentRequests => 'Последние запросы';
 
   @override
-  String get findProcessMode => 'Поиск процесса';
+  String get alwaysFindProcess => 'Всегда искать процесс';
 
   @override
   String get init => 'Инициализация';
@@ -947,7 +951,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get disclaimerSoftwareContent =>
-      'Программа — это клиент сетевого прокси с открытым исходным кодом на основе ядра Clash.Meta (mihomo). Она предоставляет только локальные инструменты: управление конфигурациями, маршрутизацию по правилам и пересылку трафика.';
+      'Программа — это клиент сетевого прокси с открытым исходным кодом на основе ядра Concord. Она предоставляет только локальные инструменты: управление конфигурациями, маршрутизацию по правилам и пересылку трафика.';
 
   @override
   String get disclaimerNoServiceStatement =>
@@ -1000,7 +1004,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get disclaimerLicenseContent =>
-      'Программа распространяется с открытым исходным кодом по лицензии GPL-3.0. По этой лицензии вы можете запускать, изучать, изменять и распространять её; распространяя Программу или её изменённую версию, вы должны также предоставить исходный код по GPL-3.0 и сохранить исходные уведомления об авторских правах.\n\nСторонние компоненты Программы, включая ядро Clash.Meta, распространяются по своим лицензиям. Исходные авторы не отвечают за проблемы версий, изменённых или распространяемых другими.';
+      'Программа распространяется с открытым исходным кодом по лицензии GPL-3.0. По этой лицензии вы можете запускать, изучать, изменять и распространять её; распространяя Программу или её изменённую версию, вы должны также предоставить исходный код по GPL-3.0 и сохранить исходные уведомления об авторских правах.\n\nСторонние компоненты Программы, включая ядро Concord, распространяются по своим лицензиям. Исходные авторы не отвечают за проблемы версий, изменённых или распространяемых другими.';
 
   @override
   String get disclaimerChangesTitle => 'Изменения заявления';
@@ -1102,9 +1106,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get hideTimeoutProxies => 'Скрывать прокси с таймаутом';
-
-  @override
-  String get stackMode => 'Режим стека';
 
   @override
   String get network => 'Сеть';
@@ -1274,10 +1275,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ruleTarget => 'Цель правила';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get exitDefault => 'По умолчанию';
 
   @override
-  String get followProfile => 'Как в профиле';
+  String get customExit => 'Свой выход';
+
+  @override
+  String get inputExitName => 'Введите название выхода';
 
   @override
   String get scriptFailed => 'Не удалось выполнить скрипт';
@@ -2751,10 +2755,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get congestionController => 'Управление перегрузкой TCP';
 
   @override
-  String get congestionControllerDesc =>
-      'Управление перегрузкой TCP действует только со стеком mips.';
-
-  @override
   String get routeExcludeAddress => 'Исключённые адреса маршрутов';
 
   @override
@@ -2828,8 +2828,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get udpTimeout => 'Тайм-аут UDP';
 
   @override
-  String get udpTimeoutDesc =>
-      'Тайм-аут UDP задаётся в секундах и действует только со стеками gvisor, system и mixed.';
+  String get udpTimeoutDesc => 'Тайм-аут UDP задаётся в секундах.';
 
   @override
   String get dnsHijackDesc =>
@@ -3410,6 +3409,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Расшифровываются только приложения, доверяющие пользовательским сертификатам, в основном браузеры.';
 
   @override
+  String get mitmAndroidRootDesc =>
+      'Без root можно расшифровать только приложения, доверяющие пользовательским сертификатам, в основном браузеры. С root — любые приложения.';
+
+  @override
   String get mitmCertificateLinuxTip =>
       'В браузеры из Flatpak экспортированный сертификат нужно импортировать вручную.';
 
@@ -3421,6 +3424,25 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String mitmMissingStores(Object stores) {
     return 'Ещё не добавлен в: $stores';
+  }
+
+  @override
+  String get httpRequestsReadFailed => 'Не удалось прочитать запросы';
+
+  @override
+  String get requestBodyReadFailed => 'Не удалось прочитать тело запроса';
+
+  @override
+  String get responseBodyReadFailed => 'Не удалось прочитать тело ответа';
+
+  @override
+  String mitmGrpcOverLimit(Object size) {
+    return 'После распаковки больше $size МБ; показаны сжатые данные';
+  }
+
+  @override
+  String mitmUntrustedStores(Object stores) {
+    return 'Установлен, но не доверен в: $stores';
   }
 
   @override
@@ -3524,6 +3546,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mapLocal => 'Локальная подмена';
 
   @override
+  String get requestBodyMock => 'Подмена тела запроса';
+
+  @override
+  String get clientSourceAddress => 'Адреса клиентов';
+
+  @override
+  String get skipVerifyHostname => 'Хосты без проверки сертификата';
+
+  @override
   String get mitmModules => 'Модули';
 
   @override
@@ -3547,8 +3578,69 @@ class AppLocalizationsRu extends AppLocalizations {
       'Правила маршрутизации идут перед правилами профиля.';
 
   @override
+  String get mitmRequestRulesDesc =>
+      'Правила URL-REGEX и USER-AGENT модуля превращаются в перезаписи URL и проверяются для каждого запроса: для всех запросов по открытому HTTP, а для HTTPS — только для хостов из списка MITM.';
+
+  @override
   String mitmModuleSystemTip(Object system) {
     return 'Написан для $system; некоторые строки могут не подходить к приложениям на этом устройстве.';
+  }
+
+  @override
+  String mitmModuleRequirementTip(Object requirement) {
+    return 'Модуль требует $requirement, а это устройство не удовлетворяет условию; он может работать не так, как задумано.';
+  }
+
+  @override
+  String mitmExitModules(Object modules) {
+    return 'Из модулей: $modules';
+  }
+
+  @override
+  String get mitmModuleRiskTitle => 'Включить этот модуль?';
+
+  @override
+  String get mitmNetworkRisk =>
+      'При создании конфигурации он меняет сетевые настройки ниже и имеет приоритет над тем, что вы задали для них в FlClash. Если выключить или удалить модуль, всё вернётся.';
+
+  @override
+  String mitmSkipVerifyRisk(Object hosts) {
+    return 'После включения сертификаты серверов этих хостов больше не проверяются, и сервер, выдающий себя за них, останется незамеченным: $hosts';
+  }
+
+  @override
+  String mitmClientSourceRisk(Object addresses) {
+    return 'Расшифровывается трафик только этих клиентов: $addresses. При включённом TUN приложения этого устройства подключаются с адреса TUN и могут не попасть в список.';
+  }
+
+  @override
+  String get mitmClientSourceTunTip =>
+      'При включённом TUN приложения этого устройства подключаются с адреса TUN; если его нет в списке, их трафик не расшифровывается.';
+
+  @override
+  String get mitmNetworkChanges => 'Сетевые настройки';
+
+  @override
+  String mitmChangeReplace(Object values) {
+    return 'Заменяется на $values';
+  }
+
+  @override
+  String mitmChangeInsert(Object values) {
+    return 'Добавляет $values в начало';
+  }
+
+  @override
+  String mitmChangeAppend(Object values) {
+    return 'Добавляет $values';
+  }
+
+  @override
+  String get mitmChangeOverridesYours => 'Перекрывает вашу настройку';
+
+  @override
+  String mitmChangeReplacedBy(Object module) {
+    return 'Перекрыто модулем $module';
   }
 
   @override
@@ -3566,20 +3658,43 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mitmSkipRule => 'Этот тип правила не поддерживается';
 
   @override
-  String get mitmSkipPolicy => 'Поддерживаются только политики DIRECT и REJECT';
+  String get mitmSkipHttpRulePolicy =>
+      'Правила URL-REGEX и USER-AGENT допускают только политику REJECT';
 
   @override
-  String get mitmSkipJq => 'Перезаписи jq не поддерживаются';
+  String get mitmSkipFinalRule =>
+      'Правила модуля идут первыми, поэтому финальное правило скрыло бы все последующие';
 
   @override
-  String get mitmSkipJsonBody => 'Перезаписи тела JSON не поддерживаются';
+  String get mitmSkipDeviceRule =>
+      'Этому правилу нужны сведения об устройстве или сети, которые FlClash не может получить';
 
   @override
-  String get mitmSkipRawHeader =>
-      'Перезапись всех заголовков как одного текста не поддерживается';
+  String get mitmSkipRequirement =>
+      'Устройство не удовлетворяет условию этой строки';
+
+  @override
+  String get mitmSkipManagedCa =>
+      'Сертификатом ЦС управляет FlClash; модуль не может его изменить';
+
+  @override
+  String get mitmSkipProxies =>
+      'Модуль не может изменять прокси и группы прокси';
+
+  @override
+  String get mitmSkipAppOnly =>
+      'Это функция исходного приложения, которой нет в FlClash';
+
+  @override
+  String get mitmSkipReflect =>
+      'FlClash не может отправить пакеты обратно отправителю';
 
   @override
   String get mitmSkipConditional => 'Условные перезаписи не поддерживаются';
+
+  @override
+  String get mitmSkipSkipVerifyAll =>
+      'Проверку сертификатов нельзя отключить для всех хостов';
 
   @override
   String get mitmSkipRelativeData =>
@@ -3619,14 +3734,49 @@ class AppLocalizationsRu extends AppLocalizations {
   String get mitmRunScript => 'Запустить сейчас';
 
   @override
+  String get mitmScriptCron => 'По расписанию';
+
+  @override
+  String get mitmScriptEvent => 'Событие';
+
+  @override
+  String get mitmScriptGeneric => 'Общий';
+
+  @override
+  String get mitmExcluded => 'Исключено';
+
+  @override
   String get mitmScriptNoOutput => 'Скрипт завершился без вывода';
 
   @override
   String get mitmScriptRiskTitle => 'Запускать скрипты этого модуля?';
 
   @override
+  String get mitmModulesTurnedOff => 'Модули отключены';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return 'Обновление $name принесло скрипты или сетевые изменения, на которые вы не соглашались';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Обновления $count модулей принесли скрипты или сетевые изменения, на которые вы не соглашались',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       'Его скрипты читают и меняют трафик подходящих хостов, включая файлы cookie и токены, и могут сами отправлять запросы. Включайте, только если доверяете источнику. После включения его обновления применяются без повторного запроса.';
+
+  @override
+  String get mitmModuleUnreadableRisk =>
+      'Не удалось прочитать файл модуля, поэтому неизвестно, что он меняет. Включайте, только если доверяете источнику.';
 
   @override
   String get skipServerCertVerify => 'Пропускать проверку сертификата сервера';
@@ -3754,6 +3904,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get coreStoppedDesc => 'Приложение потеряло связь с ядром';
 
   @override
+  String coreStoppedWithReason(Object reason) {
+    return 'Приложение потеряло связь с ядром: $reason';
+  }
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return 'Смешанный порт не может быть $value, он возвращён к $port';
+  }
+
+  @override
   String get restartCore => 'Перезапустить ядро';
 
   @override
@@ -3815,4 +3975,25 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tunStartFailed =>
       'Не удалось запустить TUN, в этом запуске попыток больше не будет.';
+
+  @override
+  String get vpnPermissionNotGranted =>
+      'Разрешение на VPN не выдано, поэтому VPN не запущен. Постоянная VPN, заданная для другого приложения, тоже мешает запуску.';
+
+  @override
+  String get vpnServiceStartFailed => 'Не удалось запустить службу VPN.';
+
+  @override
+  String get rootTun => 'Режим root';
+
+  @override
+  String get rootTunDesc => 'Использует root вместо системного VPN.';
+
+  @override
+  String get rootTunUnavailable => 'Root на устройстве не найден';
+
+  @override
+  String rootTunFallback(Object reason) {
+    return 'Root недоступен ($reason), поэтому сейчас используется системный VPN.';
+  }
 }

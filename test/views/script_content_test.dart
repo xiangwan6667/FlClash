@@ -87,9 +87,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('the configure entry opens the scripts in a sheet over it', (
-    tester,
-  ) async {
+  testWidgets('the configure row opens the scripts', (tester) async {
     container = buildContainer(scripts: [_script(10, 'alpha')]);
 
     await pumpScriptContent(tester);
@@ -98,23 +96,6 @@ void main() {
 
     expect(find.byType(ScriptsView), findsOneWidget);
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets('leaves a gap above its configure entry', (tester) async {
-    container = buildContainer(scripts: [_script(10, 'alpha')]);
-
-    await pumpScriptContent(tester);
-
-    final rowBottom = tester.getBottomLeft(find.byType(ListItem<int?>)).dy;
-    final entryTop = tester
-        .getTopLeft(
-          find.descendant(
-            of: find.byType(MoreActionButton),
-            matching: find.byType(Card),
-          ),
-        )
-        .dy;
-    expect(entryTop - rowBottom, 20);
   });
 
   testWidgets('offers only no script when none exists', (tester) async {

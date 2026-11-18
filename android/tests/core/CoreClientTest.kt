@@ -226,7 +226,6 @@ class CoreClientTest {
 class TunOptionsTest {
     private val options =
         TunOptions(
-            stack = "mixed",
             mtu = 9000,
             address = listOf("198.18.0.1/30"),
             dns = listOf("198.18.0.2"),

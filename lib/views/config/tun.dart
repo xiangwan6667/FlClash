@@ -1,7 +1,9 @@
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/mitm_network.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/views/config/override.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -17,7 +19,6 @@ extension on TunOverrideKey {
     TunOverrideKey.dnsHijack => l.dnsHijacking,
     TunOverrideKey.udpTimeout => l.udpTimeout,
     TunOverrideKey.disableIcmpForwarding => l.disableIcmpForwarding,
-    TunOverrideKey.gso => 'GSO',
     TunOverrideKey.includeInterface => l.includeInterface,
     TunOverrideKey.excludeInterface => l.excludeInterface,
     TunOverrideKey.includeUid => l.includeUid,
@@ -28,14 +29,13 @@ extension on TunOverrideKey {
 
   ConfigLabel? get description => switch (this) {
     TunOverrideKey.mtu ||
+    TunOverrideKey.congestionController ||
     TunOverrideKey.routeAddress ||
     TunOverrideKey.routeExcludeAddress => null,
-    TunOverrideKey.congestionController => (l) => l.congestionControllerDesc,
     TunOverrideKey.strictRoute => (l) => l.strictRouteDesc,
     TunOverrideKey.dnsHijack => (l) => l.dnsHijackDesc,
     TunOverrideKey.udpTimeout => (l) => l.udpTimeoutDesc,
     TunOverrideKey.disableIcmpForwarding => (l) => l.disableIcmpForwardingDesc,
-    TunOverrideKey.gso => null,
     TunOverrideKey.includeInterface => (l) => l.includeInterfaceDesc,
     TunOverrideKey.excludeInterface ||
     TunOverrideKey.includeUid ||
@@ -57,7 +57,6 @@ bool _isRead(
   required bool isWindows,
 }) => switch (key) {
   TunOverrideKey.strictRoute => isLinux || isWindows,
-  TunOverrideKey.gso => !rsFeature && isLinux,
   TunOverrideKey.includeInterface ||
   TunOverrideKey.excludeInterface ||
   TunOverrideKey.includeUid ||
@@ -180,6 +179,28 @@ class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
   String label(TunOverrideKey key, AppLocalizations l) => key.label(l);
 
   @override
+  List<String> notesOf(
+    WidgetRef ref,
+    Iterable<TunOverrideKey> keys,
+    AppLocalizations l,
+  ) {
+    if (!keys.contains(TunOverrideKey.routeExcludeAddress)) {
+      return const [];
+    }
+    final module = ref
+        .watch(mitmTakeoverProvider)
+        .value
+        ?.keys[MitmNetworkKey.routeExcludeAddress];
+    return [
+      if (module != null)
+        [
+          TunOverrideKey.routeExcludeAddress.label(l),
+          l.mitmChangeReplacedBy(module),
+        ].join(': '),
+    ];
+  }
+
+  @override
   ConfigLabel? description(TunOverrideKey key) => key.description;
 
   @override
@@ -225,10 +246,6 @@ class _TunOverrideSpec extends OverrideSpec<TunOverrideKey, ProfileTun> {
     TunOverrideKey.disableIcmpForwarding => ToggleOverrideField(
       (tun) => tun.disableIcmpForwarding,
       (tun, value) => tun.copyWith(disableIcmpForwarding: value),
-    ),
-    TunOverrideKey.gso => ToggleOverrideField(
-      (tun) => tun.gso,
-      (tun, value) => tun.copyWith(gso: value),
     ),
     TunOverrideKey.includeInterface => ListOverrideField(
       (tun) => tun.includeInterface,

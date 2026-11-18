@@ -4,7 +4,7 @@
 
 # FlClash
 
-A multi-platform proxy client based on ClashMeta. Simple to use, open source and ad-free.
+A multi-platform proxy client based on the Concord core. Simple to use, open source and ad-free.
 
 **English** · [简体中文](README_zh_CN.md)
 
@@ -27,7 +27,7 @@ A multi-platform proxy client based on ClashMeta. Simple to use, open source and
 ## Features
 
 - **One app for Android, Windows, macOS and Linux**, with x64 and ARM64 builds on the desktop.
-- **mihomo (Clash.Meta) core** with rule routing, proxy groups, latency tests, system proxy and TUN mode.
+- **Concord core** with rule routing, proxy groups, latency tests, system proxy and TUN mode.
 - **Profiles** from a subscription link or a file, with a built-in editor, override scripts, and custom rules,
   proxies and proxy groups.
 - **Live views** of connections, requests, DNS queries and logs.
@@ -106,7 +106,7 @@ host, except Android, which builds anywhere.
 git clone --recursive https://github.com/chen08209/FlClash.git
 cd FlClash
 flutter pub get
-dart setup.dart android   # or windows, macos, linux
+dart run tool/package.dart android   # or windows, macos, linux
 ```
 
 Packages land in `dist/`. The Go core and the Rust libraries are compiled as part of the Flutter build.
@@ -118,7 +118,7 @@ Packages land in `dist/`. The Go core and the Rust libraries are compiled as par
 | macOS | Xcode and Node.js. The script installs `appdmg` through npm. |
 | Linux | Debian or Ubuntu. The script installs the build packages with apt and downloads `appimagetool`. |
 
-Run `dart setup.dart --help` for the remaining options, such as `--targets` to build only some package formats.
+Run `dart run tool/package.dart --help` for the remaining options, such as `--targets` to build only some package formats or `--dry-run` to list the files a run would write.
 
 ## Support
 

@@ -67,6 +67,13 @@ class _RecordingProxiesAction extends ProxiesAction {
   void updateGroupsDebounce([Duration? duration]) => groupUpdates++;
 }
 
+class _LostRecordingSetupAction extends SetupAction {
+  int lostCount = 0;
+
+  @override
+  void onCoreLost() => lostCount++;
+}
+
 class _Feeds {
   final crashes = StreamController<String>.broadcast();
   final dns = StreamController<List<DnsEntry>>.broadcast();
@@ -286,6 +293,29 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('a crash ends the run here without telling the Core to stop', (
+    tester,
+  ) async {
+    final harness = _harness();
+    final setup = _LostRecordingSetupAction();
+    final container = await _pumpConnected(
+      tester,
+      harness,
+      overrides: [setupActionProvider.overrideWith(() => setup)],
+    );
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+
+    harness.feeds.crashes.add('boom');
+    await tester.pump();
+
+    expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+    expect(setup.lostCount, 1);
+    verifyNever(() => harness.mocks.api.stopEngine());
+
+    await tester.pumpWidget(const SizedBox());
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
 
   testWidgets('a crash is ignored when the core is not connected', (
     tester,

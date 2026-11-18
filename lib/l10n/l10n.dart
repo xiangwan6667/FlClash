@@ -867,7 +867,7 @@ abstract class AppLocalizations {
   /// No description provided for @desc.
   ///
   /// In en, this message translates to:
-  /// **'A multi-platform proxy client based on ClashMeta, simple and easy to use, open-source and ad-free.'**
+  /// **'A multi-platform proxy client based on the Concord core, simple and easy to use, open-source and ad-free.'**
   String get desc;
 
   /// No description provided for @startVpn.
@@ -1056,6 +1056,18 @@ abstract class AppLocalizations {
   /// **'External controller secret'**
   String get externalControllerSecret;
 
+  /// No description provided for @externalControllerCors.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow cross-origin access'**
+  String get externalControllerCors;
+
+  /// No description provided for @externalControllerCorsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Web dashboards can connect from other sites.'**
+  String get externalControllerCorsDesc;
+
   /// No description provided for @ipv6Desc.
   ///
   /// In en, this message translates to:
@@ -1110,12 +1122,6 @@ abstract class AppLocalizations {
   /// **'TCP concurrent'**
   String get tcpConcurrent;
 
-  /// No description provided for @geodataLoader.
-  ///
-  /// In en, this message translates to:
-  /// **'Geo low-memory mode'**
-  String get geodataLoader;
-
   /// No description provided for @requests.
   ///
   /// In en, this message translates to:
@@ -1128,11 +1134,11 @@ abstract class AppLocalizations {
   /// **'Recent requests'**
   String get recentRequests;
 
-  /// No description provided for @findProcessMode.
+  /// No description provided for @alwaysFindProcess.
   ///
   /// In en, this message translates to:
-  /// **'Find process'**
-  String get findProcessMode;
+  /// **'Always find process'**
+  String get alwaysFindProcess;
 
   /// No description provided for @init.
   ///
@@ -1911,7 +1917,7 @@ abstract class AppLocalizations {
   /// No description provided for @disclaimerSoftwareContent.
   ///
   /// In en, this message translates to:
-  /// **'The Software is an open-source network proxy client built on the Clash.Meta (mihomo) core. It only provides local tooling such as configuration management, rule-based routing, and traffic forwarding.'**
+  /// **'The Software is an open-source network proxy client built on the Concord core. It only provides local tooling such as configuration management, rule-based routing, and traffic forwarding.'**
   String get disclaimerSoftwareContent;
 
   /// No description provided for @disclaimerNoServiceStatement.
@@ -2001,7 +2007,7 @@ abstract class AppLocalizations {
   /// No description provided for @disclaimerLicenseContent.
   ///
   /// In en, this message translates to:
-  /// **'The Software is open source under the GPL-3.0 license. Under that license you may run, study, modify, and distribute it; when you distribute the Software or a modified version, you must provide its source code under GPL-3.0 as well and keep the original copyright notices.\n\nThird-party components in the Software, including the Clash.Meta core, follow their own licenses. The original authors are not responsible for any problem arising from versions modified or distributed by others.'**
+  /// **'The Software is open source under the GPL-3.0 license. Under that license you may run, study, modify, and distribute it; when you distribute the Software or a modified version, you must provide its source code under GPL-3.0 as well and keep the original copyright notices.\n\nThird-party components in the Software, including the Concord core, follow their own licenses. The original authors are not responsible for any problem arising from versions modified or distributed by others.'**
   String get disclaimerLicenseContent;
 
   /// No description provided for @disclaimerChangesTitle.
@@ -2183,12 +2189,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide timed-out proxies'**
   String get hideTimeoutProxies;
-
-  /// No description provided for @stackMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Stack mode'**
-  String get stackMode;
 
   /// No description provided for @network.
   ///
@@ -2514,17 +2514,23 @@ abstract class AppLocalizations {
   /// **'Rule target'**
   String get ruleTarget;
 
-  /// No description provided for @matchTarget.
+  /// No description provided for @exitDefault.
   ///
   /// In en, this message translates to:
-  /// **'MATCH-TARGET'**
-  String get matchTarget;
+  /// **'Default'**
+  String get exitDefault;
 
-  /// No description provided for @followProfile.
+  /// No description provided for @customExit.
   ///
   /// In en, this message translates to:
-  /// **'Follow profile'**
-  String get followProfile;
+  /// **'Custom exit'**
+  String get customExit;
+
+  /// No description provided for @inputExitName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the exit name'**
+  String get inputExitName;
 
   /// No description provided for @scriptFailed.
   ///
@@ -4950,12 +4956,6 @@ abstract class AppLocalizations {
   /// **'TCP congestion control'**
   String get congestionController;
 
-  /// No description provided for @congestionControllerDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'TCP congestion control works only with the mips stack.'**
-  String get congestionControllerDesc;
-
   /// No description provided for @routeExcludeAddress.
   ///
   /// In en, this message translates to:
@@ -5091,7 +5091,7 @@ abstract class AppLocalizations {
   /// No description provided for @udpTimeoutDesc.
   ///
   /// In en, this message translates to:
-  /// **'The UDP timeout is in seconds and works only with the gvisor, system and mixed stacks.'**
+  /// **'The UDP timeout is in seconds.'**
   String get udpTimeoutDesc;
 
   /// No description provided for @dnsHijackDesc.
@@ -6072,6 +6072,12 @@ abstract class AppLocalizations {
   /// **'Only apps that trust user certificates, mostly browsers, are decrypted.'**
   String get mitmCertificateAndroidReadyTip;
 
+  /// No description provided for @mitmAndroidRootDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Without root, only apps that trust user certificates, mostly browsers, can be decrypted. With root, every app can.'**
+  String get mitmAndroidRootDesc;
+
   /// No description provided for @mitmCertificateLinuxTip.
   ///
   /// In en, this message translates to:
@@ -6089,6 +6095,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not yet in: {stores}'**
   String mitmMissingStores(Object stores);
+
+  /// No description provided for @httpRequestsReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the requests'**
+  String get httpRequestsReadFailed;
+
+  /// No description provided for @requestBodyReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the request body'**
+  String get requestBodyReadFailed;
+
+  /// No description provided for @responseBodyReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the response body'**
+  String get responseBodyReadFailed;
+
+  /// No description provided for @mitmGrpcOverLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflates past {size} MB; shown compressed'**
+  String mitmGrpcOverLimit(Object size);
+
+  /// No description provided for @mitmUntrustedStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed but not trusted in: {stores}'**
+  String mitmUntrustedStores(Object stores);
 
   /// No description provided for @mitmSystemStoreFailed.
   ///
@@ -6246,6 +6282,24 @@ abstract class AppLocalizations {
   /// **'Map local'**
   String get mapLocal;
 
+  /// No description provided for @requestBodyMock.
+  ///
+  /// In en, this message translates to:
+  /// **'Request body mock'**
+  String get requestBodyMock;
+
+  /// No description provided for @clientSourceAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Client addresses'**
+  String get clientSourceAddress;
+
+  /// No description provided for @skipVerifyHostname.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts without certificate checks'**
+  String get skipVerifyHostname;
+
   /// No description provided for @mitmModules.
   ///
   /// In en, this message translates to:
@@ -6288,11 +6342,95 @@ abstract class AppLocalizations {
   /// **'Routing rules go in front of the profile’s own.'**
   String get mitmModuleRulesDesc;
 
+  /// No description provided for @mitmRequestRulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The module’s URL-REGEX and USER-AGENT rules became URL rewrites, judged request by request: on every plain HTTP request, and on HTTPS only for hosts in the MITM hostname list.'**
+  String get mitmRequestRulesDesc;
+
   /// No description provided for @mitmModuleSystemTip.
   ///
   /// In en, this message translates to:
   /// **'Written for {system}; some lines may not match apps on this device.'**
   String mitmModuleSystemTip(Object system);
+
+  /// No description provided for @mitmModuleRequirementTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The module requires {requirement}, which this device does not meet; it may not work as intended.'**
+  String mitmModuleRequirementTip(Object requirement);
+
+  /// No description provided for @mitmExitModules.
+  ///
+  /// In en, this message translates to:
+  /// **'From modules: {modules}'**
+  String mitmExitModules(Object modules);
+
+  /// No description provided for @mitmModuleRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on this module?'**
+  String get mitmModuleRiskTitle;
+
+  /// No description provided for @mitmNetworkRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'When the config is generated, it changes the network settings below, ahead of what you set for the same ones in FlClash. Turning the module off or deleting it undoes this.'**
+  String get mitmNetworkRisk;
+
+  /// No description provided for @mitmSkipVerifyRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning it on stops checking the certificates of these hosts\' servers, so a server posing as one of them goes unnoticed: {hosts}'**
+  String mitmSkipVerifyRisk(Object hosts);
+
+  /// No description provided for @mitmClientSourceRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'It decrypts only for these clients: {addresses}. With TUN on, this device\'s apps reach FlClash from the TUN\'s address, so they may be left out.'**
+  String mitmClientSourceRisk(Object addresses);
+
+  /// No description provided for @mitmClientSourceTunTip.
+  ///
+  /// In en, this message translates to:
+  /// **'With TUN on, this device\'s apps come from the TUN\'s address; a list that leaves it out leaves their traffic undecrypted.'**
+  String get mitmClientSourceTunTip;
+
+  /// No description provided for @mitmNetworkChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Network settings'**
+  String get mitmNetworkChanges;
+
+  /// No description provided for @mitmChangeReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced with {values}'**
+  String mitmChangeReplace(Object values);
+
+  /// No description provided for @mitmChangeInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {values} first'**
+  String mitmChangeInsert(Object values);
+
+  /// No description provided for @mitmChangeAppend.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {values}'**
+  String mitmChangeAppend(Object values);
+
+  /// No description provided for @mitmChangeOverridesYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes over your setting'**
+  String get mitmChangeOverridesYours;
+
+  /// No description provided for @mitmChangeReplacedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overridden by the module {module}'**
+  String mitmChangeReplacedBy(Object module);
 
   /// No description provided for @mitmSkipSection.
   ///
@@ -6318,35 +6456,65 @@ abstract class AppLocalizations {
   /// **'This rule type is not supported'**
   String get mitmSkipRule;
 
-  /// No description provided for @mitmSkipPolicy.
+  /// No description provided for @mitmSkipHttpRulePolicy.
   ///
   /// In en, this message translates to:
-  /// **'Only the DIRECT and REJECT policies are supported'**
-  String get mitmSkipPolicy;
+  /// **'URL-REGEX and USER-AGENT rules only take a REJECT policy'**
+  String get mitmSkipHttpRulePolicy;
 
-  /// No description provided for @mitmSkipJq.
+  /// No description provided for @mitmSkipFinalRule.
   ///
   /// In en, this message translates to:
-  /// **'jq rewrites are not supported'**
-  String get mitmSkipJq;
+  /// **'Module rules go first, so a final rule would hide every rule after it'**
+  String get mitmSkipFinalRule;
 
-  /// No description provided for @mitmSkipJsonBody.
+  /// No description provided for @mitmSkipDeviceRule.
   ///
   /// In en, this message translates to:
-  /// **'JSON body rewrites are not supported'**
-  String get mitmSkipJsonBody;
+  /// **'This rule needs device or network details FlClash cannot read'**
+  String get mitmSkipDeviceRule;
 
-  /// No description provided for @mitmSkipRawHeader.
+  /// No description provided for @mitmSkipRequirement.
   ///
   /// In en, this message translates to:
-  /// **'Rewriting all headers as one text is not supported'**
-  String get mitmSkipRawHeader;
+  /// **'This line’s requirement is not met on this device'**
+  String get mitmSkipRequirement;
+
+  /// No description provided for @mitmSkipManagedCa.
+  ///
+  /// In en, this message translates to:
+  /// **'FlClash manages the CA certificate; a module cannot change it'**
+  String get mitmSkipManagedCa;
+
+  /// No description provided for @mitmSkipProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'A module cannot change proxies or proxy groups'**
+  String get mitmSkipProxies;
+
+  /// No description provided for @mitmSkipAppOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'A feature of the app this was written for that FlClash does not have'**
+  String get mitmSkipAppOnly;
+
+  /// No description provided for @mitmSkipReflect.
+  ///
+  /// In en, this message translates to:
+  /// **'FlClash cannot send packets back to their sender'**
+  String get mitmSkipReflect;
 
   /// No description provided for @mitmSkipConditional.
   ///
   /// In en, this message translates to:
   /// **'Conditional rewrites are not supported'**
   String get mitmSkipConditional;
+
+  /// No description provided for @mitmSkipSkipVerifyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate checks are not turned off for every host'**
+  String get mitmSkipSkipVerifyAll;
 
   /// No description provided for @mitmSkipRelativeData.
   ///
@@ -6414,6 +6582,30 @@ abstract class AppLocalizations {
   /// **'Run now'**
   String get mitmRunScript;
 
+  /// No description provided for @mitmScriptCron.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get mitmScriptCron;
+
+  /// No description provided for @mitmScriptEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get mitmScriptEvent;
+
+  /// No description provided for @mitmScriptGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Generic'**
+  String get mitmScriptGeneric;
+
+  /// No description provided for @mitmExcluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded'**
+  String get mitmExcluded;
+
   /// No description provided for @mitmScriptNoOutput.
   ///
   /// In en, this message translates to:
@@ -6426,11 +6618,35 @@ abstract class AppLocalizations {
   /// **'Run this module\'s scripts?'**
   String get mitmScriptRiskTitle;
 
+  /// No description provided for @mitmModulesTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules turned off'**
+  String get mitmModulesTurnedOff;
+
+  /// No description provided for @mitmModuleTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'An update to {name} brought scripts or network changes you have not agreed to'**
+  String mitmModuleTurnedOffDesc(Object name);
+
+  /// No description provided for @mitmModulesTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} modules got updates with scripts or network changes you have not agreed to}}'**
+  String mitmModulesTurnedOffDesc(num count);
+
   /// No description provided for @mitmScriptRisk.
   ///
   /// In en, this message translates to:
   /// **'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from. Once on, its updates take effect without asking again.'**
   String get mitmScriptRisk;
+
+  /// No description provided for @mitmModuleUnreadableRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'The module file could not be read, so what it changes is unknown. Turn it on only if you trust where it comes from.'**
+  String get mitmModuleUnreadableRisk;
 
   /// No description provided for @skipServerCertVerify.
   ///
@@ -6648,6 +6864,18 @@ abstract class AppLocalizations {
   /// **'The app lost its connection to the core'**
   String get coreStoppedDesc;
 
+  /// No description provided for @coreStoppedWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lost its connection to the core: {reason}'**
+  String coreStoppedWithReason(Object reason);
+
+  /// No description provided for @mixedPortReset.
+  ///
+  /// In en, this message translates to:
+  /// **'The mixed port cannot be {value}, so it was set back to {port}'**
+  String mixedPortReset(Object value, Object port);
+
   /// No description provided for @restartCore.
   ///
   /// In en, this message translates to:
@@ -6749,6 +6977,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'TUN could not start and will not be tried again in this run.'**
   String get tunStartFailed;
+
+  /// No description provided for @vpnPermissionNotGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.'**
+  String get vpnPermissionNotGranted;
+
+  /// No description provided for @vpnServiceStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The VPN service could not start.'**
+  String get vpnServiceStartFailed;
+
+  /// No description provided for @rootTun.
+  ///
+  /// In en, this message translates to:
+  /// **'Root mode'**
+  String get rootTun;
+
+  /// No description provided for @rootTunDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses root instead of the system VPN.'**
+  String get rootTunDesc;
+
+  /// No description provided for @rootTunUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No root found on this device'**
+  String get rootTunUnavailable;
+
+  /// No description provided for @rootTunFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Root is unavailable ({reason}), so this run uses the system VPN.'**
+  String rootTunFallback(Object reason);
 }
 
 class _AppLocalizationsDelegate

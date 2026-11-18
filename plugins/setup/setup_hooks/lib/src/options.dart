@@ -10,6 +10,7 @@ class BuildConfig {
   const BuildConfig({
     required this.concordDir,
     required this.coreName,
+    required this.coreBundleId,
     required this.productName,
     required this.outputDir,
     required this.helperDir,
@@ -18,6 +19,7 @@ class BuildConfig {
 
   final String concordDir;
   final String coreName;
+  final String coreBundleId;
   final String productName;
   final String outputDir;
   final String helperDir;
@@ -26,6 +28,7 @@ class BuildConfig {
   static const _defaults = BuildConfig(
     concordDir: 'concord',
     coreName: 'FlClashCore',
+    coreBundleId: 'com.follow.clash.core',
     productName: 'FlClash',
     outputDir: 'libclash',
     helperDir: 'services/helper',
@@ -43,6 +46,7 @@ class BuildConfig {
     return BuildConfig(
       concordDir: yaml['concord_dir'] as String? ?? _defaults.concordDir,
       coreName: yaml['core_name'] as String? ?? _defaults.coreName,
+      coreBundleId: yaml['core_bundle_id'] as String? ?? _defaults.coreBundleId,
       productName: yaml['product_name'] as String? ?? _defaults.productName,
       outputDir: yaml['output_dir'] as String? ?? _defaults.outputDir,
       helperDir: yaml['helper_dir'] as String? ?? _defaults.helperDir,
@@ -53,6 +57,7 @@ class BuildConfig {
   Map<String, String> toFingerprintMap() => {
     'concord_dir': concordDir,
     'core_name': coreName,
+    'core_bundle_id': coreBundleId,
     'product_name': productName,
     'output_dir': outputDir,
     'helper_dir': helperDir,

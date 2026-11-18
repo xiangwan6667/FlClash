@@ -44,6 +44,21 @@ An owner has more entry paths than the UI: provider calls, Quick Settings, notif
 callbacks, application exit, and crash/disconnect recovery all reach it. Always-on startup is explicit through
 `VPN_START_REQUESTED` and revoke through `VPN_REVOKED`; service creation or destruction is never read as intent.
 
+## Config Keys Sent To The Core
+
+The wire key is the contract; the Dart field and the Rust field are not. When a change adds, drops, gates or renames
+a key in the profile `makeRealProfileTask` builds or in `configPatchOf`:
+
+1. Change the setting in `test/core/sent_config_golden_test.dart` if it is new, so every platform's golden carries
+   it with a non-default value.
+2. Run `flutter test --update-goldens test/core/sent_config_golden_test.dart`, read the diff of
+   `test/fixtures/sent_config/` and `.agents/sent-config-keys.md`, and commit both.
+3. Run `make core-sent-config`. Each golden must load under `concord -t` with no `unknown_key` or
+   `not_applied`; a key the Core cannot honour on some platform is not sent there, as `transparentPortsOf` does.
+4. An exception goes into `_allowed` in that script with the reason it is sent anyway.
+
+Whether the key takes effect is decided by those two checks, as the rule in `.agents/rules.md` says.
+
 ## Verification
 
 Focused tests live at the narrowest layer, and the matching commands are in `.agents/commands.md`:

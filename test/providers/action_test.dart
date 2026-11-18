@@ -305,6 +305,27 @@ void main() {
       await expectLater(action.reportNetworkChange(), completes);
     });
 
+    test('a core that fails to start keeps why for the stopped card', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      loadAppLocalizations(const Locale('en'));
+      final container = ProviderContainer(
+        overrides: [coreActionProvider.overrideWith(_TestCoreAction.new)],
+      );
+      addTearDown(container.dispose);
+      final coreAction =
+          container.read(coreActionProvider.notifier) as _TestCoreAction;
+      coreAction.startCompleter = Completer()
+        ..completeError(StateError('launch refused'));
+
+      await coreAction.startCore();
+
+      expect(container.read(coreStatusProvider), CoreStatus.disconnected);
+      expect(
+        container.read(coreStopReasonProvider),
+        'Bad state: launch refused',
+      );
+    });
+
     test('applies the profile after restarting a stopped core', () async {
       final container = ProviderContainer(
         overrides: [
@@ -370,6 +391,53 @@ void main() {
 
         expect(applied, isFalse);
         expect(setupAction.setRunningCount, 1);
+      },
+    );
+
+    test('a restart resumes a run a lost Core session ended', () async {
+      final container = ProviderContainer(
+        overrides: [
+          coreActionProvider.overrideWith(_TestCoreAction.new),
+          setupActionProvider.overrideWith(_TestSetupAction.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final coreAction =
+          container.read(coreActionProvider.notifier) as _TestCoreAction;
+      final setupAction =
+          container.read(setupActionProvider.notifier) as _TestSetupAction;
+      setupAction.resumeOnRestart();
+
+      await coreAction.restartCore();
+
+      expect(setupAction.setRunningCount, 1);
+      expect(setupAction.applyProfileCount, 0);
+    });
+
+    test(
+      'starting on a stopped Core restarts it and resumes the run',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            coreActionProvider.overrideWith(_TestCoreAction.new),
+            setupActionProvider.overrideWith(_TestSetupAction.new),
+            commonActionProvider.overrideWith(_RaceCommonAction.new),
+          ],
+        );
+        addTearDown(container.dispose);
+        final coreAction =
+            container.read(coreActionProvider.notifier) as _TestCoreAction;
+        final setupAction =
+            container.read(setupActionProvider.notifier) as _TestSetupAction;
+        container.read(coreStatusProvider.notifier).value =
+            CoreStatus.disconnected;
+
+        container.read(commonActionProvider.notifier).toggleRunning();
+        await pumpEventQueue();
+
+        expect(coreAction.lifecycleRestartCount, 1);
+        expect(setupAction.setRunningCount, 1);
+        expect(container.read(coreStatusProvider), CoreStatus.connected);
       },
     );
 

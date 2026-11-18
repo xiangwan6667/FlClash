@@ -229,6 +229,11 @@ extension type CoreController._(CoreBackend _backend) implements CoreBackend {
     return built.text ?? '';
   }
 
+  Future<String?> getProfileMatchTarget(int id) async {
+    final path = await appPath.getProfilePath(id.toString());
+    return lastMatchTarget((await api.inspectProfile(path)).matchRules);
+  }
+
   Future<({ProfileBase base, String path})> getProfileBase(int id) async {
     final path = await appPath.getProfilePath(id.toString());
     final inspect = await api.inspectProfile(path);

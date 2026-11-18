@@ -116,6 +116,23 @@ void main() {
       });
     });
 
+    test('configPatchOf lets other sites reach the controller unless the '
+        'user turns it off, and sends the refusal too', () {
+      expect(
+        _patchOf(const PatchClashConfig()).toJson()['externalControllerCors'],
+        {
+          'allowOrigins': ['*'],
+          'allowPrivateNetwork': true,
+        },
+      );
+      expect(
+        _patchOf(
+          const PatchClashConfig(externalControllerCors: false),
+        ).toJson()['externalControllerCors'],
+        {'allowOrigins': <String>[], 'allowPrivateNetwork': false},
+      );
+    });
+
     test('configPatchOf sends the Core options under options', () {
       final json = _patchOf(
         const PatchClashConfig(),
@@ -590,10 +607,25 @@ void main() {
       expect(config.allowLan, false);
       expect(config.mode, Mode.rule);
       expect(config.externalController, ExternalControllerStatus.close);
-      expect(config.geodataLoader, GeodataLoader.memconservative);
       expect(config.interfaceNameMode, InterfaceNameMode.clear);
       expect(config.interfaceName, '');
+      expect(config.geoAutoUpdate, isTrue);
+      expect(config.geoUpdateInterval, 24);
     });
+
+    test(
+      'missing geo auto-update uses the default and saved false stays off',
+      () {
+        expect(PatchClashConfig.fromJson({}).geoAutoUpdate, isTrue);
+        expect(PatchClashConfig.safeFormJson(null).geoAutoUpdate, isTrue);
+        final saved = PatchClashConfig.fromJson({'geo-auto-update': false});
+        expect(saved.geoAutoUpdate, isFalse);
+        expect(
+          roundTrip(saved.toJson, PatchClashConfig.fromJson).geoAutoUpdate,
+          isFalse,
+        );
+      },
+    );
 
     test('custom values survive round-trip', () {
       const config = PatchClashConfig(
@@ -602,7 +634,6 @@ void main() {
         mode: Mode.rule,
         logLevel: LogLevel.debug,
         externalController: ExternalControllerStatus.open,
-        geodataLoader: GeodataLoader.memconservative,
         interfaceNameMode: InterfaceNameMode.custom,
         interfaceName: 'eth0',
       );
@@ -617,7 +648,6 @@ void main() {
       expect(restored.mode, Mode.rule);
       expect(restored.logLevel, LogLevel.debug);
       expect(restored.externalController, ExternalControllerStatus.open);
-      expect(restored.geodataLoader, GeodataLoader.memconservative);
       expect(restored.interfaceNameMode, InterfaceNameMode.custom);
       expect(restored.interfaceName, 'eth0');
     });
@@ -639,6 +669,46 @@ void main() {
       });
 
       expect(restored.interfaceNameMode, InterfaceNameMode.clear);
+    });
+
+    test('find process defaults to strict and a saved off reads as strict', () {
+      expect(const PatchClashConfig().findProcessMode, FindProcessMode.strict);
+      for (final saved in ['off', 'strict']) {
+        final restored = PatchClashConfig.fromJson({
+          'find-process-mode': saved,
+        });
+        expect(restored.findProcessMode, FindProcessMode.strict, reason: saved);
+      }
+      final always = PatchClashConfig.fromJson({'find-process-mode': 'always'});
+      expect(always.findProcessMode, FindProcessMode.always);
+    });
+  });
+
+  group('PatchClashConfig mixed port', () {
+    test('a stored 0 or a part of a port reads as the default', () {
+      for (final stored in <Object>[0, 0.5, -1, 70000, '7890']) {
+        expect(
+          PatchClashConfig.fromJson({'mixed-port': stored}).mixedPort,
+          defaultMixedPort,
+          reason: '$stored',
+        );
+        expect(unusableMixedPort({'mixed-port': stored}), stored);
+      }
+    });
+
+    test('a usable port and the other ports at 0 are kept', () {
+      final config = PatchClashConfig.fromJson({
+        'mixed-port': 7899,
+        'port': 0,
+        'socks-port': 0,
+      });
+
+      expect(config.mixedPort, 7899);
+      expect(config.port, 0);
+      expect(config.socksPort, 0);
+      expect(unusableMixedPort({'mixed-port': 7899}), isNull);
+      expect(unusableMixedPort(const <String, Object?>{}), isNull);
+      expect(unusableMixedPort('not a map'), isNull);
     });
   });
 
@@ -712,7 +782,6 @@ void main() {
         GeneralOverrideKey.unifiedDelay,
         GeneralOverrideKey.tcpConcurrent,
         GeneralOverrideKey.ipv6,
-        GeneralOverrideKey.geodataLoader,
       });
       expect(config.tcpConcurrent, false);
       expect(config.ipv6, false);
@@ -726,6 +795,24 @@ void main() {
       });
 
       expect(config.generalOverrideKeys, {GeneralOverrideKey.unifiedDelay});
+    });
+
+    test('the Go core settings a saved config carries are dropped', () {
+      final config = PatchClashConfig.fromJson({
+        ...savedBefore({'geodata-loader': 'standard'}),
+        'general-override-keys': ['geodata-loader', 'ipv6'],
+        'tun': {'enable': true, 'stack': 'gvisor', 'mtu': 1400},
+        'tun-override': {'gso': true, 'mtu': 1400},
+        'tun-override-keys': ['gso', 'mtu'],
+      });
+
+      expect(config.generalOverrideKeys, {GeneralOverrideKey.ipv6});
+      expect(config.tunOverrideKeys, {TunOverrideKey.mtu});
+      expect(config.tun.enable, isTrue);
+      expect(config.tunOverride.mtu, 1400);
+      expect(config.toJson(), isNot(contains('geodata-loader')));
+      expect(config.tun.toJson(), isNot(contains('stack')));
+      expect(config.tunOverride.toJson(), isNot(contains('gso')));
     });
 
     test('only picked keys reach the Core live', () {
@@ -754,7 +841,7 @@ void main() {
   group('PatchClashConfig.setupOnly', () {
     test('drops every field the update params patch live', () {
       final live = defaultClashConfig.copyWith(
-        tun: const Tun(enable: true, stack: TunStack.gvisor, mtu: 1500),
+        tun: const Tun(enable: true, mtu: 1500),
         mixedPort: 8899,
         allowLan: true,
         findProcessMode: FindProcessMode.always,
@@ -764,8 +851,9 @@ void main() {
         tcpConcurrent: false,
         externalController: ExternalControllerStatus.open,
         secret: 'secret',
+        externalControllerCors: false,
         unifiedDelay: false,
-        geoAutoUpdate: true,
+        geoAutoUpdate: false,
         geoUpdateInterval: 6,
         geoXUrl: {...defaultGeoXUrl, GeoResource.MMDB: 'https://mmdb.test'},
         testUrl: 'https://probe.test/204',
@@ -800,8 +888,9 @@ void main() {
         defaultClashConfig.copyWith(globalUa: 'ua'),
         defaultClashConfig.copyWith(hosts: const {'a.test': '1.1.1.1'}),
         defaultClashConfig.copyWith(dns: defaultDns.copyWith(ipv6: true)),
-        defaultClashConfig.copyWith(tunOverrideKeys: {TunOverrideKey.gso}),
-        defaultClashConfig.copyWith(geodataLoader: GeodataLoader.standard),
+        defaultClashConfig.copyWith(
+          tunOverrideKeys: {TunOverrideKey.strictRoute},
+        ),
       ];
 
       for (final config in setupOnlyChanges) {
@@ -1182,7 +1271,6 @@ void main() {
       expect(config.patchClashConfig.mixedPort, 7891);
       expect(config.patchClashConfig.mode, Mode.rule);
       expect(config.patchClashConfig.tun.enable, true);
-      expect(config.patchClashConfig.tun.stack, TunStack.mips);
       expect(config.hotKeyActions, [
         const HotKeyAction(action: HotAction.mode, key: 1),
       ]);

@@ -662,12 +662,13 @@ void main() {
       expect(inSheet('Core'), findsNothing);
       expect(inSheet('App & shared'), findsOneWidget);
       expect(find.text('Core is not running'), findsNothing);
+      expect(find.text(_estimateDesc), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
-    testWidgets('an in-process Core labels the app share as shared, with no '
-        'runtime estimate', (tester) async {
+    testWidgets('an in-process Core with a runtime breakdown says its share '
+        'comes from it', (tester) async {
       await openSheet(
         tester,
         reader: () async => MemorySnapshot.resolve(
@@ -679,7 +680,7 @@ void main() {
 
       expect(inSheet('App & shared'), findsOneWidget);
       expect(inSheet('App'), findsNothing);
-      expect(find.text(_estimateDesc), findsOneWidget);
+      expect(find.text(_sharedDesc), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());
     });
@@ -778,6 +779,10 @@ void main() {
 const _estimateDesc =
     'Estimated from process resident memory; it may differ from what the '
     'system reports.';
+
+const _sharedDesc =
+    'The Core runs inside the app process. Its share is estimated from runtime '
+    'stats, and the rest counts as app and shared memory.';
 
 Widget _scaffoldBody(Widget child) => HostScaffold(body: child);
 

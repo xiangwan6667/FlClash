@@ -1,3 +1,4 @@
+import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/common/protocol.dart';
 import 'package:test/test.dart';
 
@@ -12,13 +13,13 @@ void main() {
     test('writes a hidden desktop entry claiming every scheme', () {
       expect(
         plan.desktopPath,
-        '/home/me/.local/share/applications/flclash-rs-url-handler.desktop',
+        '/home/me/.local/share/applications/$linuxUrlHandlerDesktopId',
       );
       expect(
         plan.desktopEntry,
         '[Desktop Entry]\n'
         'Type=Application\n'
-        'Name=FlClash\n'
+        'Name=$packageDisplayName\n'
         'NoDisplay=true\n'
         'Exec="/home/me/Apps/FlClash.AppImage" %u\n'
         'MimeType=x-scheme-handler/clash;x-scheme-handler/clashmeta;'

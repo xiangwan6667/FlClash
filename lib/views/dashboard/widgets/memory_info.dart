@@ -540,7 +540,7 @@ class _MemoryOverview extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            snapshot.coreInProcess && !rsFeature
+            snapshot.coreInProcess && snapshot.coreTotal > 0
                 ? appLocalizations.memoryEstimateSharedDesc
                 : appLocalizations.memoryEstimateDesc,
             style: AppTextStyle.footnote

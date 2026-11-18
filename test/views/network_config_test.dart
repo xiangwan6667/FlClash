@@ -121,19 +121,6 @@ void main() {
   });
 
   group('option pickers', () {
-    testWidgets('the stack picker writes the chosen tun stack', (tester) async {
-      await pumpItem(tester, const TunStackItem());
-      final initial = container.read(patchClashConfigProvider).tun.stack;
-      final target = TunStack.values.firstWhere((item) => item != initial);
-
-      await tester.tap(find.byType(ListRow).first);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(target.name).last);
-      await tester.pumpAndSettle();
-
-      expect(container.read(patchClashConfigProvider).tun.stack, target);
-    });
-
     testWidgets('the interface name mode picker writes the chosen mode', (
       tester,
     ) async {
@@ -204,11 +191,6 @@ void main() {
       expect(androidTypes, isNot(contains(InterfaceNameItem)));
     });
 
-    test('the rs build lists no stack row', () {
-      expect(types(isDesktop: true), isNot(contains(TunStackItem)));
-      expect(types(isDesktop: false), isNot(contains(TunStackItem)));
-    });
-
     test('the interface name row is listed only for the custom mode', () {
       expect(
         types(isDesktop: true, isCustomInterfaceName: false),
@@ -218,15 +200,11 @@ void main() {
   });
 
   group('tun settings', () {
-    List<Widget> items({bool isMipsStack = true}) =>
-        tunItems(isMipsStack: isMipsStack);
-
     test('Android sets the routes its VPN service starts with', () {
-      final types = items().map((item) => item.runtimeType);
+      final types = tunItems().map((item) => item.runtimeType);
       expect(types, contains(BypassPrivateRouteItem));
       expect(types, contains(RouteAddressItem));
-      expect(items(), hasLength(5));
-      expect(items(isMipsStack: false), hasLength(4));
+      expect(tunItems(), hasLength(5));
     });
 
     Widget desktopSection({bool isWindows = false}) =>
@@ -291,7 +269,7 @@ void main() {
     testWidgets('a number shows the core default and resets to it', (
       tester,
     ) async {
-      await pumpItem(tester, items().first);
+      await pumpItem(tester, tunItems().first);
       final l = currentAppLocalizations;
       expect(find.text('9000'), findsOneWidget);
 
@@ -313,7 +291,7 @@ void main() {
       tester,
     ) async {
       Future<void> openCongestion() async {
-        await pumpItem(tester, items()[1]);
+        await pumpItem(tester, tunItems()[1]);
         await tester.tap(
           find.text(currentAppLocalizations.congestionController),
         );
@@ -345,6 +323,84 @@ void main() {
       expect(outboundItems(isDesktop: false, isLinux: false), isEmpty);
       expect(outboundItems(isDesktop: true, isLinux: false), hasLength(3));
       expect(outboundItems(isDesktop: true, isLinux: true), hasLength(4));
+    });
+  });
+
+  group('root mode', () {
+    Future<void> pumpVpn(
+      WidgetTester tester, {
+      required bool su,
+      required bool rootTun,
+      Widget item = const VpnSections(),
+    }) async {
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          profilesProvider.overrideWith(TestProfiles.new),
+          suInstalledProvider.overrideWith((ref) async => su),
+        ],
+      );
+      globalState.container = container;
+      container.read(viewSizeProvider.notifier).value = const Size(1200, 1000);
+      container
+          .read(vpnSettingProvider.notifier)
+          .update((state) => state.copyWith(rootTun: rootTun));
+      await pumpItem(tester, item);
+    }
+
+    bool enabled(WidgetTester tester, Type row) =>
+        tester
+            .widget<Switch>(
+              find.descendant(
+                of: find.byType(row),
+                matching: find.byType(Switch),
+              ),
+            )
+            .onChanged !=
+        null;
+
+    String footer(WidgetTester tester) => tester
+        .widget<Text>(
+          find.textContaining(currentAppLocalizations.bypassDomainDesc),
+        )
+        .data!;
+
+    testWidgets('the VPN section offers no root mode', (tester) async {
+      await pumpVpn(tester, su: true, rootTun: false);
+      final l = currentAppLocalizations;
+
+      expect(find.byType(RootTunItem), findsNothing);
+      expect(footer(tester), isNot(contains(l.rootTunDesc)));
+      for (final row in [
+        VpnSystemProxyItem,
+        AllowBypassItem,
+        Ipv6Item,
+        DNSHijackingItem,
+      ]) {
+        expect(enabled(tester, row), isTrue, reason: '$row');
+      }
+    });
+
+    testWidgets('without su the row says so and still turns on', (
+      tester,
+    ) async {
+      await pumpVpn(
+        tester,
+        su: false,
+        rootTun: false,
+        item: const RootTunItem(),
+      );
+      final l = currentAppLocalizations;
+
+      expect(find.text(l.rootTunUnavailable), findsOneWidget);
+      await tester.tap(
+        find.descendant(
+          of: find.byType(RootTunItem),
+          matching: find.byType(Switch),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(vpnSettingProvider).rootTun, isTrue);
     });
   });
 }

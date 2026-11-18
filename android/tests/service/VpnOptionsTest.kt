@@ -22,7 +22,6 @@ private fun optionsWithRoutes(routeAddress: List<String>) = VpnOptions(
     allowBypass = false,
     systemProxy = true,
     bypassDomain = emptyList(),
-    stack = "gvisor",
     routeAddress = routeAddress,
 )
 

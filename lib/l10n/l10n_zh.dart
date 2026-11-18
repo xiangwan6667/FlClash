@@ -394,7 +394,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tabAnimation => '选项卡动画';
 
   @override
-  String get desc => '基于ClashMeta的多平台代理客户端，简单易用，开源无广告。';
+  String get desc => '基于 Concord 内核的多平台代理客户端，简单易用，开源无广告。';
 
   @override
   String get startVpn => '正在启动VPN…';
@@ -490,6 +490,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get externalControllerSecret => '外部控制器密钥';
 
   @override
+  String get externalControllerCors => '允许跨域访问';
+
+  @override
+  String get externalControllerCorsDesc => '允许网页面板从其他网址连接。';
+
+  @override
   String get ipv6Desc => '开启 IPv6 后才会接收 IPv6 流量。';
 
   @override
@@ -517,16 +523,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tcpConcurrent => 'TCP并发';
 
   @override
-  String get geodataLoader => 'Geo低内存模式';
-
-  @override
   String get requests => '请求';
 
   @override
   String get recentRequests => '最近请求';
 
   @override
-  String get findProcessMode => '查找进程';
+  String get alwaysFindProcess => '始终查找进程';
 
   @override
   String get init => '初始化';
@@ -920,7 +923,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get disclaimerSoftwareContent =>
-      '本软件是基于 Clash.Meta（mihomo）内核的开源网络代理客户端，仅提供配置管理、规则分流与流量转发等本地工具功能。';
+      '本软件是基于 Concord 内核的开源网络代理客户端，仅提供配置管理、规则分流与流量转发等本地工具功能。';
 
   @override
   String get disclaimerNoServiceStatement =>
@@ -973,7 +976,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get disclaimerLicenseContent =>
-      '本软件以 GPL-3.0 协议开源，你可以依该协议运行、研究、修改和分发本软件；分发本软件或其修改版本时，须同样以 GPL-3.0 协议提供源代码并保留原有的版权声明。\n\n本软件包含的第三方组件（包括 Clash.Meta 内核）分别遵循其各自的开源协议。基于本软件修改或分发的版本所产生的任何问题，与原作者无关。';
+      '本软件以 GPL-3.0 协议开源，你可以依该协议运行、研究、修改和分发本软件；分发本软件或其修改版本时，须同样以 GPL-3.0 协议提供源代码并保留原有的版权声明。\n\n本软件包含的第三方组件（包括 Concord 内核）分别遵循其各自的开源协议。基于本软件修改或分发的版本所产生的任何问题，与原作者无关。';
 
   @override
   String get disclaimerChangesTitle => '声明变更';
@@ -1069,9 +1072,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get hideTimeoutProxies => '隐藏超时代理';
-
-  @override
-  String get stackMode => '栈模式';
 
   @override
   String get network => '网络';
@@ -1239,10 +1239,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ruleTarget => '规则目标';
 
   @override
-  String get matchTarget => 'MATCH-TARGET';
+  String get exitDefault => '默认';
 
   @override
-  String get followProfile => '跟随配置';
+  String get customExit => '自定义出口';
+
+  @override
+  String get inputExitName => '输入出口名称';
 
   @override
   String get scriptFailed => '脚本运行失败';
@@ -2600,9 +2603,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get congestionController => 'TCP 拥塞控制';
 
   @override
-  String get congestionControllerDesc => 'TCP 拥塞控制仅在 mips 栈生效。';
-
-  @override
   String get routeExcludeAddress => '排除路由地址';
 
   @override
@@ -2673,7 +2673,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get udpTimeout => 'UDP 超时';
 
   @override
-  String get udpTimeoutDesc => 'UDP 超时以秒为单位，仅在 gvisor、system 和 mixed 栈生效。';
+  String get udpTimeoutDesc => 'UDP 超时以秒为单位。';
 
   @override
   String get dnsHijackDesc => '未添加时劫持所有发往 53 端口的 DNS 请求（any:53）。';
@@ -3217,6 +3217,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mitmCertificateAndroidReadyTip => '只有信任用户证书的应用（多为浏览器）会被解密。';
 
   @override
+  String get mitmAndroidRootDesc =>
+      '未 root 时只能解密信任用户证书的应用，多为浏览器；root 后可解密所有应用。';
+
+  @override
   String get mitmCertificateLinuxTip => 'Flatpak 版浏览器需要手动导入导出的证书。';
 
   @override
@@ -3227,6 +3231,25 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String mitmMissingStores(Object stores) {
     return '尚未加入：$stores';
+  }
+
+  @override
+  String get httpRequestsReadFailed => '无法读取请求';
+
+  @override
+  String get requestBodyReadFailed => '无法读取请求体';
+
+  @override
+  String get responseBodyReadFailed => '无法读取响应体';
+
+  @override
+  String mitmGrpcOverLimit(Object size) {
+    return '解压后超过 $size MB，显示压缩数据';
+  }
+
+  @override
+  String mitmUntrustedStores(Object stores) {
+    return '已安装但未信任：$stores';
   }
 
   @override
@@ -3326,6 +3349,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mapLocal => '本地映射';
 
   @override
+  String get requestBodyMock => '请求体替换';
+
+  @override
+  String get clientSourceAddress => '客户端地址';
+
+  @override
+  String get skipVerifyHostname => '不校验证书的主机';
+
+  @override
   String get mitmModules => '模块';
 
   @override
@@ -3348,8 +3380,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mitmModuleRulesDesc => '分流规则排在配置自身的规则之前。';
 
   @override
+  String get mitmRequestRulesDesc =>
+      '模块里的 URL-REGEX 和 USER-AGENT 规则已改成 URL 重写，逐个请求判断：明文 HTTP 请求都会判断，HTTPS 只在 MITM 主机名里的连接上判断。';
+
+  @override
   String mitmModuleSystemTip(Object system) {
     return '为 $system 编写，部分行可能不适用于本设备。';
+  }
+
+  @override
+  String mitmModuleRequirementTip(Object requirement) {
+    return '模块要求 $requirement，本设备不满足，可能无法按预期工作。';
+  }
+
+  @override
+  String mitmExitModules(Object modules) {
+    return '来自模块：$modules';
+  }
+
+  @override
+  String get mitmModuleRiskTitle => '启用此模块？';
+
+  @override
+  String get mitmNetworkRisk =>
+      '生成配置时，它会修改下列网络设置，并优先于你在 FlClash 中对同一项的设置。关闭或删除模块后即恢复。';
+
+  @override
+  String mitmSkipVerifyRisk(Object hosts) {
+    return '开启后，将不再校验下列主机的服务器证书，冒充这些服务器的连接不会被发现：$hosts';
+  }
+
+  @override
+  String mitmClientSourceRisk(Object addresses) {
+    return '它只为这些客户端解密：$addresses。开启 TUN 时，本机应用经 TUN 地址连入 FlClash，可能因此不再解密。';
+  }
+
+  @override
+  String get mitmClientSourceTunTip =>
+      '开启 TUN 时，本机应用的来源是 TUN 地址；列表不包含它时，本机应用的流量不会被解密。';
+
+  @override
+  String get mitmNetworkChanges => '网络设置';
+
+  @override
+  String mitmChangeReplace(Object values) {
+    return '替换为 $values';
+  }
+
+  @override
+  String mitmChangeInsert(Object values) {
+    return '在前面添加 $values';
+  }
+
+  @override
+  String mitmChangeAppend(Object values) {
+    return '添加 $values';
+  }
+
+  @override
+  String get mitmChangeOverridesYours => '会盖过你的设置';
+
+  @override
+  String mitmChangeReplacedBy(Object module) {
+    return '已被模块 $module 覆盖';
   }
 
   @override
@@ -3367,19 +3460,35 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mitmSkipRule => '不支持此规则类型';
 
   @override
-  String get mitmSkipPolicy => '只支持 DIRECT 和 REJECT 策略';
+  String get mitmSkipHttpRulePolicy =>
+      'URL-REGEX 和 USER-AGENT 规则只能用 REJECT 类策略';
 
   @override
-  String get mitmSkipJq => '不支持 jq 重写';
+  String get mitmSkipFinalRule => '模块的规则排在最前面，兜底规则会盖住后面的所有规则';
 
   @override
-  String get mitmSkipJsonBody => '不支持 JSON 正文重写';
+  String get mitmSkipDeviceRule => '这类规则依赖 FlClash 读不到的设备或网络信息';
 
   @override
-  String get mitmSkipRawHeader => '不支持把全部标头作为一段文本改写';
+  String get mitmSkipRequirement => '这一行的使用条件在本设备上不满足';
+
+  @override
+  String get mitmSkipManagedCa => 'CA 证书由 FlClash 管理，模块不能更改';
+
+  @override
+  String get mitmSkipProxies => '模块不能修改节点和策略组';
+
+  @override
+  String get mitmSkipAppOnly => '这是原 App 独有的功能，FlClash 没有对应项';
+
+  @override
+  String get mitmSkipReflect => 'FlClash 不能把数据包原路弹回';
 
   @override
   String get mitmSkipConditional => '不支持条件重写';
+
+  @override
+  String get mitmSkipSkipVerifyAll => '不会对全部主机关闭证书校验';
 
   @override
   String get mitmSkipRelativeData => '此行引用的文件不是附件，请改用 URL 或添加为附件';
@@ -3417,14 +3526,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mitmRunScript => '立即运行';
 
   @override
+  String get mitmScriptCron => '定时';
+
+  @override
+  String get mitmScriptEvent => '事件';
+
+  @override
+  String get mitmScriptGeneric => '通用';
+
+  @override
+  String get mitmExcluded => '排除';
+
+  @override
   String get mitmScriptNoOutput => '脚本已运行完毕，没有输出';
 
   @override
   String get mitmScriptRiskTitle => '运行此模块的脚本？';
 
   @override
+  String get mitmModulesTurnedOff => '模块已关闭';
+
+  @override
+  String mitmModuleTurnedOffDesc(Object name) {
+    return '$name 的更新带来了你未同意过的脚本或网络改动';
+  }
+
+  @override
+  String mitmModulesTurnedOffDesc(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 个模块的更新带来了你未同意过的脚本或网络改动',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get mitmScriptRisk =>
       '它的脚本能读取并修改所匹配主机的流量，包括 Cookie 和令牌，还能自行发送请求。只在信任其来源时开启。开启后，它之后的更新会直接生效。';
+
+  @override
+  String get mitmModuleUnreadableRisk => '无法读取模块文件，不清楚它会改动什么。只在信任其来源时开启。';
 
   @override
   String get skipServerCertVerify => '跳过服务器证书验证';
@@ -3542,6 +3684,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get coreStoppedDesc => '应用与核心的连接已断开';
 
   @override
+  String coreStoppedWithReason(Object reason) {
+    return '应用与核心的连接已断开：$reason';
+  }
+
+  @override
+  String mixedPortReset(Object value, Object port) {
+    return '混合端口不能是 $value，已恢复为 $port';
+  }
+
+  @override
   String get restartCore => '重启核心';
 
   @override
@@ -3600,4 +3752,25 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tunStartFailed => '虚拟网卡启动失败，本次运行不再尝试。';
+
+  @override
+  String get vpnPermissionNotGranted =>
+      '未获得 VPN 权限，VPN 没有启动。其他应用设为始终开启的 VPN 时也会如此。';
+
+  @override
+  String get vpnServiceStartFailed => 'VPN 服务无法启动。';
+
+  @override
+  String get rootTun => 'Root 模式';
+
+  @override
+  String get rootTunDesc => '不占用系统 VPN，需要 root 权限。';
+
+  @override
+  String get rootTunUnavailable => '未检测到 root';
+
+  @override
+  String rootTunFallback(Object reason) {
+    return 'Root 不可用（$reason），本次使用系统 VPN。';
+  }
 }

@@ -1,7 +1,7 @@
 # Project Context
 
 FlClash is a multi-platform proxy client built with Flutter around Concord, a Rust core in `concord/` that reads
-Clash/mihomo configuration. It supports Android, Windows, macOS, and Linux, drawing its own components in `plugins/prism_ui`: a Material You color scheme with Apple's Human Interface interaction conventions.
+Clash configuration. It supports Android, Windows, macOS, and Linux, drawing its own components in `plugins/prism_ui`: a Material You color scheme with Apple's Human Interface interaction conventions.
 
 ## Version Notes
 
@@ -26,12 +26,9 @@ Builds need Flutter and `cargo` with the toolchain pinned in `concord/rust-toolc
 
 ## Forked Dependencies
 
-One `pubspec.yaml` dependency is pinned to a fork by commit SHA. The fork lives
-under `chen08209`, the same account that owns this repository, so it is
-maintained in-house rather than tracked from a third party: advancing a pin is a
-local decision, and there is no external maintainer to wait on for the patch
-itself. What the fork still waits on is the *upstream* fix that would let the pin
-be dropped entirely, recorded below.
+No `pubspec.yaml` dependency is pinned to a fork. The forks below, all under
+`chen08209`, were folded into the repository; each entry says where their
+behavior lives now.
 
 Each entry records what the fork changes and what has to be true before it can go
 back to the published package, so a future upgrade does not have to rediscover it.
@@ -108,7 +105,8 @@ sudo apt-get install ninja-build libgtk-3-dev libsecret-1-dev
 
 Windows:
 
-- GCC and Inno Setup.
+- Inno Setup, and on x64 NASM for BoringSSL's assembly (CI installs it with
+  `choco install nasm`).
 
 macOS:
 

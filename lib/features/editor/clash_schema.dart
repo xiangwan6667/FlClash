@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/constant.dart';
+import 'generated/concord_tiers.dart';
 
 enum YamlKind { scalar, map, list }
 
@@ -16,49 +16,110 @@ enum YamlScalar {
   subRule,
 }
 
-/// The part of the mihomo configuration the editor completes against. A map
+const _appliedTiers = {ConcordTier.t0, ConcordTier.t1};
+
+bool _concordApplies(String section, String name) =>
+    _appliedTiers.contains(concordKeyTiers[section]![name]);
+
+final _offered = Expando<Object>();
+
+/// The part of the Clash configuration the editor completes against. A map
 /// lists its [fields], plus [variants] keyed by the value of its `type`; a map
 /// with free keys and a list both describe their members with [entry].
+///
+/// A node naming a [concordSection] offers only what Concord applies of its
+/// variants, or else of its fields or values.
 class YamlSchema {
   final YamlKind kind;
-  final Map<String, YamlSchema> fields;
-  final Map<String, Map<String, YamlSchema>> variants;
+  final Map<String, YamlSchema> _fields;
+  final Map<String, Map<String, YamlSchema>> _variants;
   final YamlSchema? entry;
-  final List<String> values;
+  final List<String> _values;
   final YamlScalar scalar;
+  final String? concordSection;
 
-  const YamlSchema.scalar([this.values = const []])
+  const YamlSchema.scalar([List<String> values = const []])
+    : this.of(YamlScalar.plain, values);
+
+  const YamlSchema.of(this.scalar, [List<String> values = const []])
     : kind = YamlKind.scalar,
-      fields = const {},
-      variants = const {},
+      _fields = const {},
+      _variants = const {},
       entry = null,
+      _values = values,
+      concordSection = null;
+
+  const YamlSchema.concordValues(
+    String this.concordSection,
+    List<String> values,
+  ) : kind = YamlKind.scalar,
+      _fields = const {},
+      _variants = const {},
+      entry = null,
+      _values = values,
       scalar = YamlScalar.plain;
 
-  const YamlSchema.of(this.scalar, [this.values = const []])
-    : kind = YamlKind.scalar,
-      fields = const {},
-      variants = const {},
-      entry = null;
-
-  const YamlSchema.map(this.fields, {this.variants = const {}})
-    : kind = YamlKind.map,
-      entry = null,
-      values = const [],
-      scalar = YamlScalar.plain;
+  const YamlSchema.map(
+    Map<String, YamlSchema> fields, {
+    Map<String, Map<String, YamlSchema>> variants = const {},
+    this.concordSection,
+  }) : kind = YamlKind.map,
+       _fields = fields,
+       _variants = variants,
+       entry = null,
+       _values = const [],
+       scalar = YamlScalar.plain;
 
   const YamlSchema.dict(YamlSchema this.entry)
     : kind = YamlKind.map,
-      fields = const {},
-      variants = const {},
-      values = const [],
-      scalar = YamlScalar.plain;
+      _fields = const {},
+      _variants = const {},
+      _values = const [],
+      scalar = YamlScalar.plain,
+      concordSection = null;
 
   const YamlSchema.list(YamlSchema this.entry)
     : kind = YamlKind.list,
-      fields = const {},
-      variants = const {},
-      values = const [],
-      scalar = YamlScalar.plain;
+      _fields = const {},
+      _variants = const {},
+      _values = const [],
+      scalar = YamlScalar.plain,
+      concordSection = null;
+
+  T _applied<T extends Object>(T all, T Function(String section) pick) {
+    final section = concordSection;
+    if (section == null) {
+      return all;
+    }
+    return (_offered[this] ??= pick(section)) as T;
+  }
+
+  Map<String, YamlSchema> get fields =>
+      kind == YamlKind.map && _variants.isEmpty
+      ? _applied(_fields, (section) => _appliedOf(section, _fields))
+      : _fields;
+
+  Map<String, Map<String, YamlSchema>> get variants => _variants.isEmpty
+      ? _variants
+      : _applied(_variants, (section) => _appliedOf(section, _variants));
+
+  List<String> get values => kind == YamlKind.scalar
+      ? _applied(
+          _values,
+          (section) => [
+            for (final value in _values)
+              if (_concordApplies(section, value)) value,
+          ],
+        )
+      : _values;
+
+  /// Every field this map describes, Concord's tiers aside.
+  Iterable<String> get listedFields => _fields.keys;
+
+  static Map<String, V> _appliedOf<V>(String section, Map<String, V> all) => {
+    for (final MapEntry(:key, :value) in all.entries)
+      if (_concordApplies(section, key)) key: value,
+  };
 
   String get hint => switch (kind) {
     YamlKind.map => '{…}',
@@ -111,7 +172,7 @@ const _policy = YamlSchema.of(YamlScalar.policy);
 const _outbound = YamlSchema.of(YamlScalar.outbound);
 const _headers = YamlSchema.dict(_strList);
 
-const ruleTypes = {
+const _ruleExamples = {
   'DOMAIN': 'example.com',
   'DOMAIN-SUFFIX': 'example.com',
   'DOMAIN-KEYWORD': 'example',
@@ -133,7 +194,7 @@ const ruleTypes = {
   'IN-TYPE': 'SOCKS/HTTP',
   'IN-USER': 'user',
   'IN-NAME': 'listener',
-  if (!rsFeature) 'REMATCH-NAME': 'rematch',
+  'REMATCH-NAME': 'rematch',
   'PROCESS-NAME': 'curl',
   'PROCESS-NAME-REGEX': '.*telegram.*',
   'PROCESS-NAME-WILDCARD': '*telegram*',
@@ -149,6 +210,11 @@ const ruleTypes = {
   'OR': '((DOMAIN,…),(NETWORK,udp))',
   'NOT': '((DOMAIN,…))',
   'MATCH': '',
+};
+
+final ruleTypes = {
+  for (final MapEntry(:key, :value) in _ruleExamples.entries)
+    if (_concordApplies('rule-types', key)) key: value,
 };
 
 /// Rules that take the options after their policy.
@@ -342,22 +408,25 @@ const _proxyTypes = [
   'snell',
   'ssh',
   'mieru',
-  if (!rsFeature) 'easytier',
+  'easytier',
   'shadowquic',
-  if (!rsFeature) 'gost-relay',
-  if (!rsFeature) 'sudoku',
-  if (!rsFeature) 'masque',
-  if (!rsFeature) 'trusttunnel',
-  if (!rsFeature) 'openvpn',
-  if (!rsFeature) 'tailscale',
-  if (!rsFeature) 'zerotier',
+  'gost-relay',
+  'sudoku',
+  'masque',
+  'trusttunnel',
+  'openvpn',
+  'tailscale',
+  'zerotier',
   'direct',
-  if (!rsFeature) 'dns',
+  'dns',
   'reject',
-  if (!rsFeature) 'rematch',
+  'rematch',
 ];
 
-const _proxyCommon = {'name': _str, 'type': YamlSchema.scalar(_proxyTypes)};
+const _proxyCommon = {
+  'name': _str,
+  'type': YamlSchema.concordValues('proxy-types', _proxyTypes),
+};
 
 const _server = {'server': _str, 'port': _str};
 
@@ -393,19 +462,18 @@ const _optionalTls = {
 const _sniTls = {'sni': _str, ..._tls};
 
 const _tlsLayers = {
-  if (!rsFeature)
-    'shadow-tls-opts': YamlSchema.map({
-      'password': _str,
-      'version': YamlSchema.scalar(['1', '2', '3']),
-    }),
-  if (!rsFeature)
-    'restls-opts': YamlSchema.map({
-      'password': _str,
-      'version-hint': YamlSchema.scalar(['tls12', 'tls13']),
-      'restls-script': _str,
-    }),
-  if (!rsFeature)
-    'jls-opts': YamlSchema.map({'username': _str, 'password': _str}),
+  'shadow-tls-opts': YamlSchema.map({
+    'host': _str,
+    'password': _str,
+    'version': YamlSchema.scalar(['1', '2', '3']),
+    'fingerprint': _str,
+    'skip-cert-verify': _bool,
+    'alpn': YamlSchema.list(YamlSchema.scalar(['h2', 'http/1.1', 'h3'])),
+    'certificate': _str,
+    'private-key': _str,
+    'name-cert-verify': _str,
+  }),
+  'jls-opts': YamlSchema.map({'username': _str, 'password': _str}),
 };
 
 const _reality = {
@@ -444,8 +512,6 @@ const _grpcOpts = YamlSchema.map({
   'max-streams': _str,
 });
 
-const _mkcpOpts = YamlSchema.map(_mkcpFields);
-
 const _mkcpFields = {
   'mtu': _str,
   'tti': _str,
@@ -466,33 +532,11 @@ const _mkcpFields = {
 };
 
 const _vmessTransport = {
-  'network': YamlSchema.scalar([
-    'tcp',
-    'ws',
-    'http',
-    'h2',
-    'grpc',
-    if (!rsFeature) 'mekya',
-    if (!rsFeature) 'mkcp',
-  ]),
+  'network': YamlSchema.scalar(['tcp', 'ws', 'http', 'h2', 'grpc']),
   'ws-opts': _wsOpts,
   'http-opts': _httpOpts,
   'h2-opts': _h2Opts,
   'grpc-opts': _grpcOpts,
-  if (!rsFeature) 'mkcp-opts': _mkcpOpts,
-  if (!rsFeature)
-    'mekya-opts': YamlSchema.map({
-      'url': _str,
-      'h2-pool-size': _str,
-      'max-write-delay': _str,
-      'max-request-size': _str,
-      'polling-interval-initial': _str,
-      'max-write-size': _str,
-      'max-write-duration-ms': _str,
-      'max-simultaneous-write-connection': _str,
-      'packet-writing-buffer': _str,
-      'kcp': _mkcpOpts,
-    }),
   'smux': _smux,
 };
 
@@ -667,12 +711,10 @@ const _tlsMirrorTime = YamlSchema.map({
 
 /// The ss plugins and snell obfs modes shadow-tls, restls and jls read these.
 const _tlsLayerOpts = {
-  if (!rsFeature) 'username': _str,
+  'username': _str,
   'password': _str,
   'version': YamlSchema.scalar(['1', '2', '3']),
   'fingerprint': _str,
-  if (!rsFeature) 'version-hint': YamlSchema.scalar(['tls12', 'tls13']),
-  if (!rsFeature) 'restls-script': _str,
 };
 
 const _proxyVariants = <String, Map<String, YamlSchema>>{
@@ -688,23 +730,12 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'plugin': YamlSchema.scalar([
       'obfs',
       'v2ray-plugin',
-      if (!rsFeature) 'gost-plugin',
+      'gost-plugin',
       'shadow-tls',
-      if (!rsFeature) 'restls',
-      if (!rsFeature) 'jls',
-      if (!rsFeature) 'kcptun',
+      'jls',
     ]),
     'plugin-opts': YamlSchema.map({
-      'mode': YamlSchema.scalar([
-        'http',
-        'tls',
-        'websocket',
-        if (!rsFeature) 'normal',
-        if (!rsFeature) 'fast',
-        if (!rsFeature) 'fast2',
-        if (!rsFeature) 'fast3',
-        if (!rsFeature) 'manual',
-      ]),
+      'mode': YamlSchema.scalar(['http', 'tls', 'websocket']),
       'host': _str,
       'path': _str,
       'tls': _bool,
@@ -716,7 +747,6 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
       'ech-opts': _ech,
       ..._pluginTls,
       ..._tlsLayerOpts,
-      if (!rsFeature) ..._kcptunFields,
     }),
     'smux': _smux,
   },
@@ -765,42 +795,6 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     ..._optionalTls,
     ..._tlsLayers,
     ..._reality,
-    if (!rsFeature)
-      'tlsmirror-opts': YamlSchema.map({
-        'primary-key': _str,
-        'explicit-nonce-ciphersuites': _strList,
-        'defer-instance-derived-write-time': _tlsMirrorTime,
-        'transport-layer-padding': YamlSchema.map({'enabled': _bool}),
-        'connection-enrolment': YamlSchema.map({
-          'primary-ingress-outbound': _str,
-          'primary-egress-outbound': _str,
-        }),
-        'embedded-traffic-generator': YamlSchema.map({
-          'steps': YamlSchema.list(
-            YamlSchema.map({
-              'name': _str,
-              'host': _str,
-              'path': _str,
-              'method': _str,
-              'headers': YamlSchema.list(
-                YamlSchema.map({
-                  'name': _str,
-                  'value': _str,
-                  'values': _strList,
-                }),
-              ),
-              'next-step': YamlSchema.list(
-                YamlSchema.map({'weight': _str, 'goto-location': _str}),
-              ),
-              'connection-ready': _bool,
-              'connection-recall-exit': _bool,
-              'wait-time': _tlsMirrorTime,
-              'h2-do-not-wait-for-download-finish': _bool,
-            }),
-          ),
-        }),
-        'sequence-watermarking-enabled': _bool,
-      }),
     ..._vmessTransport,
   },
   'vless': {
@@ -1029,15 +1023,11 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'psk': _str,
     'version': YamlSchema.scalar(['1', '2', '3', '4', '5', '6']),
     'mode': _snellV6Mode,
+    'userkey': _str,
     'reuse': _bool,
     'client-fingerprint': _clientFingerprint,
     'obfs-opts': YamlSchema.map({
-      'mode': YamlSchema.scalar([
-        'http',
-        'tls',
-        'shadow-tls',
-        if (!rsFeature) ...['restls', 'jls'],
-      ]),
+      'mode': YamlSchema.scalar(['http', 'tls', 'shadow-tls', 'jls']),
       'host': _str,
       'alpn': _strList,
       ..._pluginTls,
@@ -1076,40 +1066,39 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     ]),
     'traffic-pattern': _str,
   },
-  if (!rsFeature)
-    'easytier': {
-      'udp': _bool,
-      ..._dial,
-      'network-name': _str,
-      'network-secret': _str,
-      'hostname': _str,
-      'ipv4': _str,
-      'dhcp': _bool,
-      'peers': _strList,
-      'listeners': _strList,
-      'no-listener': _bool,
-      'mapped-listeners': _strList,
-      'exit-nodes': _strList,
-      'proxy-networks': _strList,
-      'instance-name': _str,
-      'state-dir': _str,
-      'accept-dns': _bool,
-      'enable-exit-node': _bool,
-      'enable-encryption': _bool,
-      'encryption-algorithm': _str,
-      'private-mode': _bool,
-      'latency-first': _bool,
-      'disable-p2p': _bool,
-      'enable-kcp-proxy': _bool,
-      'disable-kcp-input': _bool,
-      'enable-quic-proxy': _bool,
-      'disable-quic-input': _bool,
-      'mtu': _str,
-      'tld-dns-zone': _str,
-      'secure-mode': _bool,
-      'local-private-key': _str,
-      'local-public-key': _str,
-    },
+  'easytier': {
+    'udp': _bool,
+    ..._dial,
+    'network-name': _str,
+    'network-secret': _str,
+    'hostname': _str,
+    'ipv4': _str,
+    'dhcp': _bool,
+    'peers': _strList,
+    'listeners': _strList,
+    'no-listener': _bool,
+    'mapped-listeners': _strList,
+    'exit-nodes': _strList,
+    'proxy-networks': _strList,
+    'instance-name': _str,
+    'state-dir': _str,
+    'accept-dns': _bool,
+    'enable-exit-node': _bool,
+    'enable-encryption': _bool,
+    'encryption-algorithm': _str,
+    'private-mode': _bool,
+    'latency-first': _bool,
+    'disable-p2p': _bool,
+    'enable-kcp-proxy': _bool,
+    'disable-kcp-input': _bool,
+    'enable-quic-proxy': _bool,
+    'disable-quic-input': _bool,
+    'mtu': _str,
+    'tld-dns-zone': _str,
+    'secure-mode': _bool,
+    'local-private-key': _str,
+    'local-public-key': _str,
+  },
   'shadowquic': {
     ..._server,
     ..._dial,
@@ -1132,174 +1121,167 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'max-datagram-frame-size': _str,
     'max-open-streams': _str,
   },
-  if (!rsFeature)
-    'gost-relay': {
-      ..._server,
-      'udp': _bool,
-      ..._tcpDial,
-      'username': _str,
-      'password': _str,
-      'forward': _bool,
-      'mux': _bool,
+  'gost-relay': {
+    ..._server,
+    'udp': _bool,
+    ..._tcpDial,
+    'username': _str,
+    'password': _str,
+    'forward': _bool,
+    'mux': _bool,
+    'tls': _bool,
+    'sni': _str,
+    'skip-cert-verify': _bool,
+    'name-cert-verify': _str,
+    'fingerprint': _str,
+    'certificate': _str,
+    'private-key': _str,
+    'client-fingerprint': _clientFingerprint,
+  },
+  'sudoku': {
+    ..._server,
+    ..._tcpDial,
+    'key': _str,
+    'aead-method': YamlSchema.scalar([
+      'aes-128-gcm',
+      'chacha20-poly1305',
+      'none',
+    ]),
+    'padding-min': _str,
+    'padding-max': _str,
+    'table-type': YamlSchema.scalar([
+      'prefer_ascii',
+      'prefer_entropy',
+      'up_ascii_down_entropy',
+      'up_entropy_down_ascii',
+    ]),
+    'custom-table': _str,
+    'custom-tables': _strList,
+    'enable-pure-downlink': _bool,
+    'multiplex': _sudokuMultiplex,
+    'http-mask': _bool,
+    'http-mask-mode': _sudokuHttpMaskMode,
+    'http-mask-tls': _bool,
+    'http-mask-host': _str,
+    'path-root': _str,
+    'httpmask': YamlSchema.map({
+      'disable': _bool,
+      'mode': _sudokuHttpMaskMode,
       'tls': _bool,
-      'sni': _str,
-      'skip-cert-verify': _bool,
-      'name-cert-verify': _str,
-      'fingerprint': _str,
-      'certificate': _str,
-      'private-key': _str,
-      'client-fingerprint': _clientFingerprint,
-    },
-  if (!rsFeature)
-    'sudoku': {
-      ..._server,
-      ..._tcpDial,
-      'key': _str,
-      'aead-method': YamlSchema.scalar([
-        'aes-128-gcm',
-        'chacha20-poly1305',
-        'none',
-      ]),
-      'padding-min': _str,
-      'padding-max': _str,
-      'table-type': YamlSchema.scalar([
-        'prefer_ascii',
-        'prefer_entropy',
-        'up_ascii_down_entropy',
-        'up_entropy_down_ascii',
-      ]),
-      'custom-table': _str,
-      'custom-tables': _strList,
-      'enable-pure-downlink': _bool,
-      'multiplex': _sudokuMultiplex,
-      'http-mask': _bool,
-      'http-mask-mode': _sudokuHttpMaskMode,
-      'http-mask-tls': _bool,
-      'http-mask-host': _str,
+      'host': _str,
       'path-root': _str,
-      'httpmask': YamlSchema.map({
-        'disable': _bool,
-        'mode': _sudokuHttpMaskMode,
-        'tls': _bool,
-        'host': _str,
-        'path-root': _str,
-        'multiplex': _sudokuMultiplex,
-      }),
-    },
-  if (!rsFeature)
-    'masque': {
-      ..._server,
-      'udp': _bool,
-      ..._dial,
-      'private-key': _str,
-      'public-key': _str,
-      'ip': _str,
-      'ipv6': _str,
-      'uri': _str,
-      'sni': _str,
-      'skip-cert-verify': _bool,
-      'network': YamlSchema.scalar(['h2', 'h3-l4proxy']),
-      'congestion-controller': _congestionController,
-      'bbr-profile': _bbrProfile,
-      'cwnd': _str,
-      'mtu': _str,
-      'handshake-timeout': _str,
-      'ip-stack': _ipStack,
-      'remote-dns-resolve': _bool,
-      'dns': _strList,
-    },
-  if (!rsFeature)
-    'trusttunnel': {
-      ..._server,
-      'udp': _bool,
-      ..._tcpDial,
-      'username': _str,
-      'password': _str,
-      'sni': _str,
-      'alpn': _strList,
-      'skip-cert-verify': _bool,
-      'name-cert-verify': _str,
-      'fingerprint': _str,
-      'certificate': _str,
-      'private-key': _str,
-      'client-fingerprint': _clientFingerprint,
-      'ech-opts': _ech,
-      'quic': _bool,
-      'congestion-controller': _congestionController,
-      'bbr-profile': _bbrProfile,
-      'cwnd': _str,
-      'health-check': _bool,
-      'max-connections': _str,
-      'min-streams': _str,
-      'max-streams': _str,
-    },
-  if (!rsFeature)
-    'openvpn': {
-      ..._server,
-      'udp': _bool,
-      ..._tcpDial,
-      'proto': YamlSchema.scalar(['udp', 'tcp']),
-      'dev': YamlSchema.scalar(['tun']),
-      'ca': _str,
-      'cert': _str,
-      'key': _str,
-      'tls-auth': _str,
-      'tls-crypt': _str,
-      'tls-crypt-v2': _str,
-      'key-direction': YamlSchema.scalar(['0', '1']),
-      'username': _str,
-      'password': _str,
-      'cipher': YamlSchema.scalar(_openvpnCiphers),
-      'data-ciphers': YamlSchema.list(YamlSchema.scalar(_openvpnCiphers)),
-      'data-ciphers-fallback': YamlSchema.scalar(_openvpnCiphers),
-      'auth': YamlSchema.scalar(['MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512']),
-      'comp-lzo': YamlSchema.scalar(['yes', 'adaptive']),
-      'peer-info': YamlSchema.dict(_str),
-      'ping': _str,
-      'ping-restart': _str,
-      'tran-window': _str,
-      'handshake-timeout': _str,
-      'mtu': _str,
-      'ip-stack': _ipStack,
-      'remote-dns-resolve': _bool,
-      'dns': _strList,
-    },
-  if (!rsFeature)
-    'tailscale': {
-      'udp': _bool,
-      ..._dial,
-      'hostname': _str,
-      'auth-key': _str,
-      'control-url': _str,
-      'state-dir': _str,
-      'ephemeral': _bool,
-      'accept-routes': _bool,
-      'exit-node': _str,
-      'exit-node-allow-lan-access': _bool,
-    },
-  if (!rsFeature)
-    'zerotier': {
-      'udp': _bool,
-      ..._dial,
-      'network': _str,
-      'state-dir': _str,
-      'identity-secret': _str,
-      'planet': _str,
-      'orbit': YamlSchema.list(YamlSchema.map({'world': _str, 'seed': _str})),
-      'mtu': _str,
-      'physical-mtu': _str,
-      'primary-port': _str,
-      'secondary-port': _str,
-      'low-bandwidth': _bool,
-      'encrypted-hello': _bool,
-      'tcp-fallback-mode': YamlSchema.scalar(['auto', 'force', 'disable']),
-      'tcp-fallback-relay': _str,
-      'remote-trace-target': _str,
-      'remote-trace-level': _str,
-      'ip-stack': _ipStack,
-      'remote-dns-resolve': _bool,
-      'dns': _strList,
-    },
+      'multiplex': _sudokuMultiplex,
+    }),
+  },
+  'masque': {
+    ..._server,
+    'udp': _bool,
+    ..._dial,
+    'private-key': _str,
+    'public-key': _str,
+    'ip': _str,
+    'ipv6': _str,
+    'uri': _str,
+    'sni': _str,
+    'skip-cert-verify': _bool,
+    'network': YamlSchema.scalar(['h2', 'h3-l4proxy']),
+    'congestion-controller': _congestionController,
+    'bbr-profile': _bbrProfile,
+    'cwnd': _str,
+    'mtu': _str,
+    'handshake-timeout': _str,
+    'ip-stack': _ipStack,
+    'remote-dns-resolve': _bool,
+    'dns': _strList,
+  },
+  'trusttunnel': {
+    ..._server,
+    'udp': _bool,
+    ..._tcpDial,
+    'username': _str,
+    'password': _str,
+    'sni': _str,
+    'alpn': _strList,
+    'skip-cert-verify': _bool,
+    'name-cert-verify': _str,
+    'fingerprint': _str,
+    'certificate': _str,
+    'private-key': _str,
+    'client-fingerprint': _clientFingerprint,
+    'ech-opts': _ech,
+    'quic': _bool,
+    'congestion-controller': _congestionController,
+    'bbr-profile': _bbrProfile,
+    'cwnd': _str,
+    'health-check': _bool,
+    'max-connections': _str,
+    'min-streams': _str,
+    'max-streams': _str,
+  },
+  'openvpn': {
+    ..._server,
+    'udp': _bool,
+    ..._tcpDial,
+    'proto': YamlSchema.scalar(['udp', 'tcp']),
+    'dev': YamlSchema.scalar(['tun']),
+    'ca': _str,
+    'cert': _str,
+    'key': _str,
+    'tls-auth': _str,
+    'tls-crypt': _str,
+    'tls-crypt-v2': _str,
+    'key-direction': YamlSchema.scalar(['0', '1']),
+    'username': _str,
+    'password': _str,
+    'cipher': YamlSchema.scalar(_openvpnCiphers),
+    'data-ciphers': YamlSchema.list(YamlSchema.scalar(_openvpnCiphers)),
+    'data-ciphers-fallback': YamlSchema.scalar(_openvpnCiphers),
+    'auth': YamlSchema.scalar(['MD5', 'SHA1', 'SHA256', 'SHA384', 'SHA512']),
+    'comp-lzo': YamlSchema.scalar(['yes', 'adaptive']),
+    'peer-info': YamlSchema.dict(_str),
+    'ping': _str,
+    'ping-restart': _str,
+    'tran-window': _str,
+    'handshake-timeout': _str,
+    'mtu': _str,
+    'ip-stack': _ipStack,
+    'remote-dns-resolve': _bool,
+    'dns': _strList,
+  },
+  'tailscale': {
+    'udp': _bool,
+    ..._dial,
+    'hostname': _str,
+    'auth-key': _str,
+    'control-url': _str,
+    'state-dir': _str,
+    'ephemeral': _bool,
+    'accept-routes': _bool,
+    'exit-node': _str,
+    'exit-node-allow-lan-access': _bool,
+  },
+  'zerotier': {
+    'udp': _bool,
+    ..._dial,
+    'network': _str,
+    'state-dir': _str,
+    'identity-secret': _str,
+    'planet': _str,
+    'orbit': YamlSchema.list(YamlSchema.map({'world': _str, 'seed': _str})),
+    'mtu': _str,
+    'physical-mtu': _str,
+    'primary-port': _str,
+    'secondary-port': _str,
+    'low-bandwidth': _bool,
+    'encrypted-hello': _bool,
+    'tcp-fallback-mode': YamlSchema.scalar(['auto', 'force', 'disable']),
+    'tcp-fallback-relay': _str,
+    'remote-trace-target': _str,
+    'remote-trace-level': _str,
+    'ip-stack': _ipStack,
+    'remote-dns-resolve': _bool,
+    'dns': _strList,
+  },
   'direct': {
     'tfo': _bool,
     'mptcp': _bool,
@@ -1307,16 +1289,19 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'interface-name': _str,
     'routing-mark': _str,
   },
-  if (!rsFeature) 'dns': {},
+  'dns': {},
   'reject': {},
-  if (!rsFeature)
-    'rematch': {
-      'target-rematch-name': _str,
-      'target-sub-rule': YamlSchema.of(YamlScalar.subRule),
-    },
+  'rematch': {
+    'target-rematch-name': _str,
+    'target-sub-rule': YamlSchema.of(YamlScalar.subRule),
+  },
 };
 
-const _proxy = YamlSchema.map(_proxyCommon, variants: _proxyVariants);
+const _proxy = YamlSchema.map(
+  _proxyCommon,
+  variants: _proxyVariants,
+  concordSection: 'proxy-types',
+);
 
 const _healthCheck = YamlSchema.map({
   'enable': _bool,
@@ -1329,7 +1314,12 @@ const _healthCheck = YamlSchema.map({
 
 const _proxyGroupFields = {
   'name': _str,
-  'type': YamlSchema.scalar(['select', 'url-test', 'fallback', 'load-balance']),
+  'type': YamlSchema.concordValues('group-types', [
+    'select',
+    'url-test',
+    'fallback',
+    'load-balance',
+  ]),
   'proxies': YamlSchema.list(_policy),
   'use': YamlSchema.list(YamlSchema.of(YamlScalar.proxyProvider)),
   'use-position': YamlSchema.dict(_str),
@@ -1361,16 +1351,21 @@ const _proxyGroupVariants = {
   },
 };
 
-const _proxyGroup = YamlSchema.map({
-  ..._proxyGroupFields,
-  'include-all': _bool,
-  'include-all-proxies': _bool,
-  'include-all-providers': _bool,
-}, variants: _proxyGroupVariants);
+const _proxyGroup = YamlSchema.map(
+  {
+    ..._proxyGroupFields,
+    'include-all': _bool,
+    'include-all-proxies': _bool,
+    'include-all-providers': _bool,
+  },
+  variants: _proxyGroupVariants,
+  concordSection: 'group-types',
+);
 
 const _customProxyGroup = YamlSchema.map(
   _proxyGroupFields,
   variants: _proxyGroupVariants,
+  concordSection: 'group-types',
 );
 
 const _providerType = YamlSchema.scalar(['http', 'file', 'inline']);
@@ -1461,8 +1456,8 @@ const _dns = YamlSchema.map({
     'geosite': _strList,
     'ipcidr': _strList,
     'domain': _strList,
-  }),
-});
+  }, concordSection: 'dns.fallback-filter'),
+}, concordSection: 'dns');
 
 const _ntp = YamlSchema.map({
   'enable': _bool,
@@ -1471,69 +1466,64 @@ const _ntp = YamlSchema.map({
   'port': _str,
   'interval': _str,
   'dialer-proxy': _outbound,
-});
+}, concordSection: 'ntp');
 
-const _tun = YamlSchema.map({'enable': _bool, ..._tunFields});
+const _tun = YamlSchema.map({
+  'enable': _bool,
+  ..._tunFields,
+}, concordSection: 'tun');
 
 const _tunFields = {
-  'stack': YamlSchema.scalar([
-    if (!rsFeature) ...['mixed', 'system'],
-    'gvisor',
-    'mips',
-  ]),
+  'stack': YamlSchema.scalar(['gvisor', 'mips']),
   'device': _str,
   'dns-hijack': YamlSchema.list(YamlSchema.scalar(['any:53', 'tcp://any:53'])),
   'auto-route': _bool,
-  if (!rsFeature) 'auto-redirect': _bool,
+  'auto-redirect': _bool,
   'auto-detect-interface': _bool,
   'strict-route': _bool,
   'mtu': _str,
-  if (!rsFeature) 'gso': _bool,
-  if (!rsFeature) 'gso-max-size': _str,
+  'gso': _bool,
+  'gso-max-size': _str,
   'udp-timeout': _str,
-  if (!rsFeature) 'endpoint-independent-nat': _bool,
+  'endpoint-independent-nat': _bool,
   'disable-icmp-forwarding': _bool,
-  if (!rsFeature) 'iproute2-table-index': _str,
-  if (!rsFeature) 'iproute2-rule-index': _str,
+  'iproute2-table-index': _str,
+  'iproute2-rule-index': _str,
   'route-address': _strList,
   'route-exclude-address': _strList,
-  if (!rsFeature)
-    'route-address-set': YamlSchema.list(
-      YamlSchema.of(YamlScalar.ruleProvider),
-    ),
-  if (!rsFeature)
-    'route-exclude-address-set': YamlSchema.list(
-      YamlSchema.of(YamlScalar.ruleProvider),
-    ),
+  'route-address-set': YamlSchema.list(YamlSchema.of(YamlScalar.ruleProvider)),
+  'route-exclude-address-set': YamlSchema.list(
+    YamlSchema.of(YamlScalar.ruleProvider),
+  ),
   'include-interface': _strList,
   'exclude-interface': _strList,
   'include-uid': _strList,
-  if (!rsFeature) 'include-uid-range': _strList,
+  'include-uid-range': _strList,
   'exclude-uid': _strList,
-  if (!rsFeature) 'exclude-uid-range': _strList,
-  if (!rsFeature) 'include-android-user': _strList,
-  if (!rsFeature) 'include-package': _strList,
-  if (!rsFeature) 'exclude-package': _strList,
-  if (!rsFeature) 'inet6-address': _strList,
-  if (!rsFeature) 'inet4-route-address': _strList,
-  if (!rsFeature) 'inet6-route-address': _strList,
-  if (!rsFeature) 'inet4-route-exclude-address': _strList,
-  if (!rsFeature) 'inet6-route-exclude-address': _strList,
-  if (!rsFeature) 'loopback-address': _strList,
-  if (!rsFeature) 'auto-redirect-input-mark': _str,
-  if (!rsFeature) 'auto-redirect-output-mark': _str,
-  if (!rsFeature) 'auto-redirect-iproute2-fallback-rule-index': _str,
+  'exclude-uid-range': _strList,
+  'include-android-user': _strList,
+  'include-package': _strList,
+  'exclude-package': _strList,
+  'inet6-address': _strList,
+  'inet4-route-address': _strList,
+  'inet6-route-address': _strList,
+  'inet4-route-exclude-address': _strList,
+  'inet6-route-exclude-address': _strList,
+  'loopback-address': _strList,
+  'auto-redirect-input-mark': _str,
+  'auto-redirect-output-mark': _str,
+  'auto-redirect-iproute2-fallback-rule-index': _str,
   'exclude-src-port': _strList,
-  if (!rsFeature) 'exclude-src-port-range': _strList,
+  'exclude-src-port-range': _strList,
   'exclude-dst-port': _strList,
-  if (!rsFeature) 'exclude-dst-port-range': _strList,
-  if (!rsFeature) 'include-mac-address': _strList,
-  if (!rsFeature) 'exclude-mac-address': _strList,
-  if (!rsFeature) 'icmp-timeout': _str,
+  'exclude-dst-port-range': _strList,
+  'include-mac-address': _strList,
+  'exclude-mac-address': _strList,
+  'icmp-timeout': _str,
   'congestion-controller': YamlSchema.scalar(['cubic', 'reno', 'bbr', 'bbr3']),
-  if (!rsFeature) 'file-descriptor': _str,
-  if (!rsFeature) 'recvmsgx': _bool,
-  if (!rsFeature) 'sendmsgx': _bool,
+  'file-descriptor': _str,
+  'recvmsgx': _bool,
+  'sendmsgx': _bool,
 };
 
 const _sniffPorts = YamlSchema.map({
@@ -1555,7 +1545,7 @@ const _sniffer = YamlSchema.map({
   'skip-domain': _strList,
   'skip-src-address': _strList,
   'skip-dst-address': _strList,
-});
+}, concordSection: 'sniffer');
 
 const _serverTls = {
   'certificate': _str,
@@ -1956,14 +1946,14 @@ const clashConfigSchema = YamlSchema.map({
   'socks-port': _str,
   'redir-port': _str,
   'tproxy-port': _str,
-  if (!rsFeature) 'ss-config': _str,
-  if (!rsFeature) 'vmess-config': _str,
-  if (!rsFeature) 'inbound-tfo': _bool,
-  if (!rsFeature) 'inbound-mptcp': _bool,
+  'ss-config': _str,
+  'vmess-config': _str,
+  'inbound-tfo': _bool,
+  'inbound-mptcp': _bool,
   'allow-lan': _bool,
-  if (!rsFeature) 'bind-address': YamlSchema.scalar(['*']),
-  if (!rsFeature) 'lan-allowed-ips': _strList,
-  if (!rsFeature) 'lan-disallowed-ips': _strList,
+  'bind-address': YamlSchema.scalar(['*']),
+  'lan-allowed-ips': _strList,
+  'lan-disallowed-ips': _strList,
   'authentication': _strList,
   'skip-auth-prefixes': _strList,
   'mode': YamlSchema.scalar(['rule', 'global', 'direct']),
@@ -1984,85 +1974,76 @@ const clashConfigSchema = YamlSchema.map({
   'disable-keep-alive': _bool,
   'interface-name': _str,
   'routing-mark': _str,
-  if (!rsFeature) 'etag-support': _bool,
+  'etag-support': _bool,
   'external-controller': YamlSchema.scalar(['127.0.0.1:9090']),
-  if (!rsFeature) 'external-controller-routing-mark': _str,
-  if (!rsFeature)
-    'external-controller-cors': YamlSchema.map({
-      'allow-origins': _strList,
-      'allow-private-network': _bool,
-    }),
+  'external-controller-routing-mark': _str,
+  'external-controller-cors': YamlSchema.map({
+    'allow-origins': _strList,
+    'allow-private-network': _bool,
+  }),
   'secret': _str,
-  if (!rsFeature) 'external-ui': _str,
-  if (!rsFeature) 'external-ui-name': _str,
-  if (!rsFeature) 'external-ui-url': _str,
-  if (!rsFeature) 'external-doh-server': _str,
-  'profile': YamlSchema.map({'store-selected': _bool, 'store-fake-ip': _bool}),
-  if (!rsFeature) 'geodata-mode': _bool,
-  if (!rsFeature)
-    'geodata-loader': YamlSchema.scalar(['memconservative', 'standard']),
-  if (!rsFeature) 'geosite-matcher': YamlSchema.scalar(['succinct', 'mph']),
+  'external-ui': _str,
+  'external-ui-name': _str,
+  'external-ui-url': _str,
+  'external-doh-server': _str,
+  'profile': YamlSchema.map({
+    'store-selected': _bool,
+    'store-fake-ip': _bool,
+  }, concordSection: 'profile'),
+  'geodata-mode': _bool,
+  'geodata-loader': YamlSchema.scalar(['memconservative', 'standard']),
+  'geosite-matcher': YamlSchema.scalar(['succinct', 'mph']),
   'geo-auto-update': _bool,
   'geo-update-interval': _str,
   'geox-url': YamlSchema.map({
-    if (!rsFeature) 'geoip': _str,
+    'geoip': _str,
     'geosite': _str,
     'mmdb': _str,
     'asn': _str,
-  }),
+  }, concordSection: 'geox-url'),
   'hosts': YamlSchema.dict(_str),
-  'tls': YamlSchema.map({
-    if (!rsFeature) ..._serverTls,
-    'custom-certifactes': _strList,
-  }),
-  'experimental': YamlSchema.map({
-    if (!rsFeature) 'quic-go-disable-gso': _bool,
-    if (!rsFeature) 'quic-go-disable-ecn': _bool,
-    'dialer-ip4p-convert': _bool,
-  }),
+  'tls': YamlSchema.map({'custom-certifactes': _strList}),
+  'experimental': YamlSchema.map({'dialer-ip4p-convert': _bool}),
   'dns': _dns,
   'tun': _tun,
   'sniffer': _sniffer,
   'ntp': _ntp,
-  if (!rsFeature) 'listeners': YamlSchema.list(_listener),
-  if (!rsFeature)
-    'tunnels': YamlSchema.list(
-      YamlSchema.map({
-        'network': YamlSchema.list(YamlSchema.scalar(['tcp', 'udp'])),
-        'address': _str,
-        'target': _str,
-        'proxy': _outbound,
-      }),
-    ),
-  if (!rsFeature)
-    'tuic-server': YamlSchema.map({
-      'enable': _bool,
-      'listen': _str,
-      'token': _strList,
-      'users': YamlSchema.dict(_str),
-      'certificate': _str,
-      'private-key': _str,
-      'alpn': _strList,
-      'congestion-controller': _congestionController,
-      'cwnd': _str,
-      'max-idle-time': _str,
-      'authentication-timeout': _str,
-      'max-udp-relay-packet-size': _str,
+  'listeners': YamlSchema.list(_listener),
+  'tunnels': YamlSchema.list(
+    YamlSchema.map({
+      'network': YamlSchema.list(YamlSchema.scalar(['tcp', 'udp'])),
+      'address': _str,
+      'target': _str,
+      'proxy': _outbound,
     }),
-  if (!rsFeature)
-    'iptables': YamlSchema.map({
-      'enable': _bool,
-      'inbound-interface': _str,
-      'bypass': _strList,
-      'dns-redirect': _bool,
-    }),
+  ),
+  'tuic-server': YamlSchema.map({
+    'enable': _bool,
+    'listen': _str,
+    'token': _strList,
+    'users': YamlSchema.dict(_str),
+    'certificate': _str,
+    'private-key': _str,
+    'alpn': _strList,
+    'congestion-controller': _congestionController,
+    'cwnd': _str,
+    'max-idle-time': _str,
+    'authentication-timeout': _str,
+    'max-udp-relay-packet-size': _str,
+  }),
+  'iptables': YamlSchema.map({
+    'enable': _bool,
+    'inbound-interface': _str,
+    'bypass': _strList,
+    'dns-redirect': _bool,
+  }),
   'proxies': YamlSchema.list(_proxy),
   'proxy-groups': YamlSchema.list(_proxyGroup),
   'proxy-providers': YamlSchema.dict(_proxyProvider),
   'rule-providers': YamlSchema.dict(_ruleProvider),
   'rules': _rules,
   'sub-rules': YamlSchema.dict(_rules),
-});
+}, concordSection: 'keys');
 
 const _providerFile = YamlSchema.map({
   'proxies': YamlSchema.list(_proxy),

@@ -98,7 +98,7 @@ as in `48 dp`, never px: a reader takes px for physical pixels and misjudges the
 and `test/`.
 
 CI gates formatting: `dart format --output=none --set-exit-if-changed lib test
-tool plugins setup.dart` runs before `flutter analyze`.
+tool plugins` runs before `flutter analyze`.
 
 These directories are excluded from analysis:
 
@@ -142,8 +142,7 @@ judgment, and it lives in the rules below and in review. Whether comments are to
 diffs under 20 added lines so small edits are never caught. The number is calibrated on this repository's own history:
 healthy changes sit at or under 3.6%, while the core fix that prompted the gate ran 22.4%.
 
-It is a ceiling on frequency, not a target to fill. Do not read `core/`'s inherited mihomo density as a quota either —
-it is forked upstream code, not a house style.
+It is a ceiling on frequency, not a target to fill.
 
 Three gates run the same script, and they do not have equal force. The `PostToolUse` hooks in `.claude/settings.json`
 and `.codex/config.toml` run after the tool and hand offending lines back as feedback; neither can undo the completed
@@ -191,10 +190,12 @@ leaving a repo-wide policy as a comment reaches only the reader of that one file
   isolate is gone while the VPN service lives on. A receiver that reports its host gone ends the session and with it every
   subscription it held; do not keep a session alive for a host that cannot answer. The service and the app reach the Core
   without a Flutter engine through `Core.kt`'s typed calls, and those must not block the Core's own threads.
-- Delay-test progress lives in `pendingDelayTestsProvider`, not as a sentinel value in `DelayDataSource`. A delay of 0
-  used to mean "testing", which let a result and the state of a test overwrite each other and left cards spinning
-  forever when the Core restarted. The run owns its keys and releases them in a `finally`, so nothing depends on a
-  reply arriving; core status leaving `connected` cancels every run in flight.
+- Delay-test progress lives in `pendingDelayTestsProvider`, never as a sentinel value in `DelayDataSource`, so a result
+  and the state of a test cannot overwrite each other and no card spins on after the Core restarts. The run owns its
+  keys and releases them in a `finally`, so nothing depends on a reply arriving; core status leaving `connected`
+  cancels every run in flight.
+- Whether a key FlClash sends takes effect is what `concord -t` reports through `tool/check_sent_config.dart` and what
+  `test/core/sent_config_golden_test.dart` pins, never what a search for the key name suggests.
 
 ### Core Constants
 
@@ -271,8 +272,9 @@ which is a subscription.
   `spawn_blocking`. On macOS only the location work hops to the main queue: the `CLLocationManager`, its delegate and
   the pending requests live there, and the SSID read waits for that answer before it asks CoreWLAN, which reaches
   `wifid` over XPC, so a wedged daemon would freeze the window.
-- Android's `system` nameserver resolves only through the DNS `NetworkObserver` reports; mihomo builds it with no
-  fallback, so with no list every lookup through it fails at once. The Core tests delays and updates providers with no
+- Android's `system` nameserver resolves only through the DNS `NetworkObserver` reports; the Core's `system` client
+  (`SystemServers` in `concord/crates/dns/src/system.rs`) falls back only to `default-nameserver`, so with no list
+  every other lookup through it fails at once. The Core tests delays and updates providers with no
   service running, so the observer lives for the process from the first `init` or native `quickSetup` and never sends
   an empty list on a service stop.
 - The delayed DNS re-check `NetworkObserver.onLosing` posts is deliberately left un-deduplicated. The runnable
@@ -373,8 +375,7 @@ as it needs anywhere else, so this part is about where work runs, not how much o
 
 ## Testing Rules
 
-The `core/` directory is excluded from automated coverage accounting. Do not add coverage instrumentation or coverage
-collection for code under `core/`. The Concord workspace is checked by the CI `rust-core` job (see `.agents/commands.md`);
+The Concord workspace is checked by the CI `rust-core` job (see `.agents/commands.md`);
 verify cross-language protocol behavior through the contract test `test/core/api/contract_test.dart` against
 `concord/schema/api.json` and native platform build checks.
 
@@ -572,15 +573,14 @@ Install the hooks once with `pre-commit install --hook-type pre-commit --hook-ty
 
 ### Fixup Commits
 
-A follow-up to a change that has not shipped in a stable release goes in as `git commit --fixup=<target>`, aimed at the
-commit that introduced what it amends.
+A follow-up lands as a regular commit. Create a `fixup!` commit only when the user asks for one, aimed at the commit
+that introduced what it amends.
 
 - Only stable tags (`vX.Y.Z`) close a commit. A target reached only by pre-release tags (`vX.Y.Z-pre.N`) is still open
-  for fixups, so do not steer away from it or flag it.
-- A commit a stable tag contains takes no fixup; land the follow-up as a regular commit. Check with
+  for fixups. A commit a stable tag contains takes no fixup, even on request; check with
   `git tag --contains <target> | grep -v -- '-pre'`, which must print nothing.
-- Asking for a fixup means creating the `fixup!` commit only. Do not run `git rebase --autosquash` or otherwise fold it
-  into its target unless the user asks for the squash.
+- Asking for a fixup means creating the `fixup!` commit only. Do not run `git rebase --autosquash`, amend, or otherwise
+  fold it into its target unless the user asks for the squash.
 
 ### Changelog Trailers
 
@@ -625,6 +625,16 @@ while `schemaVersion` at the last release tag is below its number; a schema chan
 step of its own. Every operation in it checks the shape it finds, a missing table or column or a column under its old
 name, so it can run again on a database that went through part of it. Its tests start from the released shape.
 
+## rsFeature
+
+`rsFeature` (`lib/common/constant.dart`) keeps off what only the rs line's Concord core serves, such as MITM. The rs
+line does not turn it on: `tool/strip_rs_feature.dart` removes every check, so a check takes one of three forms,
+`if (rsFeature) element` in a collection, `rsFeature && x`, or `if (rsFeature) { ... }` with no else. Anything else,
+a negation or an else branch included, fails `test/lint/rs_feature_forms_test.dart`. Only a feature dev does not have
+otherwise goes behind it; code that replaces something dev already has stays on the rs line. A test that needs the
+feature on runs inside `if (rsFeature) { ... }`. `make strip-check`, which CI runs, strips a scratch copy and analyzes
+it.
+
 ## Generated Code
 
 Do not manually edit generated files under:
@@ -658,7 +668,7 @@ versions still resolves to it.
 
 Labels for enum values go through the exhaustive switches in `lib/common/l10n_labels.dart`, never
 `Intl.message(<runtime string>)`. A key built from an enum name or a stored string is invisible to the analyzer, and
-`Intl.message` has no messages to look up since generation moved to `gen-l10n`, so it returns the key itself and ships
+`Intl.message` has no messages to look up under `gen-l10n`, so it returns the key itself and ships
 `routeMode_config` in the UI rather than throwing.
 `test/lint/dynamic_message_key_test.dart` fails on any `Intl.message(` in `lib` outside the generated code, and checks
 that every locale carries the same keys and has a display name.

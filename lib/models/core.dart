@@ -81,6 +81,117 @@ abstract class MitmScriptOutput with _$MitmScriptOutput {
       _$MitmScriptOutputFromJson(json);
 }
 
+typedef MitmCheck = ({
+  Map<MitmList, Map<int, String>> issues,
+  Map<MitmList, Map<int, MitmLineView>> views,
+});
+
+/// A MITM line as the Core reads it, from the same parse that applies it.
+@Freezed(unionKey: 'type')
+sealed class MitmLineView with _$MitmLineView {
+  const factory MitmLineView.urlRewrite({
+    required String pattern,
+    required String action,
+    String? replacement,
+    String? requestHead,
+  }) = MitmUrlRewriteView;
+
+  const factory MitmLineView.headerRewrite({
+    required String phase,
+    required String pattern,
+    String? requestHead,
+    String? responseHead,
+    required String action,
+    String? name,
+    String? value,
+    String? regex,
+    String? replacement,
+  }) = MitmHeaderRewriteView;
+
+  const factory MitmLineView.bodyRewrite({
+    required String phase,
+    required String pattern,
+    String? requestHead,
+    String? responseHead,
+    @Default([]) List<MitmBodyReplacement> replacements,
+    String? jq,
+  }) = MitmBodyRewriteView;
+
+  const factory MitmLineView.mapLocal({
+    required String pattern,
+    String? requestHead,
+    required String dataType,
+    @Default('') String data,
+    int? status,
+    @Default([]) List<MitmHeader> headers,
+    @Default('') String contentType,
+  }) = MitmMapLocalView;
+
+  const factory MitmLineView.script({
+    required String name,
+    required String kind,
+    @Default('') String path,
+    String? pattern,
+    String? cronexp,
+    String? event,
+    @Default(false) bool requiresBody,
+    int? timeoutMs,
+  }) = MitmScriptView;
+
+  const factory MitmLineView.hosts({@Default([]) List<MitmHostEntry> entries}) =
+      MitmHostsView;
+
+  const factory MitmLineView.sources({
+    @Default([]) List<MitmSourceEntry> entries,
+  }) = MitmSourcesView;
+
+  factory MitmLineView.fromJson(Map<String, Object?> json) =>
+      _$MitmLineViewFromJson(json);
+}
+
+@freezed
+abstract class MitmBodyReplacement with _$MitmBodyReplacement {
+  const factory MitmBodyReplacement({
+    required String regex,
+    required String replacement,
+  }) = _MitmBodyReplacement;
+
+  factory MitmBodyReplacement.fromJson(Map<String, Object?> json) =>
+      _$MitmBodyReplacementFromJson(json);
+}
+
+@freezed
+abstract class MitmHeader with _$MitmHeader {
+  const factory MitmHeader({required String name, required String value}) =
+      _MitmHeader;
+
+  factory MitmHeader.fromJson(Map<String, Object?> json) =>
+      _$MitmHeaderFromJson(json);
+}
+
+@freezed
+abstract class MitmHostEntry with _$MitmHostEntry {
+  const factory MitmHostEntry({
+    required String host,
+    int? port,
+    @Default(false) bool exclude,
+  }) = _MitmHostEntry;
+
+  factory MitmHostEntry.fromJson(Map<String, Object?> json) =>
+      _$MitmHostEntryFromJson(json);
+}
+
+@freezed
+abstract class MitmSourceEntry with _$MitmSourceEntry {
+  const factory MitmSourceEntry({
+    required String network,
+    @Default(false) bool exclude,
+  }) = _MitmSourceEntry;
+
+  factory MitmSourceEntry.fromJson(Map<String, Object?> json) =>
+      _$MitmSourceEntryFromJson(json);
+}
+
 /// Times are in milliseconds, sizes those of the client's bodies.
 @freezed
 abstract class MitmExchangeSummary with _$MitmExchangeSummary {
@@ -182,10 +293,10 @@ abstract class VpnOptions with _$VpnOptions {
     required bool allowBypass,
     required bool systemProxy,
     required List<String> bypassDomain,
-    required String stack,
     @Default([]) List<String> routeAddress,
     @Default(0) int mtu,
     @Default('') String congestionController,
+    @Default(false) bool rootTun,
   }) = _VpnOptions;
 
   factory VpnOptions.fromJson(Map<String, Object?> json) =>
@@ -205,7 +316,6 @@ extension VpnOptionsExt on VpnOptions {
         allowBypass: false,
         systemProxy: false,
         bypassDomain: [],
-        stack: '',
       );
     }
     final accessControl = accessControlProps;
