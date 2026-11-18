@@ -96,17 +96,47 @@ ConfigCounts configCountsOf(Map<Object?, Object?> config) {
   );
 }
 
-String? lastMatchTarget(List<String> rules) {
-  for (int i = rules.length - 1; i >= 0; i--) {
-    final parsed = Rule.parse(rules[i]);
-    if (parsed.ruleAction == RuleAction.MATCH) {
-      final target = parsed.ruleTarget;
+String? lastMatchTarget(List<String> rules) =>
+    matchTargetOf(rules.map(Rule.parse));
+
+String? matchTargetOf(Iterable<Rule> rules) {
+  for (final rule in rules.toList().reversed) {
+    if (rule.ruleAction == RuleAction.MATCH) {
+      final target = rule.ruleTarget;
       if (target != null && target.isNotEmpty) {
         return target;
       }
     }
   }
   return null;
+}
+
+Set<String> outboundNamesOf(Map<dynamic, dynamic> config) => {
+  for (final key in const ['proxies', 'proxy-groups'])
+    if (config[key] case final List<dynamic> items)
+      for (final item in items)
+        if (item case {'name': final String name}) name,
+};
+
+/// mihomo sends DIRECT what no rule matches, MATCH included.
+String Function(String exit) exitTargetResolver({
+  required Map<String, String> targets,
+  required Set<String> outbounds,
+  required String? fallback,
+}) {
+  bool usable(String? target) =>
+      target != null &&
+      (RuleTarget.ruleTargets.contains(target) || outbounds.contains(target));
+  return (exit) {
+    final mapped = targets[exit];
+    if (usable(mapped)) {
+      return mapped!;
+    }
+    if (outbounds.contains(exit)) {
+      return exit;
+    }
+    return fallback ?? RuleTarget.DIRECT.value;
+  };
 }
 
 Map<String, dynamic> inboundConfigOf(
@@ -282,10 +312,25 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
     };
   }
 
+  final attachedRuleSets = {
+    for (final MapEntry(:key, :value) in mitm.ruleProviders.entries)
+      if (value['type'] == 'file') key: value,
+  };
+  if (mitm.ruleProviders.length > attachedRuleSets.length) {
+    final providers = rawConfig['rule-providers'];
+    rawConfig['rule-providers'] = {
+      if (providers is Map) ...providers.cast<String, dynamic>(),
+      for (final MapEntry(:key, :value) in mitm.ruleProviders.entries)
+        if (!attachedRuleSets.containsKey(key)) key: value,
+    };
+  }
   confineProviders('proxy-providers', proxiesProviderDirectoryName);
   confineProviders('rule-providers', rulesProviderDirectoryName);
   injectUnconfinedProviders('proxy-providers', data.injectedProxyProviders);
-  injectUnconfinedProviders('rule-providers', data.injectedRuleProviders);
+  injectUnconfinedProviders('rule-providers', {
+    ...data.injectedRuleProviders,
+    ...attachedRuleSets,
+  });
   rawConfig['profile']['store-selected'] = false;
   rawConfig['geox-url'] = realPatchConfig.geoXUrl.raw;
   rawConfig['global-ua'] = realPatchConfig.globalUa ?? defaultUA;
@@ -295,6 +340,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
   for (final host in realPatchConfig.hosts.entries) {
     rawConfig['hosts'][host.key] = host.value.splitByMultipleSeparators;
   }
+  (rawConfig['hosts'] as Map).addAll(mitm.network.hosts);
   var rawDns = rawConfig['dns'] is Map
       ? Map<String, dynamic>.from(rawConfig['dns'] as Map)
       : <String, dynamic>{};
@@ -310,6 +356,7 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
     rawDns,
     overrides.dns.overrideJson(overrides.dnsOverrideKeys),
   );
+  mitm.network.applyToDns(rawDns);
   rawConfig['dns'] = rawDns;
   final ntpOverride = overrides.ntp.overrideJson(overrides.ntpOverrideKeys);
   if (ntpOverride.isNotEmpty) {
@@ -348,34 +395,18 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
       rules = List<String>.from(rawConfig['rules']);
     }
     if (addedRules.isNotEmpty) {
-      final hasMatchPlaceholder = addedRules.any(
-        (item) => item.ruleTarget?.toUpperCase() == 'MATCH',
+      final exitTarget = exitTargetResolver(
+        targets: data.exitTargets,
+        outbounds: data.outboundNames ?? outboundNamesOf(rawConfig),
+        fallback: data.defaultExitTarget ?? lastMatchTarget(rules),
       );
-      String? replacementTarget = data.matchTarget?.trim();
-      if (replacementTarget?.isEmpty == true) {
-        replacementTarget = null;
-      }
-
-      if (hasMatchPlaceholder && replacementTarget == null) {
-        replacementTarget = lastMatchTarget(rules);
-      }
-      final List<String> finalAddedRules;
-
-      if (replacementTarget?.isNotEmpty == true) {
-        finalAddedRules = [];
-        for (int i = 0; i < addedRules.length; i++) {
-          final parsed = addedRules[i];
-          if (parsed.ruleTarget?.toUpperCase() == 'MATCH') {
-            finalAddedRules.add(
-              parsed.copyWith(ruleTarget: replacementTarget).rawValue,
-            );
-          } else {
-            finalAddedRules.add(addedRules[i].rawValue);
-          }
-        }
-      } else {
-        finalAddedRules = addedRules.map((e) => e.rawValue).toList();
-      }
+      final finalAddedRules = [
+        for (final rule in addedRules)
+          (rule.customExit && rule.ruleTarget != null
+                  ? rule.copyWith(ruleTarget: exitTarget(rule.ruleTarget!))
+                  : rule)
+              .rawValue,
+      ];
       rules = [...finalAddedRules, ...rules];
     }
   } else {
@@ -386,7 +417,18 @@ Future<RealProfile> _makeRealProfileTask(MakeRealProfileState data) async {
         .map((item) => item.definition)
         .toList();
   }
-  rawConfig['rules'] = [...mitm.rules, ...rules];
+  final mitmRules = mitm.exits.isEmpty
+      ? mitm.rules
+      : mitmRulesWithExits(
+          mitm.rules,
+          mitm.exits,
+          exitTargetResolver(
+            targets: data.exitTargets,
+            outbounds: data.outboundNames ?? outboundNamesOf(rawConfig),
+            fallback: data.defaultExitTarget ?? lastMatchTarget(rules),
+          ),
+        );
+  rawConfig['rules'] = [...mitmRules, ...rules];
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
   return (yaml: yaml, md5: yaml.toMd5(), counts: configCountsOf(rawConfig));
 }

@@ -58,17 +58,35 @@ Future<ClashConfig?> scriptOutbounds(Ref ref, int profileId) async {
   return evaluateOutbounds(content, config);
 }
 
+@Riverpod(retry: _noRetry)
+Future<String?> profileMatchTarget(Ref ref, int profileId) async {
+  final (:type, updated: _) = ref.watch(
+    profileProvider(
+      profileId,
+    ).select((state) => (type: state?.type, updated: state?.lastUpdateDate)),
+  );
+  if (type == null || type == ProfileType.custom) {
+    return null;
+  }
+  final scripted = await ref.watch(scriptOutboundsProvider(profileId).future);
+  if (scripted != null) {
+    return matchTargetOf(scripted.rules);
+  }
+  return ref.read(coreHandlerProvider).getProfileMatchTarget(profileId);
+}
+
+/// What the user set over the profile: a custom profile's own settings over
+/// the app's TUN overrides, or the app's overrides for any other profile.
 @riverpod
-Future<SetupState> setupState(Ref ref, int? profileId) async {
+ProfileOverrides profileOverrides(Ref ref, int? profileId) {
   final profile = ref.watch(profileProvider(profileId));
-  final scriptId = profile?.scriptId;
-  final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
-  final profileType = profile?.type ?? ProfileType.file;
-  final overrides = profileType == ProfileType.custom
+  return profile?.type == ProfileType.custom
       ? ref.watch(
           patchClashConfigProvider.select(
-            (state) => (profile?.overrides ?? const ProfileOverrides())
-                .overAppTun(state.tunOverride, state.tunOverrideKeys),
+            (state) => profile!.overrides.overAppTun(
+              state.tunOverride,
+              state.tunOverrideKeys,
+            ),
           ),
         )
       : ref.watch(
@@ -83,9 +101,18 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
             ),
           ),
         );
+}
+
+@riverpod
+Future<SetupState> setupState(Ref ref, int? profileId) async {
+  final profile = ref.watch(profileProvider(profileId));
+  final scriptId = profile?.scriptId;
+  final profileLastUpdateDate = profile?.lastUpdateDate?.millisecondsSinceEpoch;
+  final profileType = profile?.type ?? ProfileType.file;
+  final overrides = ref.watch(profileOverridesProvider(profileId));
   final allProfileProviders = ref.watch(profileProvidersProvider);
   final mitmModules =
-      mitmFeature &&
+      rsFeature &&
           ref.watch(
             patchClashConfigProvider.select((state) => state.mitm.enable),
           )
@@ -134,9 +161,7 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     addedRules: addedRules,
     script: script,
     overrides: overrides,
-    matchTarget: profileType != ProfileType.custom
-        ? profile?.matchTarget
-        : null,
+    exitTargets: profile?.exitTargets ?? const {},
   );
 }
 

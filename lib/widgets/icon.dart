@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:fl_clash/common/cache.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/plugins/app.dart';
+import 'package:fl_clash/providers/app.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/ui/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
 const _maxCachedIconBytes = 16 << 20;
@@ -376,57 +378,111 @@ class PackageIcon extends StatefulWidget {
   State<PackageIcon> createState() => _PackageIconState();
 }
 
-class _PackageIconState extends State<PackageIcon> {
-  ImageProvider? _icon;
-  int _generation = 0;
+class _PackageIconState extends State<PackageIcon>
+    with _PackageIconLoader<PackageIcon> {
+  @override
+  String packageNameOf(PackageIcon widget) => widget.packageName;
+
+  @override
+  (ImageProvider?, Future<ImageProvider?>?) lookUp(String packageName) => (
+    app?.getCachedPackageIcon(packageName),
+    app?.getPackageIcon(packageName),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = this.icon;
+    if (icon == null) {
+      return SizedBox(width: widget.size, height: widget.size);
+    }
+    return packageIconImage(icon, widget.size);
+  }
+}
+
+/// Shows a package's cached icon at once and the one [lookUp] loads once it
+/// lands, unless the widget has moved to another package by then.
+mixin _PackageIconLoader<T extends StatefulWidget> on State<T> {
+  ImageProvider? icon;
+  var _generation = 0;
+
+  String packageNameOf(T widget);
+
+  (ImageProvider?, Future<ImageProvider?>?) lookUp(String packageName);
 
   @override
   void initState() {
     super.initState();
-    _showCachedIcon();
-    _loadIcon();
+    _resolve();
   }
 
   @override
-  void didUpdateWidget(covariant PackageIcon oldWidget) {
+  void didUpdateWidget(covariant T oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.packageName != widget.packageName) {
-      _showCachedIcon();
-      _loadIcon();
+    if (packageNameOf(oldWidget) != packageNameOf(widget)) {
+      _resolve();
     }
   }
 
-  void _showCachedIcon() {
-    _generation++;
-    _icon = app?.getCachedPackageIcon(widget.packageName);
-  }
-
-  void _loadIcon() {
-    final generation = _generation;
-    app?.getPackageIcon(widget.packageName).then((icon) {
-      if (!mounted ||
-          generation != _generation ||
-          icon == null ||
-          icon == _icon) {
-        return;
+  void _resolve() {
+    final generation = ++_generation;
+    final (cached, load) = lookUp(packageNameOf(widget));
+    icon = cached;
+    load?.then((loaded) {
+      if (mounted &&
+          generation == _generation &&
+          loaded != null &&
+          loaded != icon) {
+        setState(() {
+          icon = loaded;
+        });
       }
-      setState(() {
-        _icon = icon;
-      });
     });
+  }
+}
+
+Widget packageIconImage(ImageProvider icon, double size) =>
+    Image(image: icon, gaplessPlayback: true, width: size, height: size);
+
+/// Builds with the icon [packageName] draws itself, or with null until it has
+/// loaded and where there is none, so a row lays out without an icon rather
+/// than around an empty slot.
+class OwnPackageIcon extends ConsumerStatefulWidget {
+  final String packageName;
+  final double size;
+  final Widget Function(BuildContext context, Widget? icon) builder;
+
+  const OwnPackageIcon({
+    super.key,
+    required this.packageName,
+    required this.size,
+    required this.builder,
+  });
+
+  @override
+  ConsumerState<OwnPackageIcon> createState() => _OwnPackageIconState();
+}
+
+class _OwnPackageIconState extends ConsumerState<OwnPackageIcon>
+    with _PackageIconLoader<OwnPackageIcon> {
+  @override
+  String packageNameOf(OwnPackageIcon widget) => widget.packageName;
+
+  @override
+  (ImageProvider?, Future<ImageProvider?>?) lookUp(String packageName) {
+    final source = ref.read(packageIconSourceProvider);
+    final cached = source?.getCachedOwnPackageIcon(packageName);
+    return (
+      cached?.icon,
+      cached == null ? source?.getOwnPackageIcon(packageName) : null,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final icon = _icon;
-    if (icon == null) {
-      return SizedBox(width: widget.size, height: widget.size);
-    }
-    return Image(
-      image: icon,
-      gaplessPlayback: true,
-      width: widget.size,
-      height: widget.size,
+    final icon = this.icon;
+    return widget.builder(
+      context,
+      icon == null ? null : packageIconImage(icon, widget.size),
     );
   }
 }

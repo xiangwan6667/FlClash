@@ -3,6 +3,7 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/features/form/form.dart';
 import 'package:fl_clash/models/clash_config.dart';
 import 'package:fl_clash/models/profile.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
 import 'package:fl_clash/views/config/rules.dart';
@@ -22,9 +23,13 @@ class _AddedRulesContentState extends ConsumerState<AddedRulesContent> {
   late int _profileId;
 
   Future<void> _handleAddOrUpdate([Rule? rule]) async {
+    final exits = customExitsOf([
+      ...?ref.read(profileRulesProvider(_profileId)).value,
+      ...?ref.read(globalRulesProvider).value,
+    ]);
     final res = await showFormSheet<Rule>(
       context: context,
-      builder: (_) => RuleForm(rule: rule),
+      builder: (_) => RuleForm(rule: rule, exits: exits),
     );
     if (res == null) {
       return;
@@ -88,10 +93,6 @@ class _AddedRulesContentState extends ConsumerState<AddedRulesContent> {
     _profileId = ProfileIdProvider.of(context)!.profileId;
   }
 
-  void _handleToEditGlobalAddedRules() {
-    BaseNavigator.push(context, _EditGlobalAddedRules(_profileId));
-  }
-
   Widget _buildRuleItem(List<Rule> rules, int index, Set<dynamic> selected) {
     final rule = rules[index];
     return ReorderDragStartListener(
@@ -102,7 +103,6 @@ class _AddedRulesContentState extends ConsumerState<AddedRulesContent> {
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           child: RuleItem(
-            hasMatch: true,
             isEditing: selected.isNotEmpty,
             isSelected: selected.contains(rule.id),
             rule: rule,
@@ -181,13 +181,17 @@ class _AddedRulesContentState extends ConsumerState<AddedRulesContent> {
                 .read(profileRulesProvider(_profileId).notifier)
                 .order,
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
-          SliverToBoxAdapter(child: _MatchTargetItem(_profileId)),
-          SliverToBoxAdapter(
-            child: MoreActionButton(
-              label: appLocalizations.controlGlobalAddedRules,
-              onPressed: _handleToEditGlobalAddedRules,
+          if (addedRules.isNotEmpty)
+            const SliverToBoxAdapter(child: ListSectionGap()),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(
+              child: generateGroup([_GlobalAddedRulesItem(_profileId)]),
             ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            sliver: SliverToBoxAdapter(child: ExitsSection(_profileId)),
           ),
         ],
       ),
@@ -198,12 +202,87 @@ class _AddedRulesContentState extends ConsumerState<AddedRulesContent> {
 bool _runsScript(Profile? profile) =>
     profile?.type != ProfileType.custom && profile?.scriptId != null;
 
-class _MatchTargetItem extends ConsumerWidget {
+/// A custom profile has no profile file: its own groups, the app's proxies
+/// and its own rules stand in.
+ClashConfig? _watchOutbounds(WidgetRef ref, int profileId) {
+  if (ref.watch(
+    profileProvider(
+      profileId,
+    ).select((state) => state?.type == ProfileType.custom),
+  )) {
+    final groups = ref.watch(proxyGroupsProvider(profileId)).value;
+    final proxies = ref.watch(customProxiesProvider).value;
+    final rules = ref.watch(profileRulesProvider(profileId)).value;
+    if (groups == null || proxies == null || rules == null) {
+      return null;
+    }
+    return ClashConfig(
+      proxyGroups: groups,
+      rules: rules,
+      proxies: [
+        for (final proxy in proxies)
+          if (proxy.definition case {
+            'name': final String name,
+            'type': final String type,
+          })
+            Proxy(name: name, type: type),
+      ],
+    );
+  }
+  final scripted = ref.watch(profileProvider(profileId).select(_runsScript))
+      ? ref.watch(scriptOutboundsProvider(profileId))
+      : const AsyncData<ClashConfig?>(null);
+  return switch (scripted) {
+    AsyncData(value: final config?) => config,
+    AsyncData() => ref.watch(clashConfigProvider(profileId)).value,
+    _ => null,
+  };
+}
+
+String? _watchFallback(WidgetRef ref, int profileId) =>
+    ref.watch(
+      profileProvider(
+        profileId,
+      ).select((state) => state?.type == ProfileType.custom),
+    )
+    ? matchTargetOf(_watchOutbounds(ref, profileId)?.rules ?? const [])
+    : ref.watch(profileMatchTargetProvider(profileId)).value;
+
+Set<String> _namesOf(ClashConfig config) => {
+  for (final item in config.proxyGroups) item.name,
+  for (final item in config.proxies) item.name,
+};
+
+/// The exits a profile's added rules and the enabled MITM modules name; a
+/// custom profile has only the modules'.
+class ExitsSection extends ConsumerWidget {
   final int profileId;
+  final bool modulesOnly;
 
-  const _MatchTargetItem(this.profileId);
+  const ExitsSection(this.profileId, {super.key, this.modulesOnly = false});
 
-  Future<void> _handleSelect(BuildContext context, WidgetRef ref) async {
+  List<String> _watchExits(WidgetRef ref, Map<String, List<String>> modules) {
+    if (modulesOnly) {
+      return modules.keys.toList();
+    }
+    final own = ref.watch(profileRulesProvider(profileId)).value ?? const [];
+    final global = ref.watch(globalRulesProvider).value ?? const [];
+    final disabled =
+        ref.watch(profileDisabledRuleIdsProvider(profileId)).value ?? const [];
+    return {
+      ...customExitsOf([
+        ...own,
+        ...global.where((rule) => !disabled.contains(rule.id)),
+      ]),
+      ...modules.keys,
+    }.toList();
+  }
+
+  Future<void> _handleSelect(
+    BuildContext context,
+    WidgetRef ref,
+    String exit,
+  ) async {
     final res = await showNestedSheet<String>(
       context,
       builder: (context) => Consumer(
@@ -215,34 +294,38 @@ class _MatchTargetItem extends ConsumerWidget {
               : const AsyncData<ClashConfig?>(null);
           if (scripted case AsyncError(:final error)) {
             return Scaffold(
-              title: appLocalizations.matchTarget,
+              title: exit,
               body: NullStatus(
                 label: appLocalizations.scriptFailed,
                 description: '$error',
                 illustration: NullStatusIllustration.error,
                 action: TonalButton(
                   size: TonalButtonSize.bar,
-                  label: appLocalizations.followProfile,
+                  label: appLocalizations.exitDefault,
                   onPressed: () => Navigator.of(context).pop(''),
                 ),
               ),
             );
           }
-          final clashConfig = switch (scripted) {
-            AsyncData(value: final config?) => config,
-            AsyncData() => ref.watch(clashConfigProvider(profileId)).value,
-            _ => null,
-          };
+          final clashConfig = _watchOutbounds(ref, profileId);
+          final fallback = _watchFallback(ref, profileId);
           final groups = clashConfig?.proxyGroups ?? const [];
           final proxies = clashConfig?.proxies ?? const [];
           final groupTypes = {
             for (final item in groups) item.name: item.type.name,
           };
           final proxyTypes = {for (final item in proxies) item.name: item.type};
+          final defaultTarget =
+              groupTypes.containsKey(exit) || proxyTypes.containsKey(exit)
+              ? exit
+              : fallback;
           return SelectionSheet<String>(
-            title: appLocalizations.matchTarget,
+            title: exit,
             sections: [
-              const SelectionSection(items: ['']),
+              SelectionSection(
+                items: const [''],
+                subtitleBuilder: (_, _) => defaultTarget,
+              ),
               SelectionSection(
                 label: appLocalizations.basicStrategy,
                 items: [
@@ -262,11 +345,11 @@ class _MatchTargetItem extends ConsumerWidget {
               ),
             ],
             labelBuilder: (item) =>
-                item.isEmpty ? appLocalizations.followProfile : item,
+                item.isEmpty ? appLocalizations.exitDefault : item,
             selectedOf: (ref) => ref.watch(
               profileProvider(
                 profileId,
-              ).select((state) => state?.matchTarget ?? ''),
+              ).select((state) => state?.exitTargets[exit] ?? ''),
             ),
             onSelected: (item) => Navigator.of(context).pop(item),
             loadingStatus: scripted is AsyncLoading
@@ -280,32 +363,43 @@ class _MatchTargetItem extends ConsumerWidget {
       return;
     }
     ref.read(profilesProvider.notifier).updateProfile(profileId, (state) {
-      return state.copyWith(matchTarget: res.isEmpty ? null : res);
+      final exitTargets = {...state.exitTargets}..remove(exit);
+      return state.copyWith(
+        exitTargets: res.isEmpty ? exitTargets : {...exitTargets, exit: res},
+      );
     });
   }
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final appLocalizations = context.appLocalizations;
-    final (:matchTarget, :scripted) = ref.watch(
-      profileProvider(profileId).select(
-        (state) =>
-            (matchTarget: state?.matchTarget, scripted: _runsScript(state)),
-      ),
-    );
-    final clashConfig = scripted
+  Widget _buildExit(
+    BuildContext context,
+    WidgetRef ref, {
+    required String exit,
+    required String? target,
+    required Set<String>? names,
+    required String? fallback,
+    required List<String>? modules,
+  }) {
+    bool usable(String? name) =>
+        name != null &&
+        (RuleTarget.ruleTargets.contains(name) || names!.contains(name));
+    final invalid = names != null && target != null && !usable(target);
+    final actual = names == null || (target != null && !invalid)
         ? null
-        : ref.watch(clashConfigProvider(profileId)).value;
-    final invalid =
-        matchTarget != null &&
-        clashConfig != null &&
-        !RuleTarget.ruleTargets.contains(matchTarget) &&
-        !clashConfig.proxyGroups.any((item) => item.name == matchTarget) &&
-        !clashConfig.proxies.any((item) => item.name == matchTarget);
-    return MoreActionButton(
-      label: appLocalizations.matchTarget,
+        : names.contains(exit)
+        ? exit
+        : usable(fallback)
+        ? fallback
+        : null;
+    final lines = [
+      ?actual,
+      if (modules != null)
+        context.appLocalizations.mitmExitModules(modules.join(', ')),
+    ];
+    return ListItem(
+      title: Text(exit),
+      subtitle: lines.isEmpty ? null : Text(lines.join('\n')),
       trailing: Text(
-        matchTarget ?? appLocalizations.followProfile,
+        target ?? context.appLocalizations.exitDefault,
         style: AppTextStyle.subheadline
             .of(context)
             .toJetBrainsMono
@@ -315,9 +409,59 @@ class _MatchTargetItem extends ConsumerWidget {
                   : context.colorScheme.tertiary,
             ),
       ),
-      onPressed: () {
-        _handleSelect(context, ref);
+      onTap: () {
+        _handleSelect(context, ref, exit);
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modules = ref.watch(mitmModuleExitsProvider).value ?? const {};
+    final exits = _watchExits(ref, modules);
+    if (exits.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final exitTargets = ref.watch(
+      profileProvider(profileId).select((state) => state?.exitTargets),
+    );
+    final outbounds = _watchOutbounds(ref, profileId);
+    final names = outbounds == null ? null : _namesOf(outbounds);
+    final fallback = _watchFallback(ref, profileId);
+    return generateSection(
+      title: context.appLocalizations.outboundExit,
+      items: [
+        for (final exit in exits)
+          _buildExit(
+            context,
+            ref,
+            exit: exit,
+            target: exitTargets?[exit],
+            names: names,
+            fallback: fallback,
+            modules: modules[exit],
+          ),
+      ],
+    );
+  }
+}
+
+class _GlobalAddedRulesItem extends ConsumerWidget {
+  final int profileId;
+
+  const _GlobalAddedRulesItem(this.profileId);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rules = ref.watch(globalRulesProvider).value ?? const <Rule>[];
+    final disabled =
+        ref.watch(profileDisabledRuleIdsProvider(profileId)).value ??
+        const <int>[];
+    final enabled = rules.where((rule) => !disabled.contains(rule.id)).length;
+    return ListItem.open(
+      title: Text(context.appLocalizations.controlGlobalAddedRules),
+      trailing: rules.isEmpty ? null : Text('$enabled/${rules.length}'),
+      widget: _EditGlobalAddedRules(profileId),
     );
   }
 }
@@ -389,10 +533,25 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
           child: Builder(
             builder: (context) => CustomScrollView(
               slivers: [
+                SliverToBoxAdapter(
+                  child: SizedBox(height: context.contentTopPadding),
+                ),
+                if (_query.isEmpty) ...[
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: generateGroup([
+                        ListItem.open(
+                          title: Text(appLocalizations.goToConfigureAddedRules),
+                          widget: const AddedRulesView(),
+                        ),
+                      ]),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(child: ListSectionGap()),
+                ],
                 SliverPadding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                  ).copyWith(top: context.contentTopPadding),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverFixedExtentList.builder(
                     itemExtent: ruleItemHeight,
                     itemBuilder: (context, index) {
@@ -412,15 +571,8 @@ class _EditGlobalAddedRulesState extends ConsumerState<_EditGlobalAddedRules> {
                     itemCount: rules.length,
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 SliverToBoxAdapter(
-                  child: MoreActionButton(
-                    label: appLocalizations.goToConfigureAddedRules,
-                    onPressed: _handleToAddedRules,
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(height: 12 + context.bottomInset),
+                  child: SizedBox(height: 16 + context.bottomInset),
                 ),
               ],
             ),

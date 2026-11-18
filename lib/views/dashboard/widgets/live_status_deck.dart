@@ -3,8 +3,10 @@ import 'dart:math' as math;
 
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/features/features.dart';
 import 'package:fl_clash/l10n/l10n.dart';
 import 'package:fl_clash/models/models.dart';
+import 'package:fl_clash/providers/mitm.dart';
 import 'package:fl_clash/providers/providers.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/ui/icons/icons.dart';
@@ -742,6 +744,26 @@ class _StatusCard extends ConsumerWidget {
     unawaited(action.installUpdate());
   }
 
+  /// Asks module by module, each as it stands when its turn comes, until the
+  /// card goes or a prompt is dismissed.
+  Future<void> _reviewModules(BuildContext context, WidgetRef ref) async {
+    final ids = [
+      for (final module in ref.read(mitmModulesToAgreeProvider)) module.id,
+    ];
+    for (final id in ids) {
+      if (!context.mounted) {
+        return;
+      }
+      final module = ref
+          .read(mitmModulesToAgreeProvider)
+          .where((item) => item.id == id)
+          .firstOrNull;
+      if (module != null && !await answerMitmModule(ref, module)) {
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = context.colorScheme;
@@ -756,12 +778,14 @@ class _StatusCard extends ConsumerWidget {
             stopDownload: action.cancelUpdateDownload,
             install: () => _install(context, ref),
             discard: () => unawaited(action.discardUpdate()),
+            reviewModules: () => unawaited(_reviewModules(context, ref)),
           )
         : (
             restartCore: _inert,
             stopDownload: _inert,
             install: _inert,
             discard: _inert,
+            reviewModules: _inert,
           );
     final (
       tint,
@@ -776,7 +800,8 @@ class _StatusCard extends ConsumerWidget {
         colorScheme.errorContainer,
         const _CoreHero(CoreStatus.disconnected),
         appLocalizations.coreStopped,
-        appLocalizations.coreStoppedDesc,
+        (status.preview == null ? ref.watch(coreStopReasonProvider) : null) ??
+            appLocalizations.coreStoppedDesc,
         appLocalizations.restartCore,
         effects.restartCore,
         (colorScheme.error, colorScheme.onError),
@@ -816,6 +841,17 @@ class _StatusCard extends ConsumerWidget {
         appLocalizations.installUpdate,
         effects.install,
         (colorScheme.success, colorScheme.onSuccess),
+      ),
+      MitmConsentStatus(:final names) => (
+        colorScheme.warningContainer,
+        _ConsentHero(names: names),
+        appLocalizations.mitmModulesTurnedOff,
+        names.length == 1
+            ? appLocalizations.mitmModuleTurnedOffDesc(names.single)
+            : appLocalizations.mitmModulesTurnedOffDesc(names.length),
+        appLocalizations.view,
+        effects.reviewModules,
+        (colorScheme.warning, colorScheme.onWarning),
       ),
     };
     final ask = switch (_confirmOf(status)) {
@@ -1218,6 +1254,88 @@ class _TicksPainter extends CustomPainter {
       oldDelegate.off != off;
 }
 
+class _BadgeHero extends StatelessWidget {
+  const _BadgeHero({
+    required this.color,
+    required this.glyph,
+    required this.glyphColor,
+    required this.chips,
+    this.fill,
+  });
+
+  final Color color;
+  final Glyph glyph;
+  final Color glyphColor;
+  final double? fill;
+  final List<Widget> chips;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 14,
+          children: [
+            SizedBox.square(
+              dimension: 60,
+              child: DecoratedBox(
+                decoration: ShapeDecoration(
+                  color: color,
+                  shape: AppShape.circle,
+                ),
+                child: Center(
+                  child: GlyphIcon(
+                    glyph,
+                    size: 28,
+                    fill: fill,
+                    color: glyphColor,
+                  ),
+                ),
+              ),
+            ),
+            Row(mainAxisSize: MainAxisSize.min, spacing: 8, children: chips),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroChip extends StatelessWidget {
+  const _HeroChip(this.text, {required this.color, this.emphasized = false});
+
+  final String text;
+  final Color color;
+  final bool emphasized;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    return DecoratedBox(
+      decoration: ShapeDecoration(
+        color: SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme),
+        shape: AppShape.full,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          text,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.footnote
+              .of(context, emphasized: emphasized)
+              .copyWith(
+                color: color,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ReadyHero extends StatelessWidget {
   const _ReadyHero({required this.tag, required this.onDiscard});
 
@@ -1227,68 +1345,28 @@ class _ReadyHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = context.colorScheme;
-    final chipFill = SurfaceLevel.floatingOf(colorScheme).colorOf(colorScheme);
-    Widget chip(String text, {Color? color, bool emphasized = false}) =>
-        DecoratedBox(
-          decoration: ShapeDecoration(color: chipFill, shape: AppShape.full),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-            child: Text(
-              text,
-              style: AppTextStyle.footnote
-                  .of(context, emphasized: emphasized)
-                  .copyWith(
-                    color: color,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                  ),
-            ),
-          ),
-        );
     return Stack(
       children: [
-        Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 14,
-            children: [
-              SizedBox.square(
-                dimension: 60,
-                child: DecoratedBox(
-                  decoration: ShapeDecoration(
-                    color: colorScheme.success,
-                    shape: AppShape.circle,
-                  ),
-                  child: Center(
-                    child: GlyphIcon(
-                      AppGlyphs.check,
-                      size: 28,
-                      color: colorScheme.onSuccess,
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  chip(
-                    globalState.packageInfo.version,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                  GlyphIcon(
-                    AppGlyphs.chevronForward,
-                    size: 16,
-                    color: colorScheme.onSuccessContainer,
-                  ),
-                  chip(
-                    tag.replaceFirst(RegExp('^v'), ''),
-                    color: colorScheme.success,
-                    emphasized: true,
-                  ),
-                ],
-              ),
-            ],
-          ),
+        _BadgeHero(
+          color: colorScheme.success,
+          glyph: AppGlyphs.check,
+          glyphColor: colorScheme.onSuccess,
+          chips: [
+            _HeroChip(
+              globalState.packageInfo.version,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            GlyphIcon(
+              AppGlyphs.chevronForward,
+              size: 16,
+              color: colorScheme.onSuccessContainer,
+            ),
+            _HeroChip(
+              tag.replaceFirst(RegExp('^v'), ''),
+              color: colorScheme.success,
+              emphasized: true,
+            ),
+          ],
         ),
         PositionedDirectional(
           top: 8,
@@ -1299,6 +1377,30 @@ class _ReadyHero extends StatelessWidget {
             onPressed: onDiscard,
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _ConsentHero extends StatelessWidget {
+  const _ConsentHero({required this.names});
+
+  static const _shownNames = 2;
+
+  final List<String> names;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.colorScheme;
+    final rest = names.length - _shownNames;
+    return _BadgeHero(
+      color: colorScheme.warning,
+      glyph: AppGlyphs.puzzle,
+      glyphColor: colorScheme.onWarning,
+      fill: 1,
+      chips: [
+        for (final text in [...names.take(_shownNames), if (rest > 0) '+$rest'])
+          Flexible(child: _HeroChip(text, color: colorScheme.onSurfaceVariant)),
       ],
     );
   }

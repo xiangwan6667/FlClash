@@ -98,7 +98,7 @@ as in `48 dp`, never px: a reader takes px for physical pixels and misjudges the
 and `test/`.
 
 CI gates formatting: `dart format --output=none --set-exit-if-changed lib test
-tool plugins setup.dart` runs before `flutter analyze`.
+tool plugins` runs before `flutter analyze`.
 
 These directories are excluded from analysis:
 
@@ -660,15 +660,14 @@ Install the hooks once with `pre-commit install --hook-type pre-commit --hook-ty
 
 ### Fixup Commits
 
-A follow-up to a change that has not shipped in a stable release goes in as `git commit --fixup=<target>`, aimed at the
-commit that introduced what it amends.
+A follow-up lands as a regular commit. Create a `fixup!` commit only when the user asks for one, aimed at the commit
+that introduced what it amends.
 
 - Only stable tags (`vX.Y.Z`) close a commit. A target reached only by pre-release tags (`vX.Y.Z-pre.N`) is still open
-  for fixups, so do not steer away from it or flag it.
-- A commit a stable tag contains takes no fixup; land the follow-up as a regular commit. Check with
+  for fixups. A commit a stable tag contains takes no fixup, even on request; check with
   `git tag --contains <target> | grep -v -- '-pre'`, which must print nothing.
-- Asking for a fixup means creating the `fixup!` commit only. Do not run `git rebase --autosquash` or otherwise fold it
-  into its target unless the user asks for the squash.
+- Asking for a fixup means creating the `fixup!` commit only. Do not run `git rebase --autosquash`, amend, or otherwise
+  fold it into its target unless the user asks for the squash.
 
 ### Changelog Trailers
 
@@ -713,6 +712,16 @@ while `schemaVersion` at the last release tag is below its number; a schema chan
 step of its own. Every operation in it checks the shape it finds, a missing table or column or a column under its old
 name, so it can run again on a database that went through part of it. Its tests start from the released shape.
 
+## rsFeature
+
+`rsFeature` (`lib/common/constant.dart`) keeps off what only the rs line's Concord core serves, such as MITM. The rs
+line does not turn it on: `tool/strip_rs_feature.dart` removes every check, so a check takes one of three forms,
+`if (rsFeature) element` in a collection, `rsFeature && x`, or `if (rsFeature) { ... }` with no else. Anything else,
+a negation or an else branch included, fails `test/lint/rs_feature_forms_test.dart`. Only a feature dev does not have
+otherwise goes behind it; code that replaces something dev already has stays on the rs line. A test that needs the
+feature on runs inside `if (rsFeature) { ... }`. `make strip-check`, which CI runs, strips a scratch copy and analyzes
+it.
+
 ## Generated Code
 
 Do not manually edit generated files under:
@@ -746,7 +755,7 @@ versions still resolves to it.
 
 Labels for enum values go through the exhaustive switches in `lib/common/l10n_labels.dart`, never
 `Intl.message(<runtime string>)`. A key built from an enum name or a stored string is invisible to the analyzer, and
-`Intl.message` has no messages to look up since generation moved to `gen-l10n`, so it returns the key itself and ships
+`Intl.message` has no messages to look up under `gen-l10n`, so it returns the key itself and ships
 `routeMode_config` in the UI rather than throwing.
 `test/lint/dynamic_message_key_test.dart` fails on any `Intl.message(` in `lib` outside the generated code, and checks
 that every locale carries the same keys and has a display name.

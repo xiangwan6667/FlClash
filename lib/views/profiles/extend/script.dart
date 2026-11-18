@@ -25,39 +25,27 @@ class ScriptContent extends ConsumerWidget {
       for (final script in ref.watch(scriptsProvider).value ?? const [])
         script.id: script.label,
     };
-    return SliverMainAxisGroup(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          sliver: SliverToBoxAdapter(
-            child: generateSection(
-              title: appLocalizations.script,
-              items: [
-                ListItem<int?>.options(
-                  title: Text(appLocalizations.extendScript),
-                  options: [null, ...labels.keys],
-                  sectionStarts: {...labels.keys.take(1)},
-                  value: labels.containsKey(scriptId) ? scriptId : null,
-                  textBuilder: (id) => labels[id] ?? appLocalizations.none,
-                  onChanged: (id) => _handleChange(ref, profileId, id),
-                ),
-              ],
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverToBoxAdapter(
+        child: generateSection(
+          title: appLocalizations.script,
+          items: [
+            ListItem<int?>.options(
+              title: Text(appLocalizations.extendScript),
+              options: [null, ...labels.keys],
+              sectionStarts: {...labels.keys.take(1)},
+              value: labels.containsKey(scriptId) ? scriptId : null,
+              textBuilder: (id) => labels[id] ?? appLocalizations.none,
+              onChanged: (id) => _handleChange(ref, profileId, id),
             ),
-          ),
+            ListItem.open(
+              title: Text(appLocalizations.goToConfigureScript),
+              widget: const ScriptsView(),
+            ),
+          ],
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 16)),
-        SliverToBoxAdapter(
-          child: MoreActionButton(
-            label: appLocalizations.goToConfigureScript,
-            onPressed: () {
-              showNestedSheet<void>(
-                context,
-                builder: (_) => const ScriptsView(),
-              );
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

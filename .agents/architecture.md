@@ -156,7 +156,7 @@ an editable row, which refuses an empty value.
 The loopback listener takes local connections without authentication by default: mandatory credentials would lock out
 every external local consumer a proxy client exists for. The binding only guarantees traffic originates on the device;
 it does not isolate programs already running there, so on Android any app holding `INTERNET` can use the proxy and learn
-the outbound IP (#1934). The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
+the outbound IP. The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
 four paths that must stay in sync: `_makeRealProfileTask` writes the credentials into `authentication` and force-clears
 `skip-auth-prefixes` so a profile cannot silently exempt loopback; `UpdateParams.authentication` applies the same list
 to a running core; `FlClashHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
@@ -225,8 +225,8 @@ re-applies the profile; keep-alive is forced off on Android, and only Linux hono
 The bundled core has no MITM: it stays private, on `feature/mitm` in FlClash-internal and `feature/mitm-latest` in
 Clash.Meta-internal, with the architecture notes of that version. The core keeps the `mitm.*` method names and answers
 them `not_implemented`, and `SetMitmPressure` does nothing. The app keeps its pages, modules and trust stores behind
-`mitmFeature` (`FEATURE_MITM`, off by default), which closes every entry and sends the core no modules or capture.
-Turn it on only with a core that has MITM.
+`rsFeature`, a const that is false here and that the rs line strips instead of turning on, so it closes every entry
+and sends the core no modules or capture. Tests that need MITM on run inside `if (rsFeature) { ... }`.
 
 Consent to a module's scripts covers `mitmScriptScope`: every line declaring a script, as written, and every line run
 now, which names its script by a hash of the content. An update that adds to that scope turns the module off until the
@@ -320,7 +320,7 @@ Android deliberately keeps Flutter requests optimistic and the native layer auth
 - The Core listens exactly while `runtime` is set: a successful start ends in `Core.startListener()` and every path
   that clears `runtime` calls `Core.stopListener()`. Both return at once when the Core is already there, which is the
   usual case, since `startTun`/`stopTun` and Flutter's own `startListener`/`stopListener` got there first. They matter
-  when nothing else does: a proxy-only run stopped from the tile used to keep the mixed port open with nothing
+  when nothing else does: without them a proxy-only run stopped from the tile keeps the mixed port open with nothing
   reported as running. A start closes after itself the same way: Flutter's `startListener` and the native `quickSetup`
   both open the ports before any service exists, so a start that ends without a `runtime`, refused or cancelled, stops
   the empty service once more, without passing through `STOPPING`. Flutter may be gone by then and never see the
@@ -519,7 +519,7 @@ force or is being asked again. The mechanism has three parts.
   come in bursts: a network switch reports more than once, and a launch applies the config and starts the
   listeners back to back. A new route version keeps every answer on show and sends their hits to `checkRoutes` in
   one call, at once for the first move and, for the moves that follow within `probeSettleDuration`, together when
-  it ends, so groups re-picking on neighbouring pick polls cost one check more; only an answer whose exit moved is
+  it ends, so groups re-picking moments apart cost one check more; only an answer whose exit moved is
   dropped and asked again, and one that held takes the checked version. An answer that lands under an older version
   than the state is held back as checking until its own check returns, so it never shows and then flips. An ask
   that is not the user's or a reset's waits out `probeThrottleDuration` since the target's last probe, so a config
@@ -674,7 +674,8 @@ select all included. Two text buttons are filled buttons in `actions`: the custo
 multi-selection, such as delete and select all, go into `selectionActions` instead: the bar keeps them in sight as
 one button group that takes a single slot beside the search button, so they never fold. A sheet's close button
 always leads its bar, whatever actions follow, as SwiftUI places a close in `.cancellationAction`; a pushed page puts
-its back button there instead.
+its back button there instead. A report of the page's state, such as the dashboard's config warnings count, goes in
+`statusActions`, which stand before every button and never fold, so an action such as edit keeps the bar's end.
 
 The search button opens its field in place, as iOS 27 does on a page above a tab bar, measured in the simulator: the
 button's group grows into the field on one spring while what it covers fades out, and the selection and
@@ -776,9 +777,9 @@ over it, as iOS's does, and lets go 0.2 s after the change, as LiquidGlassKit's 
   5.7 pixels from a copy shrunk to what the layer covers, so a band clears all of its rect before its slots draw: when
   it covered only its content, a slot growing or shrinking by a pixel as its pane moved, or one cut off by the screen's
   edge, shrank that copy by other than half, and at density 3 the docked search's standard frost jumped by 1.5/255 every
-  1.3 dp it moved. Each picture also lands on a whole pixel of the capture, as text rounds each line to one: a list
-  under the glass moving by part of a pixel jumped its lines one at a time while their rows glided, and the frost
-  shimmered every frame (up to 3.6/255 at density 2), where now it steps once a pixel of the capture, by under 0.7.
+  1.3 dp it moved. Each picture also lands on a whole pixel of the capture, as text rounds each line to one: otherwise a
+  list under the glass moving by part of a pixel jumps its lines one at a time while their rows glide, and the frost
+  shimmers every frame (up to 3.6/255 at density 2); rounded, it steps once a pixel of the capture, by under 0.7.
 - Measured on an Android emulator rendering in software (SwiftShader, 1080×2400 at density 420), as raster-thread time a
   frame counting the captures that FrameTiming's raster span leaves out, median of three runs, each capture against
   none in a run of its own: scrolling Tools takes 43 ms with none, 6 more with a sigma over one pixel of the capture and
@@ -1057,10 +1058,14 @@ in `lib/views/config/network.dart` and `_appSettingToggle` in `lib/views/config/
 second provider write — stay hand-written rather than growing extra parameters on the shared items.
 
 In an inset grouped list (`generateSection`, `generateAnimatedSection`), a row's subtitle shows its value or state,
-never what the setting does. As iOS settings do, the explanation goes in the group's `footer`, drawn by `ListFooter`,
-one sentence per setting that names it. A section header carries its title, set as iOS 27 sets a grouped list's header
-in `headline` and the footer's `onSurfaceVariant`, and at most a few actions on the group, as
-`IconButtonData`: `ListHeader` draws them as 36 dp tonal buttons (`TonalButtonSize.section`), the first two grouped,
+never what the setting does, and holds one piece of information: two facts are never joined into one subtitle with
+`·`. Most groups have no `footer`. A footer, when a group has one, is drawn by `ListFooter` and holds only what the
+row cannot say and what changes the outcome, one sentence per setting that names it, such as a platform limit; a
+note that depends on a state shows only in that state, and steps to install or do something belong in the dialog
+that starts them. A list or map edit page is the exception: its description says what to enter and when it takes
+effect. A section header carries its title, set as iOS 27 sets a grouped list's header in `headline` and the
+footer's `onSurfaceVariant`, and at most a few actions on the group, as `IconButtonData`: `ListHeader` draws them as
+36 dp tonal buttons (`TonalButtonSize.section`), the first two grouped,
 centered on the title. Every header stands as tall as one with a button, 6 dp clear of the group below, so headers
 match whether or not they carry actions. A group with a selection swaps them
 for delete and select all, never a text button. `generateSection` is the only section builder, and a sheet lays its groups inside the 16 dp inset the pages use.
@@ -1082,6 +1087,10 @@ control shows its value with `PopupValueText`, which blurs across to the new val
 width. A menu opened at a point, as a context menu or the editor's is, runs its pick at once. A menu capped by
 `maxVisibleItems`, such as the proxy group tabs' more menu with every group in it, builds only the rows in view and
 takes its width from its labels measured as `EmojiText` lays them out.
+
+Copy calls a proxy a proxy (`Proxy`, 代理) everywhere except the members of a custom profile's proxy group, the one
+place it says node (`Node`, 节点): the member list and the picker its add entry opens. A key names one concept in
+every locale, and a key two contexts share is split into two.
 
 ## Forms
 
@@ -1158,6 +1167,9 @@ the overlay or the whole section with them on every frame. `test/widgets/route_t
 `SnapSheetRoute` follows `UISheetPresentationController` as measured on the iOS 27 simulator (a UIKit probe app driven
 by the simulator's touch injection, logging the presented view's presentation layer every frame).
 
+- A sheet rests at 9/16 of the view and drags up to 0.9 (`snapSheetDetents` in `prism_ui/lib/snap_sheet.dart`), or
+  fits content shorter than that. A sheet that needs other heights passes `SheetProps(detents: ...)` where it is
+  shown, never a fixed `SizedBox` or `ConstrainedBox` inside its content.
 - One spring moves a sheet: UIKit's mass 3, stiffness 1000, which runs critically damped (ω ≈ 18.26 rad/s, done in
   about 0.5 s). Presenting, closing, a detent change and a spring back all trace it within a point. A release thrown
   toward its target keeps its velocity and lands with UIKit's slight overshoot, about damping ratio 0.8 at full
@@ -1176,7 +1188,7 @@ by the simulator's touch injection, logging the presented view's presentation la
 - Where the keyboard starts or stops carrying the sheet, that function rounds its corner (`_rounded`), so the sheet's
   speed changes smoothly. With a sharp corner a sheet stood still while the keyboard slid over the blank below short
   content and then jumped, and on the way down halted in mid-flight; the tallest detent hit the peek at the keyboard's
-  full speed. Short content now eases into the rise over half its blank, which can leave the sheet up to an eighth of
+  full speed. Short content instead eases into the rise over half its blank, which can leave the sheet up to an eighth of
   the blank higher than its content needs, and the tallest detent slows into the peek over as much keyboard again as
   it takes to get there, up to `_peakEase`.
 - Below its tallest detent a sheet floats as a card, as iOS 27's medium sheet does: it shrinks about its top to leave
@@ -1211,8 +1223,10 @@ than the frames a load costs. What a transition must not carry is work that repe
   without an image, so a grid of placeholders is never painted only to be replaced. `whenRouteSettled`
   (`prism_ui/lib/navigator.dart`) is left for sequencing navigation, such as opening a page once the sheet above it is gone.
 - Two views arrive after the motion. `EditorPage` keeps the document it opened until its route has settled and only
-  then mounts CodeForge, showing a spinner only if the file is still being read: the mount lays out, folds and
-  highlights a screen of text in one frame, which a phone cannot fit in a transition frame whatever the file's size.
+  then mounts CodeForge, sliding in with its spinner until then: the mount lays out, folds and highlights a screen of
+  text in one frame, which a phone cannot fit in a transition frame whatever the file's size. The spinner, with no
+  surface behind it, leaves in the frame the text mounts rather than fading: a fade there runs over the bar items
+  fading in after the route settles, and on a phone at 120 Hz the two together overran a frame.
   `AccessView` reads the installed apps only once its route has settled and its bar items have faded in
   (`whenNothingAnimates`, not counting its own spinner), and slides in with that spinner when this run has not read
   them yet (`NullStatusSwitcher` with `holdsArrival: false`): the read can outlast `arrivalHoldLimit`, and a list of
@@ -1649,9 +1663,8 @@ that asks the OS for a permission, a global shortcut or a registration, must con
 
 ## Build System
 
-`setup.dart` is the release build orchestrator: it writes `env.json` (`APP_ENV`), activates `flutter_distributor` from
-the `chen08209/flutter_distributor` fork pinned to a `v<version>-flclash.<n>` tag (cut a new tag there and bump
-`--git-ref` when the fork changes), and leaves the Core artifacts to the build hook.
+`tool/package.dart` is the release build orchestrator (see Packaging below): it writes `env.json` (`APP_ENV`), runs
+`flutter build`, and leaves the Core artifacts to the build hook.
 
 The desktop Go core and the Rust helper are built by a Dart build hook; Android's Core is built by Gradle (see Android
 Core Build). `plugins/setup/hook/build.dart` only constructs
@@ -1669,7 +1682,7 @@ What the hook protocol forces:
 - The hook does not know the build mode: the protocol carries none and `linkingEnabled` only says whether link hooks
   run, so nothing in the hook branches on debug versus release. It cannot tell `flutter test` from a build either; the
   `build_assets: false` user-define in the root `pubspec.yaml` is the one switch (see `.agents/commands.md`), and
-  `setup.dart` refuses to package while it is set.
+  `tool/package.dart` refuses to package while it is set.
 - The hook declares the files it read but the *directories* it wrote: `hooks_runner` hashes a file by content and a
   directory by child names, so `libclash/macos/` catches a deleted artifact without MD5-ing a 55 MB Core on every
   build. A rebuild touches those directories after the runner's cutoff, so the next build runs the hook once more and
@@ -1753,7 +1766,30 @@ its version only from its own CI, so the fork alone reports the placeholder `1.1
 user agents; `GoBuilder` passes the value as `-X github.com/metacubex/mihomo/constant.Version=...` for every build,
 local and CI alike. Bump it whenever the submodule moves onto a new upstream release.
 
-Architecture detection is automatic. The `--description` flag passed to `flutter_distributor` adds arch suffixes to artifact names, such as `FlClash-0.8.93-macos-arm64.dmg`.
+### Packaging
+
+`tool/package.dart` (sources in `tool/src/package/`) replaced the forked `flutter_distributor`. It runs one
+`flutter build` per platform, then the native tool of each format: Inno Setup's `ISCC` for the installer, `appdmg`,
+`dpkg-deb`, `rpmbuild` and `appimagetool`; the portable zip is written in Dart. `--dry-run` prints every artifact name
+and step without building, for any platform.
+
+- Inputs stay per format in `<os>/packaging/<format>/make_config.yaml`; the packager reads only the keys it uses. The
+  Linux binary name and window class come from `BINARY_NAME` and `APPLICATION_ID` in `linux/CMakeLists.txt`.
+  `windows/packaging/exe/inno_setup.iss` takes `{{NAME}}` placeholders, filled by `innoVariables`, and nothing else.
+- Names come from `releaseAssetName` in `lib/common/release_asset.dart`, which the in-app updater also uses:
+  `FlClash-<line>-<version>-<os>-<arch>[-<form>].<ext>`. The line is `rs` when `build_config.yaml` names
+  `concord_dir` and `dev` when it names `core_dir`, whatever the branch. The version is the `v*` tag on `HEAD` without
+  its `v` and with `+` turned into `.` (GitHub rewrites `+` in asset names), else `<pubspec version>-nightly.<commit
+  date>.<sha7>`. The form is `setup` or `portable` on Windows and absent elsewhere.
+- Each run writes `dist/manifest.json` and `FlClash-<line>-<version>-SHA256SUMS`. The release job merges the
+  per-platform runs with `dart run tool/package.dart merge`, and its release notes, Homebrew cask and F-Droid copy
+  read names from the merged manifest. For the `dev` line it also uploads the Windows installers and APKs under their
+  old names plus a `SHA256SUMS`, which apps released before these names still fetch.
+- Kept from the fork's patches: package trees normalized to 0755/0644 before `dpkg-deb`, `rpmbuild` and
+  `appimagetool` (see Linux Helper below); `dpkg-deb -Zxz`, because the dpkg of UOS and other Debian derivatives
+  cannot unpack Ubuntu's default zstd; `StartupWMClass` in every desktop entry; an `AppRun` that passes its arguments
+  on and appends to `LD_LIBRARY_PATH`; and an AppImage that leaves `libstdc++`, glibc, the GL stack and the other
+  libraries in `appImageSystemLibraries` to the host, since a bundled `libstdc++` older than the host's breaks Mesa.
 
 #### Android Core Build
 
@@ -2105,7 +2141,7 @@ shows its unavailable state when `RustLib` is not initialized rather than loadin
 returns the JSON the script produced. Nothing about the script runs in Dart.
 
 - QuickJS is compiled from source for the target being built, which is what removed the prebuilt `quickjs-c-bridge`
-  binaries: `flutter_js` shipped x64 Windows and desktop-only libraries, so Windows ARM64 could not start (#2361).
+  binaries: `flutter_js` shipped x64 Windows and desktop-only libraries, so Windows ARM64 could not start.
 - `rquickjs` carries pre-generated bindings for every target this project builds except the Android ones, so Android
   builds enable its `bindgen` feature. That needs the NDK's own libclang and sysroot: `native_toolchain_rust` exports
   the sysroot through `BINDGEN_EXTRA_CLANG_ARGS_<target>`, and `hook/build.dart` adds `LIBCLANG_PATH` from the NDK
@@ -2148,7 +2184,7 @@ password the app asks for and hands to `sudo -S` on stdin. A 126 means the user 
   the socket to. It also refuses a Helper whose binary or directory is not root-owned and non-writable (a unit runs it
   as root at every boot, so an unpacked bundle would be a standing escalation), and refuses to replace a unit already
   installed for a different UID rather than restart the service out from under that account.
-- That ownership check is why the `flutter_distributor` fork normalizes the packaging tree to 0755/0644 before
+- That ownership check is why `tool/package.dart` normalizes the packaging tree to 0755/0644 before
   `dpkg-deb`, `rpmbuild` and `appimagetool` run: they record modes verbatim, and Ubuntu's per-user default umask
   of 002 would otherwise ship `/opt/FlClash` as 0775, which the installer rejects as group-writable.
 - The rpm spec sets `debug_package` and `__os_install_post` to nil for the same reason: rpmbuild's find-debuginfo and

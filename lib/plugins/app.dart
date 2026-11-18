@@ -136,6 +136,45 @@ class App {
     return _packageIconTasks[packageName] ??= _loadPackageIcon(packageName);
   }
 
+  final Map<String, ImageProvider?> _ownPackageIcons = {};
+  final Map<String, Future<ImageProvider?>> _ownPackageIconTasks = {};
+
+  final ownPackageIconsLoaded = ValueNotifier(0);
+
+  ({ImageProvider? icon})? getCachedOwnPackageIcon(String packageName) {
+    if (!_ownPackageIcons.containsKey(packageName)) {
+      return null;
+    }
+    return (icon: _ownPackageIcons[packageName]);
+  }
+
+  Future<ImageProvider?> getOwnPackageIcon(String packageName) {
+    if (_ownPackageIcons.containsKey(packageName)) {
+      return Future.value(_ownPackageIcons[packageName]);
+    }
+    return _ownPackageIconTasks[packageName] ??= _loadOwnPackageIcon(
+      packageName,
+    );
+  }
+
+  // getPackageIconPath answers a package without an icon as it answers ''.
+  Future<ImageProvider?> _loadOwnPackageIcon(String packageName) async {
+    ImageProvider? own;
+    if (packageName.isNotEmpty) {
+      final (icon, fallback) = await (
+        getPackageIcon(packageName),
+        getPackageIcon(''),
+      ).wait;
+      own = icon == fallback ? null : icon;
+    }
+    _ownPackageIcons[packageName] = own;
+    unawaited(_ownPackageIconTasks.remove(packageName));
+    if (own != null) {
+      ownPackageIconsLoaded.value++;
+    }
+    return own;
+  }
+
   Future<ImageProvider?> _loadPackageIcon(String packageName) async {
     var icon = await _requestPackageIcon(packageName);
     if (icon == null && packageName.isNotEmpty) {
@@ -167,6 +206,8 @@ class App {
   void clearPackageIconCache() {
     _packageIcons.clear();
     _packageIconTasks.clear();
+    _ownPackageIcons.clear();
+    _ownPackageIconTasks.clear();
   }
 
   Future<bool?> tip(String? message) async {

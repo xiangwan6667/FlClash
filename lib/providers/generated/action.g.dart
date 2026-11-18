@@ -40,7 +40,7 @@ final class CommonActionProvider extends $NotifierProvider<CommonAction, void> {
   }
 }
 
-String _$commonActionHash() => r'89de98285d0076738573c9cc971ba05421f4fa4a';
+String _$commonActionHash() => r'2b60228192b83336807d2becbd3ce6b989197cd3';
 
 abstract class _$CommonAction extends $Notifier<void> {
   void build();
@@ -91,7 +91,7 @@ final class SetupActionProvider extends $NotifierProvider<SetupAction, void> {
   }
 }
 
-String _$setupActionHash() => r'18ff44174700e1155f9b8e98f0b9d388bf8c13f1';
+String _$setupActionHash() => r'a656f1c5133f11f7b9f67616823bd48ffb0aec72';
 
 abstract class _$SetupAction extends $Notifier<void> {
   void build();
@@ -142,7 +142,7 @@ final class BackupActionProvider extends $NotifierProvider<BackupAction, void> {
   }
 }
 
-String _$backupActionHash() => r'99b508bc48b5717dd2bf7f5da189f81944f37643';
+String _$backupActionHash() => r'83094fb976853502a7c4003ea00a01f86b1f876e';
 
 abstract class _$BackupAction extends $Notifier<void> {
   void build();
@@ -193,7 +193,7 @@ final class CoreActionProvider extends $NotifierProvider<CoreAction, void> {
   }
 }
 
-String _$coreActionHash() => r'942a3b5732a4bf200f8e7d685fb5d6e37c01af9f';
+String _$coreActionHash() => r'402f35753a76e704696838d1f907556c2fec6c1f';
 
 abstract class _$CoreAction extends $Notifier<void> {
   void build();
@@ -450,7 +450,7 @@ final class ProfilesActionProvider
   }
 }
 
-String _$profilesActionHash() => r'd8a34d545b8191c46b1cff11a00ee5f33a7c2f8c';
+String _$profilesActionHash() => r'858cdf92276872e2a4772c4b55f4747690c2be8f';
 
 abstract class _$ProfilesAction extends $Notifier<void> {
   void build();
@@ -554,7 +554,7 @@ final class MitmModulesActionProvider
   }
 }
 
-String _$mitmModulesActionHash() => r'99278008215d7cbe518bc879470ce01920fea82f';
+String _$mitmModulesActionHash() => r'74c01a53bc54860dc52bb599e6b9ce14f783857c';
 
 abstract class _$MitmModulesAction extends $Notifier<void> {
   void build();
@@ -763,7 +763,7 @@ final class ResourcesActionProvider
   }
 }
 
-String _$resourcesActionHash() => r'1d35501f1e3d2306e58da6b1759cb5d86c5de529';
+String _$resourcesActionHash() => r'de9d405a1a9f18f14fcab06bc048e1f804a1e338';
 
 abstract class _$ResourcesAction extends $Notifier<void> {
   void build();

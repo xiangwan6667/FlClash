@@ -1134,11 +1134,11 @@ abstract class AppLocalizations {
   /// **'Recent requests'**
   String get recentRequests;
 
-  /// No description provided for @findProcessMode.
+  /// No description provided for @alwaysFindProcess.
   ///
   /// In en, this message translates to:
-  /// **'Find process'**
-  String get findProcessMode;
+  /// **'Always find process'**
+  String get alwaysFindProcess;
 
   /// No description provided for @init.
   ///
@@ -2520,17 +2520,23 @@ abstract class AppLocalizations {
   /// **'Rule target'**
   String get ruleTarget;
 
-  /// No description provided for @matchTarget.
+  /// No description provided for @exitDefault.
   ///
   /// In en, this message translates to:
-  /// **'MATCH-TARGET'**
-  String get matchTarget;
+  /// **'Default'**
+  String get exitDefault;
 
-  /// No description provided for @followProfile.
+  /// No description provided for @customExit.
   ///
   /// In en, this message translates to:
-  /// **'Follow profile'**
-  String get followProfile;
+  /// **'Custom exit'**
+  String get customExit;
+
+  /// No description provided for @inputExitName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the exit name'**
+  String get inputExitName;
 
   /// No description provided for @scriptFailed.
   ///
@@ -6000,12 +6006,6 @@ abstract class AppLocalizations {
   /// **'FlClash will be able to read everything sent to the decrypted hosts, cookies and passwords included. Turn this on only for hosts you mean to rewrite.'**
   String get mitmEnableTip;
 
-  /// No description provided for @certificate.
-  ///
-  /// In en, this message translates to:
-  /// **'Certificate'**
-  String get certificate;
-
   /// No description provided for @generateCertificate.
   ///
   /// In en, this message translates to:
@@ -6078,17 +6078,17 @@ abstract class AppLocalizations {
   /// **'Checking…'**
   String get mitmTrustChecking;
 
-  /// No description provided for @trustCertificate.
-  ///
-  /// In en, this message translates to:
-  /// **'Trust certificate'**
-  String get trustCertificate;
-
   /// No description provided for @mitmCertificateAndroidReadyTip.
   ///
   /// In en, this message translates to:
   /// **'Only apps that trust user certificates, mostly browsers, are decrypted.'**
   String get mitmCertificateAndroidReadyTip;
+
+  /// No description provided for @mitmAndroidRootDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Without root, only apps that trust user certificates, mostly browsers, can be decrypted. With root, every app can.'**
+  String get mitmAndroidRootDesc;
 
   /// No description provided for @mitmCertificateLinuxTip.
   ///
@@ -6107,6 +6107,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not yet in: {stores}'**
   String mitmMissingStores(Object stores);
+
+  /// No description provided for @httpRequestsReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the requests'**
+  String get httpRequestsReadFailed;
+
+  /// No description provided for @requestBodyReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the request body'**
+  String get requestBodyReadFailed;
+
+  /// No description provided for @responseBodyReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the response body'**
+  String get responseBodyReadFailed;
+
+  /// No description provided for @mitmGrpcOverLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Inflates past {size} MB; shown compressed'**
+  String mitmGrpcOverLimit(Object size);
+
+  /// No description provided for @mitmUntrustedStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed but not trusted in: {stores}'**
+  String mitmUntrustedStores(Object stores);
 
   /// No description provided for @mitmSystemStoreFailed.
   ///
@@ -6168,6 +6198,48 @@ abstract class AppLocalizations {
   /// **'The old certificate, {name}, is still among the system\'s trusted CAs. Allow FlClash root access in your root manager and regenerate, or remove the FlClash MITM CA module there and restart.'**
   String mitmOldSystemCertificateLeftTip(Object name);
 
+  /// No description provided for @removeCertificate.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove certificate'**
+  String get removeCertificate;
+
+  /// No description provided for @removeCertificateSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate removed'**
+  String get removeCertificateSuccess;
+
+  /// No description provided for @mitmSystemStoreRemoveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Removing the certificate from the system\'s trusted roots failed'**
+  String get mitmSystemStoreRemoveFailed;
+
+  /// No description provided for @mitmRemoveInSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove in Settings'**
+  String get mitmRemoveInSettings;
+
+  /// No description provided for @mitmRemoveUserCertificateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Android doesn\'t let apps remove user certificates. Remove {name} in Settings under Security › Encryption & credentials › Trusted credentials › User.'**
+  String mitmRemoveUserCertificateTip(Object name);
+
+  /// No description provided for @mitmCannotRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t remove'**
+  String get mitmCannotRemove;
+
+  /// No description provided for @mitmRemoveSystemCertificateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The FlClash MITM CA root module added the certificate to the system. Allow FlClash root access in your root manager and try again, or remove the module there and restart.'**
+  String get mitmRemoveSystemCertificateTip;
+
   /// No description provided for @mitmDecryptHost.
   ///
   /// In en, this message translates to:
@@ -6222,11 +6294,23 @@ abstract class AppLocalizations {
   /// **'Map local'**
   String get mapLocal;
 
-  /// No description provided for @mitmHostnameDesc.
+  /// No description provided for @requestBodyMock.
   ///
   /// In en, this message translates to:
-  /// **'A leading - excludes a host, and the first match decides.'**
-  String get mitmHostnameDesc;
+  /// **'Request body mock'**
+  String get requestBodyMock;
+
+  /// No description provided for @clientSourceAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Client addresses'**
+  String get clientSourceAddress;
+
+  /// No description provided for @skipVerifyHostname.
+  ///
+  /// In en, this message translates to:
+  /// **'Hosts without certificate checks'**
+  String get skipVerifyHostname;
 
   /// No description provided for @mitmModules.
   ///
@@ -6270,11 +6354,95 @@ abstract class AppLocalizations {
   /// **'Routing rules go in front of the profile’s own.'**
   String get mitmModuleRulesDesc;
 
+  /// No description provided for @mitmRequestRulesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The module’s URL-REGEX and USER-AGENT rules became URL rewrites, judged request by request: on every plain HTTP request, and on HTTPS only for hosts in the MITM hostname list.'**
+  String get mitmRequestRulesDesc;
+
   /// No description provided for @mitmModuleSystemTip.
   ///
   /// In en, this message translates to:
   /// **'Written for {system}; some lines may not match apps on this device.'**
   String mitmModuleSystemTip(Object system);
+
+  /// No description provided for @mitmModuleRequirementTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The module requires {requirement}, which this device does not meet; it may not work as intended.'**
+  String mitmModuleRequirementTip(Object requirement);
+
+  /// No description provided for @mitmExitModules.
+  ///
+  /// In en, this message translates to:
+  /// **'From modules: {modules}'**
+  String mitmExitModules(Object modules);
+
+  /// No description provided for @mitmModuleRiskTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on this module?'**
+  String get mitmModuleRiskTitle;
+
+  /// No description provided for @mitmNetworkRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'When the config is generated, it changes the network settings below, ahead of what you set for the same ones in FlClash. Turning the module off or deleting it undoes this.'**
+  String get mitmNetworkRisk;
+
+  /// No description provided for @mitmSkipVerifyRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Turning it on stops checking the certificates of these hosts\' servers, so a server posing as one of them goes unnoticed: {hosts}'**
+  String mitmSkipVerifyRisk(Object hosts);
+
+  /// No description provided for @mitmClientSourceRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'It decrypts only for these clients: {addresses}. With TUN on, this device\'s apps reach FlClash from the TUN\'s address, so they may be left out.'**
+  String mitmClientSourceRisk(Object addresses);
+
+  /// No description provided for @mitmClientSourceTunTip.
+  ///
+  /// In en, this message translates to:
+  /// **'With TUN on, this device\'s apps come from the TUN\'s address; a list that leaves it out leaves their traffic undecrypted.'**
+  String get mitmClientSourceTunTip;
+
+  /// No description provided for @mitmNetworkChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Network settings'**
+  String get mitmNetworkChanges;
+
+  /// No description provided for @mitmChangeReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced with {values}'**
+  String mitmChangeReplace(Object values);
+
+  /// No description provided for @mitmChangeInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {values} first'**
+  String mitmChangeInsert(Object values);
+
+  /// No description provided for @mitmChangeAppend.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds {values}'**
+  String mitmChangeAppend(Object values);
+
+  /// No description provided for @mitmChangeOverridesYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Goes over your setting'**
+  String get mitmChangeOverridesYours;
+
+  /// No description provided for @mitmChangeReplacedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Overridden by the module {module}'**
+  String mitmChangeReplacedBy(Object module);
 
   /// No description provided for @mitmSkipSection.
   ///
@@ -6300,35 +6468,65 @@ abstract class AppLocalizations {
   /// **'This rule type is not supported'**
   String get mitmSkipRule;
 
-  /// No description provided for @mitmSkipPolicy.
+  /// No description provided for @mitmSkipHttpRulePolicy.
   ///
   /// In en, this message translates to:
-  /// **'Only the DIRECT and REJECT policies are supported'**
-  String get mitmSkipPolicy;
+  /// **'URL-REGEX and USER-AGENT rules only take a REJECT policy'**
+  String get mitmSkipHttpRulePolicy;
 
-  /// No description provided for @mitmSkipJq.
+  /// No description provided for @mitmSkipFinalRule.
   ///
   /// In en, this message translates to:
-  /// **'jq rewrites are not supported'**
-  String get mitmSkipJq;
+  /// **'Module rules go first, so a final rule would hide every rule after it'**
+  String get mitmSkipFinalRule;
 
-  /// No description provided for @mitmSkipJsonBody.
+  /// No description provided for @mitmSkipDeviceRule.
   ///
   /// In en, this message translates to:
-  /// **'JSON body rewrites are not supported'**
-  String get mitmSkipJsonBody;
+  /// **'This rule needs device or network details FlClash cannot read'**
+  String get mitmSkipDeviceRule;
 
-  /// No description provided for @mitmSkipRawHeader.
+  /// No description provided for @mitmSkipRequirement.
   ///
   /// In en, this message translates to:
-  /// **'Rewriting all headers as one text is not supported'**
-  String get mitmSkipRawHeader;
+  /// **'This line’s requirement is not met on this device'**
+  String get mitmSkipRequirement;
+
+  /// No description provided for @mitmSkipManagedCa.
+  ///
+  /// In en, this message translates to:
+  /// **'FlClash manages the CA certificate; a module cannot change it'**
+  String get mitmSkipManagedCa;
+
+  /// No description provided for @mitmSkipProxies.
+  ///
+  /// In en, this message translates to:
+  /// **'A module cannot change proxies or proxy groups'**
+  String get mitmSkipProxies;
+
+  /// No description provided for @mitmSkipAppOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'A feature of the app this was written for that FlClash does not have'**
+  String get mitmSkipAppOnly;
+
+  /// No description provided for @mitmSkipReflect.
+  ///
+  /// In en, this message translates to:
+  /// **'FlClash cannot send packets back to their sender'**
+  String get mitmSkipReflect;
 
   /// No description provided for @mitmSkipConditional.
   ///
   /// In en, this message translates to:
   /// **'Conditional rewrites are not supported'**
   String get mitmSkipConditional;
+
+  /// No description provided for @mitmSkipSkipVerifyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate checks are not turned off for every host'**
+  String get mitmSkipSkipVerifyAll;
 
   /// No description provided for @mitmSkipRelativeData.
   ///
@@ -6396,6 +6594,30 @@ abstract class AppLocalizations {
   /// **'Run now'**
   String get mitmRunScript;
 
+  /// No description provided for @mitmScriptCron.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get mitmScriptCron;
+
+  /// No description provided for @mitmScriptEvent.
+  ///
+  /// In en, this message translates to:
+  /// **'Event'**
+  String get mitmScriptEvent;
+
+  /// No description provided for @mitmScriptGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Generic'**
+  String get mitmScriptGeneric;
+
+  /// No description provided for @mitmExcluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded'**
+  String get mitmExcluded;
+
   /// No description provided for @mitmScriptNoOutput.
   ///
   /// In en, this message translates to:
@@ -6408,17 +6630,35 @@ abstract class AppLocalizations {
   /// **'Run this module\'s scripts?'**
   String get mitmScriptRiskTitle;
 
+  /// No description provided for @mitmModulesTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Modules turned off'**
+  String get mitmModulesTurnedOff;
+
+  /// No description provided for @mitmModuleTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'An update to {name} brought scripts or network changes you have not agreed to'**
+  String mitmModuleTurnedOffDesc(Object name);
+
+  /// No description provided for @mitmModulesTurnedOffDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, other{{count} modules got updates with scripts or network changes you have not agreed to}}'**
+  String mitmModulesTurnedOffDesc(num count);
+
   /// No description provided for @mitmScriptRisk.
   ///
   /// In en, this message translates to:
-  /// **'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from.'**
+  /// **'Its scripts read and change the traffic of the hosts they match, cookies and tokens included, and can send requests of their own. Turn it on only if you trust where it comes from. Once on, its updates take effect without asking again.'**
   String get mitmScriptRisk;
 
-  /// No description provided for @mitmModuleScriptsChanged.
+  /// No description provided for @mitmModuleUnreadableRisk.
   ///
   /// In en, this message translates to:
-  /// **'{name} changed its scripts and was turned off'**
-  String mitmModuleScriptsChanged(Object name);
+  /// **'The module file could not be read, so what it changes is unknown. Turn it on only if you trust where it comes from.'**
+  String get mitmModuleUnreadableRisk;
 
   /// No description provided for @skipServerCertVerify.
   ///
@@ -6636,6 +6876,18 @@ abstract class AppLocalizations {
   /// **'The app lost its connection to the core'**
   String get coreStoppedDesc;
 
+  /// No description provided for @coreStoppedWithReason.
+  ///
+  /// In en, this message translates to:
+  /// **'The app lost its connection to the core: {reason}'**
+  String coreStoppedWithReason(Object reason);
+
+  /// No description provided for @mixedPortReset.
+  ///
+  /// In en, this message translates to:
+  /// **'The mixed port cannot be {value}, so it was set back to {port}'**
+  String mixedPortReset(Object value, Object port);
+
   /// No description provided for @restartCore.
   ///
   /// In en, this message translates to:
@@ -6683,6 +6935,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Force restart'**
   String get forceRestartCore;
+
+  /// No description provided for @vpnPermissionNotGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'VPN permission was not granted, so the VPN did not start. An always-on VPN set for another app also blocks it.'**
+  String get vpnPermissionNotGranted;
+
+  /// No description provided for @vpnServiceStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The VPN service could not start.'**
+  String get vpnServiceStartFailed;
 }
 
 class _AppLocalizationsDelegate

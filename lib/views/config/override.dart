@@ -213,10 +213,12 @@ class OptionsOverrideField<M, T extends Object>
     super.select,
     super.update, {
     this.labelOf = _nameOf,
+    this.available,
   });
 
   final List<T> options;
   final String Function(T value) labelOf;
+  final ProviderListenable<bool Function(T option)>? available;
 
   static String _nameOf(Object value) => value is Enum ? value.name : '$value';
 
@@ -231,6 +233,7 @@ class OptionsOverrideField<M, T extends Object>
       title: title,
       options: options,
       textBuilder: labelOf,
+      available: available,
       selector: model.selectModel(select),
       onChanged: model.modelWriter(update),
     );
@@ -377,6 +380,10 @@ abstract class OverrideSpec<K extends OverrideKey, M> {
     }
     return (model: model, keys: state.keys.difference(keys));
   }
+
+  /// What of [keys] an enabled MITM module goes over.
+  List<String> notesOf(WidgetRef ref, Iterable<K> keys, AppLocalizations l) =>
+      const [];
 
   String? footerOf(Iterable<K> keys, AppLocalizations l) {
     final lines = [for (final key in keys) ?description(key)?.call(l)];
@@ -590,7 +597,10 @@ class _OverrideList<K extends OverrideKey, M> extends ConsumerWidget {
                 key: ValueKey(title),
                 child: generateAnimatedSection(
                   title: title,
-                  footer: spec.footerOf(keys, appLocalizations),
+                  footer: [
+                    ?spec.footerOf(keys, appLocalizations),
+                    ...spec.notesOf(ref, keys, appLocalizations),
+                  ].join('\n').value,
                   items: [
                     for (final key in keys)
                       OverrideEntry(
@@ -656,6 +666,7 @@ class OverrideSection<K extends OverrideKey, M> extends ConsumerWidget {
         ...footer,
         spec.target.description(appLocalizations),
         ?spec.footerOf(listed, appLocalizations),
+        ...spec.notesOf(ref, listed, appLocalizations),
       ].join('\n'),
     );
   }
