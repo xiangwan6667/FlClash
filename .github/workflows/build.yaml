@@ -717,6 +717,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse v0.9.4-pre.2)" = 8774c99828db6d790ebb00bacd8af260d74b580d
+          git -c 'url.https://github.com/.insteadOf=git@github.com:' submodule update --init --depth 1 plugins/prism_ui
           flutter pub get
           yq -i '.hooks.user_defines.setup.build_assets = false | .hooks.user_defines.rust_api.build_assets = false' pubspec.yaml
           dart tool/package.dart merge artifacts/* --out dist
