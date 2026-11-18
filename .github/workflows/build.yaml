@@ -794,7 +794,6 @@ jobs:
         with:
           token: ${{ github.token }}
           tag_name: v0.9.4-pre.2
-          target_commitish: 8774c99828db6d790ebb00bacd8af260d74b580d
           name: v0.9.4-pre.2
           files: ./dist/*
           body_path: release.md
