@@ -1,3 +1,4 @@
+import 'dart:ffi' show Abi;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -187,12 +188,13 @@ void main() {
     tester,
   ) async {
     final originalAdapter = request.dio.httpClientAdapter;
-    final originalSuffix = resolveSelfUpdateSuffix;
+    final originalAsset = resolveSelfUpdateAsset;
     request.dio.httpClientAdapter = _CheckAdapter(_CheckResult.noRelease);
-    resolveSelfUpdateSuffix = () => 'android-arm64-v8a.apk';
+    resolveSelfUpdateAsset = () =>
+        selfUpdateAssetFor(Abi.androidArm64, windowsInstalled: false);
     addTearDown(() {
       request.dio.httpClientAdapter = originalAdapter;
-      resolveSelfUpdateSuffix = originalSuffix;
+      resolveSelfUpdateAsset = originalAsset;
     });
     await pumpAbout(tester, const Size(390, 800));
 

@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/constant.dart';
 import 'package:fl_clash/core/desktop/helper_client.dart';
+import 'package:fl_clash/core/desktop/launcher.dart';
 import 'package:fl_clash/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -372,7 +373,7 @@ void main() {
     },
   );
 
-  test('ping requires protocol 6 and the expected Helper path', () async {
+  test('ping requires the current protocol and expected Helper path', () async {
     final adapter = _ResponseAdapter((options) {
       expect(options.queryParameters, {'coreSha256': _coreSha256});
       return ResponseBody.fromString(
@@ -725,6 +726,7 @@ HelperClient _client(
   final dio = Dio()..httpClientAdapter = adapter;
   return HelperClient(
     dio: dio,
+    baseUrl: 'http://127.0.0.1:$helperPort',
     expectedHelperPath: expectedHelperPath ?? () => r'C:\Helper.exe',
     readCoreSha256: readCoreSha256 ?? () async => _coreSha256,
   );

@@ -52,7 +52,13 @@ class ChangelogBuilder {
   final Git git;
   final String boundary;
 
-  ChangelogBuildResult build({PendingVersion? pending}) {
+  /// A stable version [recorded] already holds is kept as written, so wording,
+  /// merges and omissions edited after a release survive the next one.
+  ChangelogBuildResult build({PendingVersion? pending, Changelog? recorded}) {
+    final kept = <String, ChangelogVersion>{
+      for (final version in recorded?.versions ?? const <ChangelogVersion>[])
+        if (!version.prerelease) version.tag: version,
+    };
     final boundaryTag = VersionTag.tryParse(boundary);
     final stable = git
         .stableTags()
@@ -91,6 +97,11 @@ class ChangelogBuilder {
       final squashed = _squashedIdsOf(commits);
       squashedIdsByTag[tag.name] = squashed;
       commitIdsByTag[tag.name] = {..._idsOf(commits), ...squashed};
+      final existing = kept[tag.name];
+      if (existing != null) {
+        versions.add(existing);
+        continue;
+      }
       versions.add(
         ChangelogVersion(
           version: tag.version,

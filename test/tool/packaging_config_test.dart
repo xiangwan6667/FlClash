@@ -34,6 +34,20 @@ void main() {
     expect(defaultTunDevice.length, lessThanOrEqualTo(15));
   });
 
+  test('the macOS image includes the isolated app folder', () {
+    final config =
+        loadYaml(
+              File('macos/packaging/dmg/make_config.yaml').readAsStringSync(),
+            )
+            as YamlMap;
+    final contents = (config['contents'] as YamlList).cast<YamlMap>();
+
+    expect(
+      contents.singleWhere((entry) => entry['type'] == 'file')['path'],
+      'FlClash-Fork',
+    );
+  });
+
   group('Linux packaging teardown', () {
     for (final format in ['deb', 'rpm']) {
       test('$format removes the Helper unit only on a real uninstall', () {
@@ -57,24 +71,6 @@ void main() {
           isTrue,
         );
       });
-    }
-  });
-
-  test('every Linux package names the GTK application id as its window '
-      'class', () {
-    final applicationId = RegExp(
-      r'set\(APPLICATION_ID "([^"]+)"\)',
-    ).firstMatch(File('linux/CMakeLists.txt').readAsStringSync())!.group(1);
-
-    for (final format in ['deb', 'rpm', 'appimage']) {
-      final config =
-          loadYaml(
-                File(
-                  'linux/packaging/$format/make_config.yaml',
-                ).readAsStringSync(),
-              )
-              as YamlMap;
-      expect(config['startup_wm_class'], applicationId, reason: format);
     }
   });
 

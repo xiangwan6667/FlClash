@@ -1016,7 +1016,8 @@ const _proxyVariants = <String, Map<String, YamlSchema>>{
     'udp': _bool,
     ..._tcpDial,
     'psk': _str,
-    'version': YamlSchema.scalar(['1', '2', '3', '4', '5']),
+    'version': YamlSchema.scalar(['1', '2', '3', '4', '5', '6']),
+    'mode': _snellV6Mode,
     'reuse': _bool,
     'client-fingerprint': _clientFingerprint,
     'obfs-opts': YamlSchema.map({
@@ -1542,6 +1543,8 @@ const _listenerUsers = YamlSchema.list(
 
 const _listenerUserDict = YamlSchema.dict(_str);
 
+const _snellV6Mode = YamlSchema.scalar(['default', 'unshaped', 'unsafe-raw']);
+
 const _fallbackLimit = YamlSchema.map({
   'after-bytes': _str,
   'bytes-per-sec': _str,
@@ -1667,6 +1670,7 @@ const _listener = YamlSchema.map(
     'shadowsocks': {
       'password': _str,
       'cipher': YamlSchema.scalar(_ssCiphers),
+      'users': _listenerUserDict,
       'udp': _bool,
       'mux-option': _muxOption,
       ..._listenerTlsLayers,
@@ -1682,7 +1686,8 @@ const _listener = YamlSchema.map(
     },
     'snell': {
       'psk': _str,
-      'version': YamlSchema.scalar(['1', '2', '3', '4', '5']),
+      'version': YamlSchema.scalar(['1', '2', '3', '4', '5', '6']),
+      'mode': _snellV6Mode,
       'udp': _bool,
       'obfs-opts': YamlSchema.map({
         'mode': YamlSchema.scalar(['http', 'tls']),
@@ -1869,6 +1874,7 @@ const _listener = YamlSchema.map(
       'users': _listenerUserDict,
       'traffic-pattern': _str,
       'user-hint-is-mandatory': _bool,
+      'tcp-idle-timeout': _str,
     },
     'sudoku': {
       'key': _str,

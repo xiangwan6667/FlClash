@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:win32/win32.dart';
-import 'package:win32_registry/win32_registry.dart';
+import 'package:rust_api/rust_api.dart' as rust_api;
 
+import 'constant.dart';
 import 'print.dart';
 
 const protocolSchemes = ['clash', 'clashmeta', 'flclash'];
@@ -10,27 +10,9 @@ const protocolSchemes = ['clash', 'clashmeta', 'flclash'];
 bool canClaimProtocol(String currentHandler, String ownHandler) =>
     currentHandler.isEmpty || currentHandler == ownHandler;
 
-class ProtocolRegistrationPlan {
-  final String scheme;
-  final String executable;
-
-  const ProtocolRegistrationPlan({
-    required this.scheme,
-    required this.executable,
-  });
-
-  String get protocolKey => 'Software\\Classes\\$scheme';
-
-  String get commandKey => 'shell\\open\\command';
-
-  String get protocolValueName => 'URL Protocol';
-
-  String get protocolValue => '';
-
-  String get command => '"$executable" "%1"';
-}
-
-/// A user-level desktop entry for the running binary, including AppImages.
+/// A user-level desktop entry that claims the schemes for the running binary,
+/// so an AppImage or a development build is reachable without a packaged
+/// .desktop file. Rewritten on every launch, like the Windows registry keys.
 class LinuxProtocolRegistrationPlan {
   final List<String> schemes;
   final String executable;
@@ -54,7 +36,7 @@ class LinuxProtocolRegistrationPlan {
   String get desktopEntry => [
     '[Desktop Entry]',
     'Type=Application',
-    'Name=FlClash',
+    'Name=$appName',
     'NoDisplay=true',
     'Exec=$exec',
     'MimeType=${mimeTypes.join(';')};',
@@ -81,39 +63,15 @@ class Protocol {
     return _instance!;
   }
 
-  void register(String scheme) {
-    final plan = ProtocolRegistrationPlan(
-      scheme: scheme,
-      executable: Platform.resolvedExecutable,
-    );
-    try {
-      final existing = CLASSES_ROOT.open('$scheme\\${plan.commandKey}');
-      try {
-        if ((existing.getString('') ?? '').isNotEmpty) return;
-      } finally {
-        existing.close();
-      }
-    } on WindowsException catch (error) {
-      if (error.hr != ERROR_FILE_NOT_FOUND.toHRESULT() &&
-          error.hr != ERROR_PATH_NOT_FOUND.toHRESULT()) {
-        commonPrint.log('protocol registration lookup failed: $error');
-        return;
-      }
-    }
-    final regKey = CURRENT_USER.create(plan.protocolKey);
-    try {
-      regKey.setValue(
-        plan.protocolValueName,
-        RegistryValue.string(plan.protocolValue),
+  Future<void> registerWindows(List<String> schemes) async {
+    for (final scheme in schemes) {
+      final registered = await rust_api.registerUrlScheme(
+        scheme: scheme,
+        executable: Platform.resolvedExecutable,
       );
-      final commandKey = regKey.create(plan.commandKey);
-      try {
-        commandKey.setValue('', RegistryValue.string(plan.command));
-      } finally {
-        commandKey.close();
+      if (!registered) {
+        commonPrint.log('windows protocol registration failed: $scheme');
       }
-    } finally {
-      regKey.close();
     }
   }
 
