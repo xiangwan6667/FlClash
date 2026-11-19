@@ -390,7 +390,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final sheetContext = tester.element(find.byType(ProxiesView));
-    final route = ModalRoute.of(sheetContext)!;
+    final sheetRoute = routesCarrying(sheetContext).last;
     final close = tester
         .widget<AppBarActionButton>(
           inSheet(
@@ -409,7 +409,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     expect(sheetContext.mounted, isTrue);
-    expect(route.isCurrent, isFalse);
+    expect(sheetRoute.isCurrent, isFalse);
     // Deliver the queued close while the dismissed sheet is still mounted.
     close();
     await tester.pumpAndSettle();
