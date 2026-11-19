@@ -32,6 +32,7 @@ void main() {
       env['CARGO_ENCODED_RUSTFLAGS']!.split('\x1f');
 
   List<String> targetRustflags(Map<String, String> env) =>
+      env['CARGO_ENCODED_RUSTFLAGS']?.split('\x1f') ??
       env['CARGO_TARGET_AARCH64_APPLE_DARWIN_RUSTFLAGS']!.split(' ');
 
   test('maps the specific prefixes after the home directory', () {
@@ -67,10 +68,18 @@ void main() {
     );
   });
 
-  test('leaves C flags alone for MSVC', () {
-    expect(environment('x86_64-pc-windows-msvc').keys, [
-      'CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS',
-    ]);
+  test('maps MSVC C and C++ source paths in deterministic mode', () {
+    final env = environment('x86_64-pc-windows-msvc', {
+      'CFLAGS_x86_64_pc_windows_msvc': '/O2',
+    });
+    expect(env['CC_SHELL_ESCAPED_FLAGS'], '1');
+    expect(env['CFLAGS_x86_64_pc_windows_msvc'], startsWith('/O2 '));
+    for (final name in ['CFLAGS', 'CXXFLAGS']) {
+      final flags = env['${name}_x86_64_pc_windows_msvc'];
+      expect(flags, contains('/experimental:deterministic'));
+      expect(flags, contains('/pathmap:"$home"=~'));
+      expect(flags, contains('/pathmap:"$checkout"=.'));
+    }
   });
 
   test('adds to the target rustflags a Cargo config joins', () {
@@ -78,7 +87,6 @@ void main() {
       'CARGO_TARGET_AARCH64_APPLE_DARWIN_RUSTFLAGS': '-C a',
     });
 
-    expect(env, isNot(contains('CARGO_ENCODED_RUSTFLAGS')));
     expect(
       targetRustflags(env),
       containsAllInOrder(['-C', 'a', '--remap-path-prefix=$home=~']),

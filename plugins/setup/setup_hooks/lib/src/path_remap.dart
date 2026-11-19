@@ -22,13 +22,17 @@ Map<String, String> trimmedPathEnvironment({
     ..._rustflags(env, targetTriple, [
       for (final (from, to) in prefixes) '--remap-path-prefix=$from=$to',
     ]),
-    if (!targetTriple.endsWith('-msvc'))
-      for (final name in const ['CFLAGS', 'CXXFLAGS'])
-        _targetVariable(name, targetTriple): [
-          ?env[_targetVariable(name, targetTriple)],
-          for (final (from, to) in prefixes)
-            if (!_splitsOnWhitespace(from)) '-ffile-prefix-map=$from=$to',
-        ].join(' '),
+    if (targetTriple.endsWith('-msvc')) 'CC_SHELL_ESCAPED_FLAGS': '1',
+    for (final name in const ['CFLAGS', 'CXXFLAGS'])
+      _targetVariable(name, targetTriple): [
+        ?env[_targetVariable(name, targetTriple)],
+        if (targetTriple.endsWith('-msvc')) '/experimental:deterministic',
+        for (final (from, to) in prefixes)
+          if (targetTriple.endsWith('-msvc'))
+            '/pathmap:"$from"=$to'
+          else if (!_splitsOnWhitespace(from))
+            '-ffile-prefix-map=$from=$to',
+      ].join(' '),
   };
 }
 
