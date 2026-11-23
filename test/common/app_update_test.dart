@@ -7,6 +7,8 @@ import 'package:fl_clash/common/app_update.dart';
 import 'package:fl_clash/common/release_asset.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../tool/src/package/version.dart';
+
 void main() {
   String? nameOn(Abi abi, {required bool windowsInstalled}) {
     final asset = selfUpdateAssetFor(abi, windowsInstalled: windowsInstalled);
@@ -69,8 +71,18 @@ void main() {
     );
   });
 
-  test('an rs build has no self-update asset to download', () {
-    expect(selfUpdateAsset, isNull);
+  test('updates from the line tool/package.dart names this build', () {
+    expect(
+      releaseLineOf(File('build_config.yaml').readAsStringSync()),
+      appReleaseLine,
+    );
+  });
+
+  test('release assets are downloaded from the maintained repository', () {
+    expect(
+      releaseAssetUri('v1.2.3', 'SHA256SUMS').toString(),
+      'https://github.com/xiangwan6667/FlClash/releases/download/v1.2.3/SHA256SUMS',
+    );
   });
 
   group('releaseChecksum', () {

@@ -234,28 +234,27 @@ void main() {
     expect(jobs['upload']['needs'] as YamlList, containsAll(gated));
   });
 
-  test('a release is announced once its packages are out, and pruned last', () {
-    final steps = [
-      for (final step in releaseSteps()) (step as YamlMap)['name'] as String?,
-    ];
-    int at(String name) {
-      expect(steps, contains(name));
-      return steps.indexOf(name);
-    }
+  test(
+    'the workflow verifies the files and adds RS aliases before publishing',
+    () {
+      final steps = releaseSteps().cast<YamlMap>();
+      final names = steps.map((step) => step['name']).toList();
+      final verify = names.indexOf(
+        'Check every file the release is looked up by',
+      );
+      final aliases = names.indexOf('Add RS updater compatibility assets');
+      final publish = names.indexOf('Release');
 
-    final announced = at('Post to Telegram');
-    expect(announced, greaterThan(at('Release')));
-    expect(announced, greaterThan(at('Push to Homebrew tap')));
-    expect(announced, greaterThan(at('Push to fdroid repo')));
-    expect(at('Delete superseded prereleases'), steps.length - 1);
-  });
-
-  test('the prune fails when a page of the release list does', () {
-    final prune = releaseSteps().cast<YamlMap>().singleWhere(
-      (step) => step['name'] == 'Delete superseded prereleases',
-    );
-
-    expect(prune['run'], contains('gh api --paginate'));
-    expect(prune['shell'], 'bash', reason: 'GitHub adds pipefail to bash');
-  });
+      expect(verify, greaterThanOrEqualTo(0));
+      expect(aliases, greaterThan(verify));
+      expect(publish, greaterThan(aliases));
+      expect(
+        steps[publish]['uses'],
+        startsWith('softprops/action-gh-release@'),
+      );
+      expect(steps[aliases]['run'], contains('FlClash-rs-'));
+      expect(steps[aliases]['run'], contains('sha256sum'));
+      expect(publish, steps.length - 1);
+    },
+  );
 }

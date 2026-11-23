@@ -1,9 +1,9 @@
 script_template: inno_setup.iss
-app_id: F353B6F4-AA56-4EC4-86F0-AEA464099350
+app_id: A97DB4C4-D63D-441E-B40A-28A40AB90133
 app_name: FlClash RS
-publisher: chen08209
-publisher_url: https://github.com/chen08209/FlClash
+publisher: ''
+publisher_url: https://github.com/xiangwan6667/FlClash
 display_name: FlClash RS
-install_dir_name: '{autopf64}\FlClash rs'
+install_dir_name: '{autopf64}\FlClash-rs'
 executable_name: FlClash-RS.exe
 setup_icon_file: windows\runner\resources\app_icon.ico

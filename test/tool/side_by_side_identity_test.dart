@@ -8,7 +8,8 @@ T _pick<T>(T rs, T flClash) => rsSideBySide ? rs : flClash;
 
 final _packageName = _pick('FlClash RS', 'FlClash');
 
-String _read(String path) => File(path).readAsStringSync();
+String _read(String path) =>
+    File(path).readAsStringSync().replaceAll('\r\n', '\n');
 
 YamlMap _yaml(String path) => loadYaml(_read(path)) as YamlMap;
 
@@ -21,13 +22,17 @@ String? _rustConst(String path, String name) {
 void main() {
   test('the app, the package and side-by-side entries keep their names', () {
     expect(appName, 'FlClash');
+    expect(productName, 'FlClash');
     expect(packageDisplayName, _packageName);
-    expect(sideBySideName, _pick('FlClash rs', 'FlClash'));
+    expect(sideBySideName, _pick('FlClash-rs', 'FlClash'));
     final installer = _yaml('windows/packaging/exe/make_config.yaml');
+    expect(installer['display_name'], packageDisplayName);
+    final script = _read('windows/packaging/exe/inno_setup.iss');
     expect(
-      (installer['display_name'] as String).toLowerCase(),
-      sideBySideName.toLowerCase(),
-      reason: 'the installer repoints the autostart Run value by this name',
+      "'Software\\Microsoft\\Windows\\CurrentVersion\\Run', '$sideBySideName'"
+          .allMatches(script)
+          .length,
+      4,
     );
   });
 
@@ -52,7 +57,7 @@ void main() {
   });
 
   test('Windows keeps its own installer, folders and data directory', () {
-    final productDirectory = _pick('clash.rs', 'clash');
+    final productDirectory = _pick('clash-rs', 'clash');
     final binary = _pick('FlClash-RS', 'FlClash');
     expect(
       _read('windows/CMakeLists.txt'),
@@ -78,13 +83,13 @@ void main() {
     expect(
       installer['app_id'],
       _pick(
-        'F353B6F4-AA56-4EC4-86F0-AEA464099350',
+        'A97DB4C4-D63D-441E-B40A-28A40AB90133',
         '728B3532-C74B-4870-9068-BE70FE12A3E6',
       ),
     );
     expect(
       installer['install_dir_name'],
-      _pick(r'{autopf64}\FlClash rs', null),
+      _pick(r'{autopf64}\FlClash-rs', null),
     );
     expect(
       _read('windows/packaging/exe/inno_setup.iss'),
@@ -107,6 +112,12 @@ void main() {
     expect(
       _rustConst('services/helper/src/service/linux.rs', 'SOCKET_PATH'),
       helperSocketPath,
+    );
+    expect(helperServiceName, 'FlClashRSHelperService');
+    expect(helperPort, 47894);
+    expect(
+      _rustConst('services/helper/src/service/peer.rs', 'PORT_KEY'),
+      'SYSTEM\\CurrentControlSet\\Services\\$helperServiceName\\Runtime',
     );
   });
 

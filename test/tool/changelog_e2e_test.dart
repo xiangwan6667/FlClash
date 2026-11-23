@@ -179,6 +179,24 @@ void main() {
     );
   });
 
+  test('a pending prerelease can share the version of another branch', () {
+    git(['switch', '--quiet', '-c', 'rs', 'v1.0.0']);
+    commit('fix(core): handle the RS handshake error');
+    const pending = PendingVersion(
+      version: '1.1.0',
+      date: '2026-02-03',
+      prerelease: true,
+    );
+    final version = build(pending: pending).changelog.versions.single;
+
+    expect(version.tag, 'v1.1.0');
+    expect(version.prerelease, isTrue);
+    expect(
+      version.groups.single.entries.single.text,
+      'Handle the RS handshake error',
+    );
+  });
+
   test('a tag with no version in changelog.json is reported', () {
     final derived = build().changelog;
     final recorded = Changelog(

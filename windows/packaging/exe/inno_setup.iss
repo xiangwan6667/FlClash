@@ -15,6 +15,7 @@ SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
 PrivilegesRequired=admin
+CloseApplications=force
 ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
@@ -100,8 +101,6 @@ begin
   Result := Pos(Lowercase(AddBackslash(ExpandConstant('{app}'))), Lowercase(Value)) > 0;
 end;
 
-// The Run value name is sideBySideName, which DISPLAY_NAME matches in any
-// case, and the schemes are protocolSchemes, both in lib/common.
 function ProtocolSchemes: TArrayOfString;
 begin
   Result := ['clash', 'clashmeta', 'flclash'];
@@ -117,9 +116,9 @@ var
   i: Integer;
 begin
   AppPath := ExpandConstant('{app}\{{EXECUTABLE_NAME}}');
-  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}', Value) and PointsIntoApp(Value) then
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-rs', Value) and PointsIntoApp(Value) then
   begin
-    RegWriteStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}', AppPath);
+    RegWriteStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-rs', AppPath);
   end;
 
   Schemes := ProtocolSchemes;
@@ -138,10 +137,10 @@ var
   Value: String;
   i: Integer;
 begin
-  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}', Value) and PointsIntoApp(Value) then
+  if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-rs', Value) and PointsIntoApp(Value) then
   begin
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', '{{DISPLAY_NAME}}');
-    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', '{{DISPLAY_NAME}}');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'FlClash-rs');
+    RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run', 'FlClash-rs');
   end;
 
   Schemes := ProtocolSchemes;
@@ -183,8 +182,8 @@ end;
 // windows/runner/Runner.rc.
 procedure RemoveUserData;
 begin
-  DelTree(ExpandConstant('{userappdata}\com.follow\clash.rs'), True, True, True);
-  DelTree(ExpandConstant('{localappdata}\com.follow\clash.rs'), True, True, True);
+  DelTree(ExpandConstant('{userappdata}\com.follow\clash-rs'), True, True, True);
+  DelTree(ExpandConstant('{localappdata}\com.follow\clash-rs'), True, True, True);
   RemoveDir(ExpandConstant('{userappdata}\com.follow'));
   RemoveDir(ExpandConstant('{localappdata}\com.follow'));
 end;
@@ -219,8 +218,8 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
-Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
+Name: "{autoprograms}\\FlClash-rs\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
+Name: "{autodesktop}\\FlClash-rs\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: runascurrentuser nowait postinstall skipifsilent
 Filename: "{app}\\{{EXECUTABLE_NAME}}"; Flags: runascurrentuser nowait; Check: IsAppUpdate

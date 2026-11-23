@@ -38,7 +38,8 @@ const defaultGeoXUrl = {
       'https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat',
 };
 
-const defaultMixedPort = 7890;
+const defaultMixedPort = 17893;
+const defaultTunDevice = 'FlClash-rs';
 const defaultKeepAliveInterval = 30;
 const defaultTunMtu = 9000;
 const minTunMtu = 1280;
@@ -257,6 +258,7 @@ const customProxyTypes = [
   'ssh',
   'mieru',
   'anytls',
+  'miu',
   'sudoku',
   'masque',
   'trusttunnel',
@@ -397,7 +399,7 @@ extension CustomProxyExt on CustomProxy {
     'ssr' => const {'server', 'port', 'password', 'cipher', 'obfs', 'protocol'},
     'vmess' => const {'server', 'port', 'uuid', 'alterId', 'cipher'},
     'vless' => const {'server', 'port', 'uuid'},
-    'snell' => const {'server', 'port', 'psk'},
+    'snell' || 'miu' => const {'server', 'port', 'psk'},
     'trojan' || 'anytls' => const {'server', 'port', 'password'},
     'hysteria' => const {'server', 'up', 'down'},
     'hysteria2' => const {'server'},
@@ -431,7 +433,7 @@ extension CustomProxyExt on CustomProxy {
     'tuic' => const [ProxyField.uuid, ProxyField.password],
     'trojan' || 'anytls' || 'hysteria2' => const [ProxyField.password],
     'hysteria' => const [ProxyField.up, ProxyField.down, ProxyField.authStr],
-    'snell' => const [ProxyField.psk],
+    'snell' || 'miu' => const [ProxyField.psk],
     'sudoku' => const [ProxyField.key],
     'wireguard' ||
     'masque' => const [ProxyField.privateKey, ProxyField.publicKey],
@@ -545,10 +547,11 @@ extension CustomProxyExt on CustomProxy {
         'shadowquic',
         'gost-relay',
         'anytls',
+        'miu',
         'masque',
         'trusttunnel',
       }.contains(type),
-      ProxyField.servername => type == 'vmess' || type == 'vless',
+      ProxyField.servername => const {'vmess', 'vless', 'miu'}.contains(type),
       ProxyField.alpn => const {
         'vmess',
         'vless',
@@ -558,6 +561,7 @@ extension CustomProxyExt on CustomProxy {
         'tuic',
         'shadowquic',
         'anytls',
+        'miu',
         'trusttunnel',
       }.contains(type),
       ProxyField.skipCertVerify => const {
@@ -571,6 +575,7 @@ extension CustomProxyExt on CustomProxy {
         'tuic',
         'gost-relay',
         'anytls',
+        'miu',
         'masque',
         'trusttunnel',
       }.contains(type),
@@ -582,12 +587,14 @@ extension CustomProxyExt on CustomProxy {
         'trojan',
         'gost-relay',
         'anytls',
+        'miu',
         'trusttunnel',
       }.contains(type),
       ProxyField.realityPublicKey || ProxyField.realityShortId => const {
         'vmess',
         'vless',
         'trojan',
+        'miu',
       }.contains(type),
       ProxyField.plugin || ProxyField.udpOverTcp => type == 'ss',
       ProxyField.pluginMode ||
@@ -1138,7 +1145,7 @@ Map<Object?, Object?> _rawSniff(Map<String, dynamic> raw) {
 abstract class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
-    @Default(productName) String device,
+    @Default(defaultTunDevice) String device,
     @JsonKey(name: 'route-address') @Default([]) List<String> routeAddress,
     @JsonKey(fromJson: _mtuFromJson) @Default(defaultTunMtu) int mtu,
     @JsonKey(

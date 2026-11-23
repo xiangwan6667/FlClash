@@ -257,6 +257,7 @@ const concordKeyTiers = <String, Map<String, ConcordTier>>{
     'ssr': ConcordTier.t1,
     'snell': ConcordTier.t1,
     'mieru': ConcordTier.t1,
+    'miu': ConcordTier.t1,
     'ssh': ConcordTier.t1,
     'shadowquic': ConcordTier.t1,
     'dns': ConcordTier.t1,

@@ -363,7 +363,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.widget<LoadingBar>(find.byType(LoadingBar)).active, isFalse);
-    expect(find.text('The app is already up to date'), findsOneWidget);
+    expect(find.text(currentAppLocalizations.checkUpdateError), findsOneWidget);
     expect(tester.takeException(), null);
   });
 

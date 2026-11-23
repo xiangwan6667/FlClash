@@ -11,7 +11,9 @@ import 'package:fl_clash/common/exception.dart';
 import 'package:fl_clash/common/release_asset.dart';
 import 'package:fl_clash/common/request.dart';
 import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -23,24 +25,6 @@ class _StalledHttpClient extends Fake implements HttpClient {
   @override
   Future<HttpClientRequest> openUrl(String method, Uri url) =>
       Completer<HttpClientRequest>().future;
-}
-
-class _HostAdapter implements HttpClientAdapter {
-  _HostAdapter(this.byHost);
-
-  final Map<String, ResponseBody Function()> byHost;
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    return byHost[options.uri.host]!();
-  }
-
-  @override
-  void close({bool force = false}) {}
 }
 
 class _PathAdapter implements HttpClientAdapter {
@@ -161,58 +145,6 @@ void main() {
     );
   });
 
-  group('latestRelease', () {
-    Request requestAnswering(Map<String, ResponseBody Function()> byHost) {
-      return Request()..dio.httpClientAdapter = _HostAdapter(byHost);
-    }
-
-    test('reads the release from the API', () async {
-      final request = requestAnswering({
-        'api.github.com': () => ResponseBody.fromString(
-          '{"tag_name":"v1.2.3","body":"notes"}',
-          200,
-          headers: {
-            Headers.contentTypeHeader: [Headers.jsonContentType],
-          },
-        ),
-      });
-
-      expect(await request.latestRelease(), {
-        'tag_name': 'v1.2.3',
-        'body': 'notes',
-      });
-    });
-
-    test(
-      'falls back to the release page when the API is rate limited',
-      () async {
-        final request = requestAnswering({
-          'api.github.com': () => ResponseBody.fromString('{}', 403),
-          'github.com': () => ResponseBody.fromString(
-            '',
-            302,
-            headers: {
-              HttpHeaders.locationHeader: [
-                'https://github.com/owner/repo/releases/tag/v1.2.4',
-              ],
-            },
-          ),
-        });
-
-        expect(await request.latestRelease(), {'tag_name': 'v1.2.4'});
-      },
-    );
-
-    test('fails instead of answering when neither endpoint does', () async {
-      final request = requestAnswering({
-        'api.github.com': () => ResponseBody.fromString('{}', 403),
-        'github.com': () => ResponseBody.fromString('', 503),
-      });
-
-      await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
-    });
-  });
-
   group('newestRelease', () {
     ResponseBody json(Object body, [int status = 200]) {
       return ResponseBody.fromString(
@@ -271,8 +203,43 @@ void main() {
 
         for (final channel in UpdateChannel.values) {
           final release = await request.newestRelease(channel);
-          expect(release['tag_name'], 'v1.3.0-rs.10');
-          expect(release['body'], 'rs 10');
+          expect(release?['tag_name'], 'v1.3.0-rs.10');
+          expect(release?['body'], 'rs 10');
+        }
+      },
+    );
+
+    test(
+      'uses the build number for older installs without an embedded tag',
+      () async {
+        PackageInfo? previous;
+        try {
+          previous = globalState.packageInfo;
+        } on Error {
+          previous = null;
+        }
+        addTearDown(() {
+          if (previous case final info?) globalState.packageInfo = info;
+        });
+        globalState.packageInfo = PackageInfo(
+          appName: 'FlClash',
+          packageName: 'app.flclash.fork.rs',
+          version: '0.9.4',
+          buildNumber: '2026112101',
+        );
+        for (final (tag, build, isNewer) in [
+          ('v0.9.3-rs.9', '2026112102', false),
+          ('v0.9.4-rs.2', '2026112101', false),
+          ('v0.9.4-rs.2', '2026112102', true),
+          ('v0.9.5-rs.1', '2026112101', true),
+        ]) {
+          final request = requestAnswering({
+            api: () => json([
+              listed(tag, body: '<!-- flclash:build-number:$build -->'),
+            ]),
+          });
+          final update = await request.checkForUpdate(UpdateChannel.stable);
+          expect(update != null, isNewer, reason: '$tag + $build');
         }
       },
     );
@@ -285,7 +252,7 @@ void main() {
         });
 
       expect(
-        (await request.newestRelease(UpdateChannel.stable))['tag_name'],
+        (await request.newestRelease(UpdateChannel.stable))?['tag_name'],
         'v1.3.0-rs.2',
       );
     });
@@ -299,7 +266,7 @@ void main() {
       });
 
       expect(
-        (await request.newestRelease(UpdateChannel.stable))['tag_name'],
+        (await request.newestRelease(UpdateChannel.stable))?['tag_name'],
         'v1.3.0-rs.2',
       );
     });
@@ -343,7 +310,7 @@ void main() {
       });
 
       expect(
-        (await request.newestRelease(UpdateChannel.stable))['tag_name'],
+        (await request.newestRelease(UpdateChannel.stable))?['tag_name'],
         'v1.2.0-rs.2',
       );
     });

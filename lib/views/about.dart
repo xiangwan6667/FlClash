@@ -112,8 +112,25 @@ class AboutView extends ConsumerWidget {
               _buildLinkItem(
                 glyph: AppGlyphs.cpu,
                 title: appLocalizations.core,
-                url: 'https://github.com/chen08209/concord',
-                label: 'github.com/chen08209/concord',
+                url: 'https://github.com/$coreRepository',
+                label: 'github.com/$coreRepository',
+              ),
+            ],
+          ),
+          generateSection(
+            title: appLocalizations.basedOn,
+            items: [
+              _buildLinkItem(
+                glyph: AppGlyphs.code,
+                title: appLocalizations.project,
+                url: 'https://github.com/$upstreamRepository',
+                label: 'github.com/$upstreamRepository',
+              ),
+              _buildLinkItem(
+                glyph: AppGlyphs.cpu,
+                title: appLocalizations.core,
+                url: 'https://github.com/$upstreamCoreRepository',
+                label: 'github.com/$upstreamCoreRepository',
               ),
               _buildLinkItem(
                 glyph: AppGlyphs.send,

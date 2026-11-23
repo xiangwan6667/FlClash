@@ -112,20 +112,37 @@ class Request {
   /// Null when this build is current; throws when GitHub cannot be asked.
   Future<Map<String, dynamic>?> checkForUpdate(UpdateChannel channel) async {
     final release = await newestRelease(channel);
+    if (release == null) return null;
     final remote = ReleaseVersion.tryParse(release['tag_name'] as String);
-    final installed = installedReleaseVersion(globalState.packageInfo.version);
-    return remote != null && remote > installed ? release : null;
+    if (remote == null) return null;
+    final package = globalState.packageInfo;
+    final installed = installedReleaseVersion(package.version);
+    final comparison = installed.isPrerelease
+        ? remote.compareTo(installed)
+        : ReleaseVersion(
+            remote.major,
+            remote.minor,
+            remote.patch,
+          ).comparePrecedence(installed);
+    if (comparison != 0) return comparison > 0 ? release : null;
+    final build = RegExp(
+      r'<!-- flclash:build-number:(\d+) -->',
+    ).firstMatch(release['body'] as String? ?? '')?.group(1);
+    return (int.tryParse(build ?? '') ?? 0) >
+            (int.tryParse(package.buildNumber) ?? 0)
+        ? release
+        : null;
   }
 
   /// The rs line publishes only prereleases and offers no channel to pick.
-  Future<Map<String, dynamic>> newestRelease(UpdateChannel _) {
+  Future<Map<String, dynamic>?> newestRelease(UpdateChannel _) {
     return newestOfAllReleases();
   }
 
   /// `releases/latest` never names a prerelease, so this reads the list. The
   /// feed answers without the hourly API quota but carries no release body,
   /// and holds only GitHub's ten newest entries, so each can be probed.
-  Future<Map<String, dynamic>> newestOfAllReleases() async {
+  Future<Map<String, dynamic>?> newestOfAllReleases() async {
     try {
       for (var page = 1; page <= _releasePages; page++) {
         final response = await dio.get<List<dynamic>>(
@@ -150,7 +167,7 @@ class Request {
           break;
         }
       }
-      throw FormatException('No ${appReleaseLine.name} release in the list');
+      return null;
     } on DioException catch (error) {
       commonPrint.log(
         'release list API failed: ${compactError(error)}',
@@ -164,7 +181,7 @@ class Request {
     for (final tag in _candidates(releaseTagsOfFeed(response.data ?? ''))) {
       if (await _hasChecksums(tag)) return {'tag_name': tag};
     }
-    throw FormatException('No ${appReleaseLine.name} release in the feed');
+    return null;
   }
 
   Iterable<String> _candidates(Iterable<String> tags) =>
@@ -190,36 +207,6 @@ class Request {
       if (error.response?.statusCode == HttpStatus.notFound) return false;
       rethrow;
     }
-  }
-
-  /// The release page redirect still answers once the hourly API quota is spent.
-  Future<Map<String, dynamic>> latestRelease() async {
-    try {
-      final response = await dio.get<Map<String, dynamic>>(
-        'https://api.github.com/repos/$repository/releases/latest',
-        options: Options(responseType: ResponseType.json),
-      );
-      return response.data!;
-    } on DioException catch (error) {
-      commonPrint.log(
-        'latest release API failed: ${compactError(error)}',
-        logLevel: LogLevel.warning,
-      );
-    }
-    final response = await dio.get<void>(
-      'https://github.com/$repository/releases/latest',
-      options: Options(
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 400,
-      ),
-    );
-    final location = response.headers.value(HttpHeaders.locationHeader);
-    final segments = Uri.tryParse(location ?? '')?.pathSegments ?? const [];
-    final tagIndex = segments.indexOf('tag') + 1;
-    if (tagIndex == 0 || tagIndex >= segments.length) {
-      throw FormatException('No release tag in the redirect', location);
-    }
-    return {'tag_name': segments[tagIndex]};
   }
 
   Future<String> downloadVerifiedRelease({

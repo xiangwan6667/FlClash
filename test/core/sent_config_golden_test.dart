@@ -161,7 +161,10 @@ Future<String> _sent(String os) async {
       authentication: const ['user:pass'],
     ),
   );
-  return result.yaml;
+  return result.yaml.replaceAllMapped(
+    RegExp(r'^    path: "/profiles[^"\n]*', multiLine: true),
+    (match) => match[0]!.replaceAll(r'\\', '/'),
+  );
 }
 
 void _expectFile(String path, String actual) {
@@ -179,7 +182,7 @@ void _expectFile(String path, String actual) {
   );
   expect(
     actual,
-    file.readAsStringSync(),
+    file.readAsStringSync().replaceAll('\r\n', '\n'),
     reason: '$path differs; run flutter test --update-goldens',
   );
 }

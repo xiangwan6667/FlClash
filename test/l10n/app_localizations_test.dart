@@ -25,4 +25,27 @@ void main() {
       isFalse,
     );
   });
+
+  test(
+    'update completion messages retain upstream wording in every locale',
+    () {
+      const messages = {
+        'en': 'The app is already up to date',
+        'zh': '当前应用已经是最新版了',
+        'ja': 'すでに最新バージョンです',
+        'ru': 'У вас уже последняя версия',
+        'fr': 'L’app est déjà à jour',
+        'es': 'La app ya está actualizada',
+        'ko': '이미 최신 버전입니다',
+      };
+
+      for (final locale in AppLocalizations.supportedLocales) {
+        expect(
+          lookupAppLocalizations(locale).checkUpdateError,
+          messages[locale.languageCode],
+          reason: locale.toString(),
+        );
+      }
+    },
+  );
 }

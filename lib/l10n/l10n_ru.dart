@@ -120,6 +120,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get defaultText => 'По умолчанию';
 
   @override
+  String get basedOn => 'Основано на';
+
+  @override
   String get more => 'Ещё';
 
   @override

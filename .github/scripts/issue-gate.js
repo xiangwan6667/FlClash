@@ -26,7 +26,7 @@ function parseForm(text) {
   const form = { title: '', labels: [], fields: [] };
   let field = null;
   let option = null;
-  for (const line of text.split('\n')) {
+  for (const line of text.split(/\r?\n/)) {
     const title = line.match(/^title:\s*(.+)$/);
     if (title) form.title = unquote(title[1]);
     const labels = line.match(/^labels:\s*\[(.*)\]\s*$/);

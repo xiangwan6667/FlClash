@@ -120,6 +120,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get defaultText => 'Predeterminado';
 
   @override
+  String get basedOn => 'Basado en';
+
+  @override
   String get more => 'Más';
 
   @override

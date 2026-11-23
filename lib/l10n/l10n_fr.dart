@@ -120,6 +120,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get defaultText => 'Par défaut';
 
   @override
+  String get basedOn => 'Basé sur';
+
+  @override
   String get more => 'Plus';
 
   @override

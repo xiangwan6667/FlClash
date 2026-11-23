@@ -26,6 +26,9 @@ class PendingVersion {
   final bool prerelease;
 
   String get tag => 'v$version';
+
+  bool isTagged(Git git) =>
+      prerelease ? git.tagIsReachable(tag) : git.tagExists(tag);
 }
 
 class ChangelogBuildResult {
@@ -66,7 +69,7 @@ class ChangelogBuilder {
     final versions = <ChangelogVersion>[];
     final commitIdsByTag = <String, Set<String>>{};
 
-    if (pending != null && !git.tagExists(pending.tag)) {
+    if (pending != null && !pending.isTagged(git)) {
       final commits = git.commits(
         from: stable.isEmpty ? boundaryTag?.name : stable.first.name,
         to: 'HEAD',

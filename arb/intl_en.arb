@@ -36,6 +36,7 @@
   "settings": "Settings",
   "language": "Language",
   "defaultText": "Default",
+  "basedOn": "Based on",
   "more": "More",
   "other": "Other",
   "about": "About",

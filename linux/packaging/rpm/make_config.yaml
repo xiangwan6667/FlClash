@@ -1,8 +1,8 @@
 display_name: FlClash RS
 package_name: flclash-rs
 
-packager: chen08209
-packagerEmail: chen08209@gmail.com
+packager: FlClash Fork
+packagerEmail: noreply@localhost
 license: Other
 
 priority: optional

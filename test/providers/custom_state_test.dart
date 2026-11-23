@@ -932,6 +932,36 @@ void main() {
     });
   });
 
+  test('Miu exposes its credentials and preserves extra config', () {
+    const proxy = CustomProxy(
+      id: 1,
+      definition: {
+        'type': 'miu',
+        'server': 'example.com',
+        'port': 443,
+        'psk': '0123456789abcdef',
+        'custom-extension': {'keep': true},
+      },
+    );
+    expect(proxy.requiredKeys, {'server', 'port', 'psk'});
+    expect(proxy.fields, [ProxyField.psk]);
+    expect(
+      proxy.options,
+      containsAll([
+        ProxyField.sni,
+        ProxyField.servername,
+        ProxyField.alpn,
+        ProxyField.skipCertVerify,
+        ProxyField.clientFingerprint,
+        ProxyField.realityPublicKey,
+        ProxyField.realityShortId,
+      ]),
+    );
+    final updated = proxy.withField(ProxyField.realityPublicKey, 'public-key');
+    expect(updated.definition['reality-opts'], {'public-key': 'public-key'});
+    expect(updated.definition['custom-extension'], {'keep': true});
+  });
+
   test('customProxyTypes names only types the core knows', () {
     expect(concordProxyTypes(), containsAll(customProxyTypes));
   });

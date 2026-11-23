@@ -209,13 +209,17 @@ class CommonAction extends _$CommonAction {
     if (asset == null || ref.read(updateDownloadStateProvider) != null) {
       return;
     }
-    final channel = ref.read(appSettingProvider).updateChannel;
-    final release = await globalState.loadingRun(
-      () => request.newestRelease(channel),
+    final result = await globalState.loadingRun(
+      () async => (release: await request.newestOfAllReleases()),
       title: currentAppLocalizations.updateDownloadTest,
       tag: LoadingTag.checkUpdate,
     );
-    if (release == null) return;
+    if (result == null) return;
+    final release = result.release;
+    if (release == null) {
+      await checkUpdateResultHandle(isUser: true);
+      return;
+    }
     final tag = release['tag_name'] as String;
     await _downloadUpdate(tag, updateAssetName(tag, asset));
   }

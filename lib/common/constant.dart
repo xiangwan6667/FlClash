@@ -15,10 +15,7 @@ const appName = 'FlClash';
 /// name it.
 const packageDisplayName = rsSideBySide ? 'FlClash RS' : appName;
 
-/// Keeps registrations and backups apart from a FlClash install beside it:
-/// the autostart entry, whose Windows Run value the installer reads under
-/// [packageDisplayName] (value names ignore case), and the WebDAV backup root.
-const sideBySideName = rsSideBySide ? 'FlClash rs' : appName;
+const sideBySideName = rsSideBySide ? 'FlClash-rs' : appName;
 const _appSlug = rsSideBySide ? 'flclash-rs' : 'flclash';
 
 /// The status card's glow while su is granted stays off until the card shows
@@ -30,7 +27,7 @@ const suAccessGlowShown = false;
 const productName = 'FlClash';
 const appHelperService = 'FlClashHelperService';
 const helperServiceName = rsSideBySide
-    ? 'FlClashRsHelperService'
+    ? 'FlClashRSHelperService'
     : 'FlClashHelperService';
 const coreManifestName = 'manifest.json';
 const browserUa =
@@ -38,7 +35,7 @@ const browserUa =
 const packageName = 'com.follow.clash';
 final unixSocketPath = _privateSocketPath();
 final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomId()}';
-const helperPort = 47890;
+const helperPort = 47894;
 const helperPortKey =
     'SYSTEM\\CurrentControlSet\\Services\\$helperServiceName\\Runtime';
 const helperPortValue = 'Port';
@@ -174,7 +171,10 @@ const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const appliedConfigMd5Key = 'applied_config_md5';
 const hostCredentialKey = 'host_credential';
-const repository = 'chen08209/FlClash';
+const repository = 'xiangwan6667/FlClash';
+const coreRepository = 'xiangwan6667/concord';
+const upstreamRepository = 'chen08209/FlClash';
+const upstreamCoreRepository = 'chen08209/concord';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 const defaultTestUrl = 'https://www.gstatic.com/generate_204';

@@ -4,9 +4,9 @@ use std::ptr::{null, null_mut};
 use windows_sys::Win32::Foundation::{ERROR_FILE_NOT_FOUND, ERROR_MORE_DATA, ERROR_SUCCESS};
 use windows_sys::Win32::System::Registry::{
     RegCloseKey, RegCreateKeyExW, RegDeleteValueW, RegGetValueW, RegOpenKeyExW, RegSetValueExW,
-    HKEY, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WRITE, REG_BINARY,
-    REG_OPTION_NON_VOLATILE, REG_ROUTINE_FLAGS, REG_SZ, REG_VALUE_TYPE, RRF_RT_REG_BINARY,
-    RRF_RT_REG_DWORD, RRF_RT_REG_SZ,
+    HKEY, HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, KEY_READ, KEY_WRITE,
+    REG_BINARY, REG_OPTION_NON_VOLATILE, REG_ROUTINE_FLAGS, REG_SZ, REG_VALUE_TYPE,
+    RRF_RT_REG_BINARY, RRF_RT_REG_DWORD, RRF_RT_REG_SZ,
 };
 
 use super::entries::{
@@ -41,6 +41,12 @@ pub fn set_autostart(id: &str, _display_name: &str, executable: &str, enabled: b
 }
 
 pub fn register_url_scheme(scheme: &str, executable: &str) -> bool {
+    if Key::open(HKEY_CLASSES_ROOT, &format!("{scheme}\\{URL_COMMAND_KEY}"))
+        .and_then(|key| key.string(""))
+        .is_some_and(|value| !value.is_empty())
+    {
+        return true;
+    }
     let Some(protocol) = Key::create(HKEY_CURRENT_USER, &url_protocol_key(scheme)) else {
         return false;
     };
