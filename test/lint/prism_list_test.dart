@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'sources.dart';
@@ -24,7 +23,7 @@ void main() {
       if (entity is! File || !entity.path.endsWith('.dart')) {
         continue;
       }
-      final path = p.relative(entity.path);
+      final path = sourcePath(entity.path);
       if (_allowed.containsKey(path)) {
         continue;
       }

@@ -129,7 +129,9 @@ String _script() {
 void main() {
   test('the site shapes are the app morphs', () {
     final expected = _script();
-    final actual = _file.existsSync() ? _file.readAsStringSync() : '';
+    final actual = _file.existsSync()
+        ? _file.readAsStringSync().replaceAll('\r\n', '\n')
+        : '';
     if (autoUpdateGoldenFiles && actual != expected) {
       _file.writeAsStringSync(expected);
       return;

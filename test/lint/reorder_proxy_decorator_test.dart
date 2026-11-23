@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'sources.dart';
@@ -40,10 +39,10 @@ void main() {
       for (final entity in sourceEntities()) {
         if (entity is! File ||
             !entity.path.endsWith('.dart') ||
-            entity.path.contains('/generated/')) {
+            sourcePath(entity.path).contains('/generated/')) {
           continue;
         }
-        final path = p.relative(entity.path);
+        final path = sourcePath(entity.path);
         if (_allowed.contains(path)) {
           continue;
         }

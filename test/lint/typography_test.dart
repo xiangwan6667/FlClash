@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'sources.dart';
@@ -24,7 +23,7 @@ void main() {
     final offenders = <String>[];
 
     for (final entity in sourceEntities()) {
-      final path = p.relative(entity.path);
+      final path = sourcePath(entity.path);
       if (entity is! File || !path.endsWith('.dart') || _isGenerated(path)) {
         continue;
       }

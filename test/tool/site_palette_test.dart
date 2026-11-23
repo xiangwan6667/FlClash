@@ -94,7 +94,7 @@ void main() {
   });
 
   test('the site palette is the app scheme of every seed', () {
-    final css = _file.readAsStringSync();
+    final css = _file.readAsStringSync().replaceAll('\r\n', '\n');
     final start = css.indexOf(_marker);
     expect(start, isNot(-1), reason: 'the palette marker is missing');
     final from = start + _marker.length + 1;

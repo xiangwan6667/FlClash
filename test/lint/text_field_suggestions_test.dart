@@ -17,8 +17,8 @@ void main() {
     for (final entity in sourceEntities()) {
       if (entity is! File ||
           !entity.path.endsWith('.dart') ||
-          entity.path.contains('/generated/') ||
-          _secretFields.contains(entity.path)) {
+          sourcePath(entity.path).contains('/generated/') ||
+          _secretFields.contains(sourcePath(entity.path))) {
         continue;
       }
       final lines = entity.readAsLinesSync();

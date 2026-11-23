@@ -361,7 +361,7 @@ void main() {
       await Tray.instance.show(_spec());
 
       expect(
-        host.lastShown!.image.path,
+        host.lastShown!.image.path.replaceAll(r'\', '/'),
         endsWith('flutter_assets/assets/images/tray/unix/3.0x/status_1.png'),
       );
     });
@@ -372,7 +372,7 @@ void main() {
       await Tray.instance.show(_spec());
 
       expect(
-        host.lastShown!.image.path,
+        host.lastShown!.image.path.replaceAll(r'\', '/'),
         endsWith('flutter_assets/assets/images/tray/unix/status_1.png'),
       );
     });

@@ -633,6 +633,23 @@ void main() {
     expect(find.byType(EditorPage), findsNothing);
 
     await tester.pump(const Duration(milliseconds: 700));
+    // Refreshing the row reopens the file for a probe. Keep driving its
+    // real I/O before the test clock shuts down and cleanup removes the file.
+    for (var attempt = 0; attempt < 10; attempt++) {
+      final removed = await tester.runAsync(() async {
+        try {
+          await file.delete();
+          return true;
+        } on PathAccessException catch (error) {
+          if (!Platform.isWindows || error.osError?.errorCode != 32) rethrow;
+          return false;
+        }
+      });
+      if (removed == true) break;
+      await tester.pump();
+    }
+    expect(file.existsSync(), isFalse);
+    await pumpTransitions(tester);
   });
 
   testWidgets('a text-backed row previews on tap and edits from its menu', (
