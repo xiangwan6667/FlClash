@@ -198,7 +198,7 @@ void main() {
     final originalAsset = resolveSelfUpdateAsset;
     request.dio.httpClientAdapter = _CheckAdapter(_CheckResult.noRelease);
     resolveSelfUpdateAsset = () =>
-        selfUpdateAssetFor(Abi.androidArm64, windowsInstalled: false);
+        selfUpdateAssetFor(Abi.androidArm64, replaceable: false);
     addTearDown(() {
       request.dio.httpClientAdapter = originalAdapter;
       resolveSelfUpdateAsset = originalAsset;
